@@ -18,11 +18,11 @@ Follow steps 4-7 below (skip step 6)
 
 Option 2: Create a new Ignite VM/Server with code from git
 1. Install postgresql
-# apt-get install postgresql-9.3 postgresql-common
+#apt-get install postgresql-9.3 postgresql-common
 
 2. Set up database
-# psql  –U postgres
-# create database  DATABASE_NAME;
+#psql  –U postgres
+#create database  DATABASE_NAME;
 Disconnect from psql.
 
 Edit  following section in ~/ignite/ignite/prod.py
@@ -38,17 +38,17 @@ DATABASES = {
 }
 
 3. Create tables in database
-# python ~ignite/ignite/manage.py makemigrations
-# python ~ignite/ignite/manage.py migrate
+#python ~ignite/ignite/manage.py makemigrations
+#python ~ignite/ignite/manage.py migrate
 
 4. Edit following line ~ignite/ignite/dist/scripts/utils/settings.*.js to ignite server ip and port.
 "baseURL" : "http://localhost:9010"
 
 5.Run server
-# python manage.py runserver <ip:port>
+#python manage.py runserver <ip:port>
 
 6. Run following command to create user on server
-# curl -X POST -i -H "Content-type: application/json" http://ip:port/auth/register/  -d '{"username”:”admin”, "password”:”admin”, "email":"username@xyz.com"}'
+#curl -X POST -i -H "Content-type: application/json" http://ip:port/auth/register/  -d '{"username”:”admin”, "password”:”admin”, "email":"username@xyz.com"}'
 
 7. Run UI on web browser
 http://ip:port/ui/index.html#/
