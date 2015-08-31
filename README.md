@@ -10,7 +10,7 @@ Ignite provides bootstrapping with the following capabilities:
 * Image and configuration store for POAP
 * POAP request handler
 
-(https://github.com/datacenter/ignite/blob/master/dist/images/ignite-screenshot.png)
+![Ignite Screenshot](https://github.com/datacenter/ignite/blob/master/dist/images/ignite-screenshot.png)
 
 # Getting Started
 
