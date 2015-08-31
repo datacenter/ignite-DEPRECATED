@@ -14,6 +14,7 @@ Ignite provides bootstrapping with the following capabilities:
 
 Option 1: Download OVA from link below:
 https://cisco.box.com/shared/static/7om0zdujm98e0u9g7kpbergau0znphq4.ova
+
 Follow steps 4-7 below (skip step 6)
 
 Option 2: Create a new Ignite VM/Server with code from git
