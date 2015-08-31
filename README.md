@@ -5,10 +5,10 @@
 Ignite is a tool to bootstrap your network. It supports Cisco Nexus switches leveraging Power-On Auto Provisioning (POAP) capabilities.
 
 Ignite provides bootstrapping with the following capabilities:
-1. Topology design
-2. Configuration design
-3. Image and configuration store for POAP
-4. POAP request handler
+* Topology design
+* Configuration design
+* Image and configuration store for POAP
+* POAP request handler
 
 # Getting Started
 
