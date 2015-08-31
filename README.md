@@ -18,7 +18,9 @@ Follow steps 4-7 below (skip step 6)
 
 Option 2: Create a new Ignite VM/Server with code from git
 1. Install postgresql
-#apt-get install postgresql-9.3 postgresql-common
+```
+apt-get install postgresql-9.3 postgresql-common
+```
 
 2. Set up database
 #psql  –U postgres
@@ -26,7 +28,7 @@ Option 2: Create a new Ignite VM/Server with code from git
 Disconnect from psql.
 
 Edit  following section in ~/ignite/ignite/prod.py
-```javascript
+```
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
