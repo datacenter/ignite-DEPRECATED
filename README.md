@@ -26,6 +26,7 @@ Option 2: Create a new Ignite VM/Server with code from git
 Disconnect from psql.
 
 Edit  following section in ~/ignite/ignite/prod.py
+```javascript
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
@@ -36,6 +37,7 @@ DATABASES = {
         'PORT': '',                      # Set to empty string for default.
     }
 }
+```
 
 3. Create tables in database
 #python ~ignite/ignite/manage.py makemigrations
