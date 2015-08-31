@@ -1,5 +1,5 @@
 # Ignite
-![Ignite](http://github.com/datacenter/ignite/dist/images/color-logo.png)
+![Ignite](https://github.com/datacenter/ignite/blob/master/dist/images/color-logo.png)
 
 # Description
 
