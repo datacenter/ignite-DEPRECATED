@@ -1,0 +1,31 @@
+
+
+{
+
+        "name": "config3", 
+        "construct_list": [
+            {
+                "params":[ {
+                        "instance": "param_value6", 
+                        "collection": "param_value6", 
+                        "autoincrement": "param_value6"
+                }], 
+                "configlet_id": "1", 
+                "construct_type": "template"
+            }, 
+            {
+                "params": [{
+                        "instance": "param_value6", 
+                        "collection": "param_value6", 
+                        "autoincrement": "param_value6"                
+
+
+
+                }], 
+                "configlet_id": "2", 
+                "construct_type": "script"
+            }
+        ]
+    }
+
+

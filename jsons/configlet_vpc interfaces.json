@@ -1,0 +1,5 @@
+{
+	"name" : "vpcinterfaces",
+	"group" : "l2",
+	"config_type" : "script",
+}

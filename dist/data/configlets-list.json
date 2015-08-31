@@ -1,0 +1,73 @@
+[{
+      "id":1,
+      "name": "Config_hostnameandlicenses",
+      "group"  : "Group1",
+      "config_type"  : "template", 
+      "parameters"    :   ["Host_Name"]
+},{
+      "id":2,
+      "name": "Config_XMPP",
+      "group"  : "Group1",
+      "config_type"  : "template", 
+      "parameters"    :   ["XMPP_SERVER_IP", "XMPP_SERVER", "XMPP_SERVER_GROUPS", "XMPP_PASSWORD"]
+},{
+      "id":3,
+      "name": "Config_XMPP_1",
+      "group"  : "Group1",
+      "config_type"  : "template", 
+      "parameters"    :   ["XMPP_SERVER_IP", "XMPP_SERVER", "XMPP_SERVER_GROUPS", "XMPP_PASSWORD"]
+},{
+      "id":4,
+      "name": "Config_hostnameandlicenses",
+      "group"  : "Group1",
+      "config_type"  : "template", 
+      "parameters"    :   ["Host_Name"]
+},{
+      "id":5,
+      "name": "Config_XMPP",
+      "group"  : "Group1",
+      "config_type"  : "template", 
+      "parameters"    :   ["XMPP_SERVER_IP", "XMPP_SERVER", "XMPP_SERVER_GROUPS", "XMPP_PASSWORD"]
+},{
+      "id":6,
+      "name": "Config_XMPP_1",
+      "group"  : "Group1",
+      "config_type"  : "template", 
+      "parameters"    :   ["XMPP_SERVER_IP", "XMPP_SERVER", "XMPP_SERVER_GROUPS", "XMPP_PASSWORD"]
+},{
+      "id":7,
+      "name": "Config_hostnameandlicenses",
+      "group"  : "Group1",
+      "config_type"  : "template", 
+      "parameters"    :   ["Host_Name"]
+},{
+      "id":8,
+      "name": "Config_XMPP",
+      "group"  : "Group1",
+      "config_type"  : "template", 
+      "parameters"    :   ["XMPP_SERVER_IP", "XMPP_SERVER", "XMPP_SERVER_GROUPS", "XMPP_PASSWORD"]
+},{
+      "id":9,
+      "name": "Config_XMPP_1",
+      "group"  : "Group1",
+      "config_type"  : "template", 
+      "parameters"    :   ["XMPP_SERVER_IP", "XMPP_SERVER", "XMPP_SERVER_GROUPS", "XMPP_PASSWORD"]
+},{
+      "id":10,
+      "name": "Config_hostnameandlicenses",
+      "group"  : "Group1",
+      "config_type"  : "template", 
+      "parameters"    :   ["Host_Name"]
+},{
+      "id":11,
+      "name": "Config_XMPP",
+      "group"  : "Group1",
+      "config_type"  : "template", 
+      "parameters"    :   ["XMPP_SERVER_IP", "XMPP_SERVER", "XMPP_SERVER_GROUPS", "XMPP_PASSWORD"]
+},{
+      "id":12,
+      "name": "Config_XMPP_1",
+      "group"  : "Group1",
+      "config_type"  : "template", 
+      "parameters"    :   ["XMPP_SERVER_IP", "XMPP_SERVER", "XMPP_SERVER_GROUPS", "XMPP_PASSWORD"]
+}]

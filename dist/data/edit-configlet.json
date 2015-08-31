@@ -1,0 +1,7 @@
+{
+	"id" : 1,
+	"name" : "Some Name",
+	"group" : "Some Group Name",
+	"type" : "Script",
+	"configlet_file" : "File Location"
+}

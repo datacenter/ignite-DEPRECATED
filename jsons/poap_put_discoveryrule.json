@@ -1,0 +1,60 @@
+{
+    "system_id":"arunraj",
+    "neighbor_list" : [
+    {
+        "local_port" : "Ethernet2/1",
+        "remote_node" : "SPINE1",
+        "remote_port" : "Ethernet1/1"
+    },
+    {
+        "local_port" : "Ethernet2/2",
+        "remote_node" : "LEAF3",
+        "remote_port" : "Ethernet2/1"
+    }
+    ]
+}
+
+
+
+<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+{
+    "system_id":"arunraj",
+    "neighbor_list" : [
+    {
+        "local_port" : "Ethernet2/1",
+        "remote_node" : "LEAF1",
+        "remote_port" : "Ethernet2/1"
+    },
+    {
+        "local_port" : "Ethernet2/2",
+        "remote_node" : "LEAF3",
+        "remote_port" : "Ethernet2/1"
+    }
+    ]
+}
+
+
+
+<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+{
+    "system_id":"arunraj",
+    "neighbor_list" : [
+    {
+        "local_port" : "Ethernet1/1",
+        "remote_node" : "LEAF1",
+        "remote_port" : "Ethernet1/1"
+    },
+    {
+        "local_port" : "Ethernet1/2",
+        "remote_node" : "LEAF3",
+        "remote_port" : "Ethernet2/1"
+    }
+    ]
+}
+
+
+

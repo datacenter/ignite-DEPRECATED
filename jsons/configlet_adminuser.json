@@ -1,0 +1,5 @@
+{
+	"name" : "adminuser",
+	"group" : "default",
+	"config_type" : "template",
+}

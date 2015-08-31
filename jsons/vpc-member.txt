@@ -1,0 +1,4 @@
+interface $$HOST_INTERFACE$$
+channel-group $$HOST_PORT_CHANNEL_NUMBER$$
+interface port-channel $$HOST_PORT_CHANNEL_NUMBER$$
+vpc $$VPC_ID$$

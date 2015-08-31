@@ -1,0 +1,2 @@
+username admin password $$ADMIN_PASSWORD$$
+role network-admin

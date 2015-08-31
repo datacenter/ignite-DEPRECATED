@@ -1,0 +1,5 @@
+{
+	"name" : "mgmt",
+	"group" : "default",
+	"config_type" : "template",
+}

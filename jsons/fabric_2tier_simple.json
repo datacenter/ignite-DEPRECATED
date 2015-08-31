@@ -1,0 +1,30 @@
+{
+            "name":"PodA",
+            "instance"  : 2,
+            "topology_id"  : 1,
+            "submit" : "true",
+            "locked"    :   1,
+            "validate"  :   1,
+            "config_json"    :   [
+                {
+                "switch_name" : "spine1",
+                "configuration_id" : 1
+                },
+                {
+                "switch_name" : "spine2",
+                "configuration_id" : 1
+                },
+                {
+                "switch_name" : "leaf1",
+                 "configuration_id" : 2
+                },
+                {
+                "switch_name" : "leaf2",
+                 "configuration_id" : 2
+                },
+                {
+                "switch_name" : "leaf3",
+                 "configuration_id" : 2
+                }
+            ]
+    }

@@ -1,0 +1,96 @@
+<<<<<<<<<<<<<<<<<<<<< JSON1>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+{
+    "name": "Backbone_Vlans",
+    "type": "Vlan",
+    "scope": "fabric",
+    "range":[
+        {
+            "start":"10",
+            "end":"25"
+        },
+        {
+            "start":"27",
+            "end":"35"
+        }
+    ]
+}
+
+
+
+
+
+<<<<<<<<<<<<<<<<<<<<< JSON2>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+{
+    "name": "mgm_ipv6",
+    "type": "IPv6",
+    "scope": "global",
+    "range":[
+        {
+            "start":"2001::1/64",
+            "end":"2001::11/64"
+        }
+    ]
+}
+
+
+
+
+<<<<<<<<<<<<<<<<<<<<< JSON3>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+{
+    "name": "mgmt_ipp",
+    "type": "MgmtIP",
+    "scope": "global",
+    "range":[
+        {
+            "start":"192.168.10.20/24",
+            "end":"192.168.10.25/24"
+        }
+    ]
+}
+
+
+
+<<<<<<<<<<<<<<<<<<<<< JSON4>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+{
+    "name": "Port_Channel",
+    "type": "Integer",
+    "scope": "fabric",
+    "range":[
+        {
+            "start":"10",
+            "end":"15"
+        }
+    ]
+}
+
+
+<<<<<<<<<<<<<<<<<<<<< JSON5>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+{
+    "name": "Vpc_Id",
+    "type": "AutoGenerate",
+    "scope": "fabric"
+}
+
+
+<<<<<<<<<<<<<<<<<<<<< JSON6>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+{
+    "name": "Port_Channel_2",
+    "type": "Integer",
+    "scope": "fabric",
+    "range":[
+        {
+            "start":"10",
+            "end":"15"
+        },
+        {
+            "start":"16",
+            "end":"20"
+        }
+    ]
+}

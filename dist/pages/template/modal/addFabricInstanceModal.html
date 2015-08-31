@@ -1,0 +1,60 @@
+<div>
+    <div class="modal-header">
+        <h3 class="modal-title pull-left">Set Configurations</h3>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="leafName">Leaf Name</label>
+                    <input type="text" class="form-control" id="leafName" placeholder="Leaf Name" value="PODDEPTC-LEAF-1">
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>Configure Name</label>
+                    <div class="select-label">
+                        <label>
+                            <select class="form-control">
+                                <option value="Baseleaf-VPC">Baseleaf-VPC</option>
+                                <option value="Baseleaf-VPC1">Baseleaf-VPC1</option>
+                                <option value="Baseleaf-VPC2">Baseleaf-VPC2</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Parameter</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>SWITCH_NAME</td>
+                        <td>
+                            PODDEPTC-LEAF-1
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>MGMT_IP</td>
+                        <td>Auto(IPAddressforpods)
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-trans btn-default btn-raised" ng-click="ok()">Cancel</button>
+</div>
+</div>

@@ -1,0 +1,107 @@
+<div class="content container" id="main">
+  <div class="table-header-cont">
+    <div class="pull-left">
+      <h5 class="page-header pull-left">Fabrics</h5>
+    </div>
+    <div class="pull-right">
+      <ul class="list-inline table-actions">
+        <li>
+          <a href="javascript:void(0);" ng-click="changeAction('edit')" ng-hide="action == 'add' || action == 'edit'" ng-model="inputModel" tooltip-placement="bottom" tooltip="Edit">
+            <span aria-hidden="true" class="glyphicon glyphicon-pencil"></span>
+          </a>
+        </li>
+        <li>
+          <a href="javascript:void(0);" ng-click="cloneFabricInstance(fabricData.id)" ng-hide="action == 'add' || action == 'edit'" ng-model="inputModel" tooltip-placement="bottom" tooltip="Clone">
+            <span aria-hidden="true" class="icon_clone"></span>
+          </a>
+        </li>
+        <li>
+          <a href="javascript:void(0);" ng-click="deleteFabricInstance(fabricData.id)" ng-hide="action == 'add' || action == 'edit'" ng-model="inputModel" tooltip-placement="bottom" tooltip="Delete">
+            <span aria-hidden="true" class="glyphicon glyphicon-trash"></span>
+          </a>
+        </li>
+        <li>
+          <button class="btn btn-default btn-raised" ng-click="action == 'edit' ? changeAction('view') : goBack('/fabricInstance')" type="submit">Cancel</button>
+        </li>
+        <li>
+          <button class="btn btn-raised btn-primary" ng-click="saveFabricInstance()" ng-hide="action == 'view'" type="button">Save</button>
+        </li>
+        <li>
+          <button class="btn btn-default btn-raised" ng-click="submitFabricInstance()" ng-hide="action == 'view'" type="submit">Submit</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <hr/>
+  <div class="row">
+    <div class="col-sm-12">
+      <form class="form-inline form_inline_style row">
+        <div class="form-group col-md-2 col-xs-6">
+          <label for="config_name">Name</label>
+          <input class="form-control" id="config_name" ng-disabled="action == 'view'" ng-model="fabricData.name" placeholder="Name" type="text">
+        </div>
+        <div class="form-group col-md-2 col-xs-6">
+          <label>Topology</label>
+          <div class="select-label">
+            <label>
+              <select class="form-control select_topology" id="" ng-change="getTopologyData(fabricData.topology_id)" ng-disabled="action == 'view'" ng-model="fabricData.topology_id" ng-options="topology.id as topology.name for topology in topologies"></select>
+            </label>
+          </div>
+        </div>
+        <div class="form-group col-md-1 col-xs-6">
+          <label for="replica">Replica</label>
+          <input class="form-control fixedwidth_input" id="replica" ng-disabled="action == 'view'" min="1" ng-model="fabricData.instance" placeholder="Replica" type="number">
+        </div>
+        <div class="form-group col-md-1 col-xs-6">
+          <label>Locked</label>
+          <div class="select-label">
+            <label>
+              <select class="form-control"
+                ng-disabled="action == 'view'"
+                ng-model="fabricData.locked"
+                ng-options="choice.id as choice.value for choice in choices">
+              </select>
+            </label>
+          </div>
+        </div>
+        <div class="form-group col-md-1 col-xs-6">
+          <label>Validate</label>
+          <div class="select-label">
+            <label>
+              <select class="form-control"
+                ng-disabled="action == 'view'"
+                ng-model="fabricData.validate"
+                ng-options="choice.id as choice.value for choice in choices">
+              </select>
+            </label>
+          </div>
+        </div>
+        <div class="form-group col-md-2 col-xs-6">
+          <label></label>
+          <button class="btn btn-raised btn-default set_configbtn" ng-click="setConfigModal('lg')" type="button">Set Configuration</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <hr/>
+  <div class="row">
+    <div class="col-md-8">
+      <div class="flow-chart"></div>
+    </div>
+<!-- <div class="col-md-4">
+            <div class="configuration pull-right">
+                <h3 class="page-header">
+    Configurations
+    </h3>
+                <div>
+                    <span ng-repeat="config in fabricData.config_json track by $index">{{$first ? '' : $last ? ' and ' : ', '}}{{(configurations | filter:{id:config.configuration_id}:true)[0].name}}</span>
+                </div>
+            </div>
+        </div> -->
+  </div>
+</div>
+<div class="table-header-cont">
+  <topology-viewer ng-if="topologyData !='';" topology="topologyData" prefix="fabricData.name"></topology-viewer>
+</div>

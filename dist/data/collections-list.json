@@ -1,0 +1,57 @@
+[{
+    "id": 1,
+    "name": "BGPRouterIP",
+    "type": "Auto",
+    "scope": "Global",
+    "range": [
+        {
+            "start": "10",
+            "end": "15"
+        }
+    ],
+    "used": 10,
+    "available": 246
+},
+{
+    "id": 2,
+    "name": "BGPRRIP",
+    "type": "vlan",
+    "scope": "fabric",
+    "range": [
+        {
+            "start": "10",
+            "end": "15"
+        }
+    ],
+    "used": 0,
+    "available": 6
+},
+{
+  "id": 3,
+  "name": "mgmt_ip",
+  "type": "IP",
+  "range": [
+      {
+          "start": "10.0.0.1/24",
+          "end": "10.0.0.2/24"
+      }
+  ],
+  "used": 3,
+  "available": 3,
+  "scope": "global"
+  },
+  {
+  "id": 4,
+  "name": "Backbone_Vlans",
+  "type": "vlan",
+  "range": [
+      {
+          "start": "10",
+          "end": "15"
+      }
+  ],
+  "used": 0,
+  "available": 6,
+  "scope": "global"
+  }
+]

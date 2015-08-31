@@ -1,0 +1,8 @@
+1. Run follwoing commands to install server python dependencies.
+pip install django==1.7.0
+pip install psycopg2
+pip install djoser
+pip install netaddr
+pip install pytz
+apt-get install python-dateutil
+

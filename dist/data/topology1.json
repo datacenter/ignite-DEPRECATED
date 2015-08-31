@@ -1,0 +1,179 @@
+{
+  "topology_name": "Topology2",
+  "num_tiers": "4",
+  "submitted": "true",
+  "switch_list": [
+    {
+      "tier": 1,
+      "tier_type": "core",
+      "tier_switch_list": []
+    },
+    {
+      "tier": 2,
+      "tier_type": "spine",
+      "tier_switch_list": [
+        {
+          "switch_name": "spine1",
+          "switch_type": "Spine2slots"
+        },
+        {
+          "switch_name": "spine2",
+          "switch_type": "Spine2slots"
+        }
+      ]
+    },
+    {
+      "tier": 3,
+      "tier_type": "leaf",
+      "tier_switch_list": [
+        {
+          "switch_name": "leaf1",
+          "switch_type": "Leaf48+6"
+        },
+        {
+          "switch_name": "leaf2",
+          "switch_type": "Leaf48+6"
+        },
+        {
+          "switch_name": "leaf3",
+          "switch_type": "Leaf24+6"
+        }
+      ]
+    },
+    {
+      "tier": 4,
+      "tier_type": "host",
+      "tier_switch_list": [
+        "host1",
+        "host2",
+        "host3",
+        "host4"
+      ]
+    }
+  ],
+  "link_list": [
+    {
+      "switch_2": "leaf1",
+      "port_list_2": [
+        "e1/1"
+      ],
+      "switch_1": "spine1",
+      "port_list_1": [
+        "e1/1"
+      ],
+      "link_type": "Linkset-1Link"
+    },
+    {
+      "switch_2": "leaf2",
+      "port_list_2": [
+        "e1/1"
+      ],
+      "switch_1": "spine1",
+      "port_list_1": [
+        "e1/2"
+      ],
+      "link_type": "Linkset-1Link"
+    },
+    {
+      "switch_2": "leaf3",
+      "port_list_2": [
+        "e1/1"
+      ],
+      "switch_1": "spine1",
+      "port_list_1": [
+        "e1/3"
+      ],
+      "link_type": "Linkset-1Link"
+    },
+    {
+      "switch_2": "leaf1",
+      "port_list_2": [
+        "e1/2"
+      ],
+      "switch_1": "spine2",
+      "port_list_1": [
+        "e1/1"
+      ],
+      "link_type": "Linkset-1Link"
+    },
+    {
+      "switch_2": "leaf2",
+      "port_list_2": [
+        "e1/2"
+      ],
+      "switch_1": "spine2",
+      "port_list_1": [
+        "e1/2"
+      ],
+      "link_type": "Linkset-1Link"
+    },
+    {
+      "switch_2": "leaf3",
+      "port_list_2": [
+        "e1/2"
+      ],
+      "switch_1": "spine2",
+      "port_list_1": [
+        "e1/3"
+      ],
+      "link_type": "Linkset-1Link"
+    },
+    {
+      "switch_2": "leaf2",
+      "port_list_2": [
+        "e2/1",
+        "e2/2"
+      ],
+      "switch_1": "leaf1",
+      "port_list_1": [
+        "e2/1",
+        "e2/2"
+      ],
+      "link_type": "VPC-2Link"
+    },
+    {
+      "switch_2": "host1",
+      "port_list_2": [
+        ""
+      ],
+      "switch_1": "leaf1",
+      "port_list_1": [
+        "e3/1"
+      ],
+      "link_type": "PortChannel-1Link"
+    },
+    {
+      "switch_2": "host1",
+      "port_list_2": [
+        ""
+      ],
+      "switch_1": "leaf2",
+      "port_list_1": [
+        "e3/2"
+      ],
+      "link_type": "PortChannel-1Link"
+    },
+    {
+      "switch_2": "host3",
+      "port_list_2": [
+        ""
+      ],
+      "switch_1": "leaf3",
+      "port_list_1": [
+        "e3/1"
+      ],
+      "link_type": "Linkset-1Link"
+    },
+    {
+      "switch_2": "host4",
+      "port_list_2": [
+        ""
+      ],
+      "switch_1": "leaf3",
+      "port_list_1": [
+        "e3/1"
+      ],
+      "link_type": "Linkset-1Link"
+    }
+  ]
+}

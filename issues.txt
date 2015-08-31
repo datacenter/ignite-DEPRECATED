@@ -1,0 +1,6 @@
+1.Topology can not be modified once the Fabric is instantiated with that topology.
+2.Topology details can not be edited via fabric interface.
+3.If topology is cloned, port numbering for any new Leaf/Spine will be incorrect.
+4.In topology default pane, changing the default values will not take effect on the topology.
+5.In topology, manual editing of port numbers is not validated. This may clash with port numbers generated automatically when new Leaf/Spine is added. User must take care to avoid duplicates.
+6.A max of 64 leaf switches is supported with automatic port-number assignment

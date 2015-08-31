@@ -1,0 +1,4 @@
+ip host $$XMPP_SERVER$$ $$XMPP_SERVER_IP$$
+fabric access server $$XMPP_SERVER$$
+vrf management password $$XMPP_PASSWORD$$
+fabric access group $$XMPP_GROUPS$$
