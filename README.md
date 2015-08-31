@@ -1,4 +1,5 @@
 # Ignite
+![Ignite](http://github.com/datacenter/ignite/dist/images/color-logo.png)
 
 # Description
 
@@ -9,6 +10,7 @@ Ignite provides bootstrapping with the following capabilities:
 * Configuration design
 * Image and configuration store for POAP
 * POAP request handler
+
 
 # Getting Started
 
