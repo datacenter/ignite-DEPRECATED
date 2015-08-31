@@ -18,12 +18,13 @@ https://cisco.box.com/shared/static/7om0zdujm98e0u9g7kpbergau0znphq4.ova
 Follow steps 4-7 below (skip step 6)
 
 Option 2: Create a new Ignite VM/Server with code from git
-1. Install postgresql
+
+1.Install postgresql
 ```
 apt-get install postgresql-9.3 postgresql-common
 ```
 
-2. Set up database
+2.Set up database
 ```
 psql  –U postgres
 create database  DATABASE_NAME;
@@ -44,13 +45,13 @@ DATABASES = {
 }
 ```
 
-3. Create tables in database
+3.Create tables in database
 ```
 python ~ignite/ignite/manage.py makemigrations
 python ~ignite/ignite/manage.py migrate
 ```
 
-4. Edit following line ~ignite/ignite/dist/scripts/utils/settings.*.js to ignite server ip and port.
+4.Edit following line ~ignite/ignite/dist/scripts/utils/settings.*.js to ignite server ip and port.
 ```
 "baseURL" : "http://localhost:9010"
 ```
@@ -65,13 +66,14 @@ to
 python manage.py runserver <ip:port>
 ```
 
-6. Run following command to create user on server
+6.Run following command to create user on server
 ```
 curl -X POST -i -H "Content-type: application/json" http://ip:port/auth/register/  -d '{"username”:”admin”, "password”:”admin”, "email":"username@xyz.com"}'
 ```
 
-7. Run UI on web browser
+7.Run UI on web browser
 http://<ignite_vm_ip>:port/ui/index.html
+
 Login using credentials: admin/admin
 
 # License
