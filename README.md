@@ -1,26 +1,35 @@
-Getting started with Ignite:
+# Ignite
 
+# Description
+
+Ignite is a tool to bootstrap your network. It supports Cisco Nexus switches leveraging Power-On Auto Provisioning (POAP) capabilities.
+
+Ignite provides bootstrapping with the following capabilities:
+1. Topology design
+2. Configuration design
+3. Image and configuration store for POAP
+4. POAP request handler
+
+# Getting Started
 
 Option 1: Download OVA from link below:
 https://cisco.box.com/shared/static/7om0zdujm98e0u9g7kpbergau0znphq4.ova
 Follow steps 4-7 below (skip step 6)
 
-
-Option 2: Create a new Ignite VM/Server with code from git 
+Option 2: Create a new Ignite VM/Server with code from git
 1. Install postgresql
-# apt-get install postgresql-9.3 postgresql-common  
+# apt-get install postgresql-9.3 postgresql-common
 
 2. Set up database
 # psql  –U postgres
 # create database  DATABASE_NAME;
 Disconnect from psql.
- 
-2. Update server settings
+
 Edit  following section in ~/ignite/ignite/prod.py
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': ‘DATABASE_NAME’,                  #Name of database created  
+        'NAME': ‘DATABASE_NAME’,                  #Name of database created
         'USER': 'postgres',                       #Database User
         'PASSWORD': 'PASSWORD',                   #password for Database user
         'HOST': 'localhost',                      # Empty for localhost through domain sockets or           '127.0.0.1' for localhost through TCP.
@@ -32,7 +41,7 @@ DATABASES = {
 # python ~ignite/ignite/manage.py makemigrations
 # python ~ignite/ignite/manage.py migrate
 
-4. Edit following line ~ignite/ignite/dist/scripts/utils/settings.*.js to ignite server ip and port. 
+4. Edit following line ~ignite/ignite/dist/scripts/utils/settings.*.js to ignite server ip and port.
 "baseURL" : "http://localhost:9010"
 
 5.Run server
@@ -44,3 +53,19 @@ DATABASES = {
 7. Run UI on web browser
 http://ip:port/ui/index.html#/
 Login using credentials: admin/admin
+
+# License
+
+Copyright 2015 Cisco Systems, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
