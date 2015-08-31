@@ -1,4 +1,4 @@
 for FABRIC_PORT in $$FABRIC_PORTS$$:
     print "interface ethernet", FABRIC_PORT
     print "no shutdown" 
-    print "switchport mode fabricpath"
+    print "switchport mode trunk"

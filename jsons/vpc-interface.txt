@@ -1,6 +1,6 @@
 for VPC_PEER_LINK_IF_NAME in $$VPC_PEER_LINK_IF_NAMES$$ :
     print "interface", VPC_PEER_LINK_IF_NAME
-    print "switchport mode fabricpath"
+    print "switchport mode trunk"
     print "channel-group $$VPC_PEER_LINK_PORT_CHANNEL_NUMBER$$ mode active"
 
 print "interface port-channel $$VPC_PEER_LINK_PORT_CHANNEL_NUMBER$$"
