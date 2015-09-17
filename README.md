@@ -18,6 +18,7 @@ Ignite provides bootstrapping with the following capabilities:
 https://cisco.box.com/shared/static/7om0zdujm98e0u9g7kpbergau0znphq4.ova
 
 Username/password: ignite/ignite
+
 Follow steps 4-7 below (skip step 6)
 
 ### Option 2: Create a new Ignite VM/Server with code from git
