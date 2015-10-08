@@ -25,6 +25,7 @@ class TopologyGetDetailSerializer(serializers.Serializer):
     submit = serializers.CharField(max_length=10)
     topology_json = JSONSerializerField()
     config_json = JSONSerializerField()
+    defaults = JSONSerializerField()
 
 class LinkSerializer(serializers.Serializer):
     id_1 = serializers.CharField()
@@ -40,6 +41,12 @@ class SwitchSerializer(serializers.Serializer):
     name = serializers.CharField()
     type = serializers.CharField()
 
+class DefaultSerializer(serializers.Serializer):
+    spine_switch = serializers.CharField(required = True)
+    leaf_switch = serializers.CharField(required = True)
+    spine_leaf_link = serializers.CharField(required = True)
+    spine_leaf_link_index = serializers.CharField(required = True)
+    
 class TopologyComponentsSerializer(serializers.Serializer):
     core_list = SwitchSerializer(required = False,many= True)
     spine_list = SwitchSerializer(required = True,many= True)
@@ -52,6 +59,7 @@ class TopologySerializer(serializers.Serializer):
     submit = serializers.CharField(max_length=10)
     topology_json = TopologyComponentsSerializer(required = True,many= False)
     config_json = ConfigurationSerializer(required = False, many = True)
+    defaults = DefaultSerializer(required = False, many = False)
     
 class TopologyPutSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
@@ -59,3 +67,4 @@ class TopologyPutSerializer(serializers.Serializer):
     submit = serializers.CharField(max_length=10)
     topology_json = TopologyComponentsSerializer(required = True,many= False)
     config_json = ConfigurationSerializer(required = False, many = True)
+    defaults = DefaultSerializer(required = True, many = False)

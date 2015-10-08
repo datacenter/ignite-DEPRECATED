@@ -1,8 +1,8 @@
-1. Run follwoing commands to install server python dependencies.
-pip install django==1.7.0
-pip install psycopg2
-pip install djoser
-pip install netaddr
-pip install pytz
-apt-get install python-dateutil
+django==1.7.0
+djangorestframework==3.1.1
+djoser==0.3.0
+psycopg2==2.6
+netaddr==0.7.10
+pytz==2015.4
+pythondateutil==2.4.2
 

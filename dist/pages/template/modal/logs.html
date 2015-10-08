@@ -1,0 +1,19 @@
+<div>
+    <div class="modal-header">
+        <h3 class="modal-title pull-left">Logs</h3>
+    </div>
+    <div class="modal-body">
+        <div ng-repeat="log in logDetails" class="log-row" ng-class="($index % 2 == 0) ? 'row-even' : ''">
+            {{log}}
+        </div>
+
+         <div ng-if="logDetails.length == 0" class="alert alert-info">
+             No logs found
+        </div>
+        
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-raised btn-trans btn-primary" ng-click="close()">Close</button>
+</div>
+</div>

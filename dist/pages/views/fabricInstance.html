@@ -26,7 +26,7 @@
         <table class="table table-hover" ng-table="tableParams">
             <thead>
                 <tr>
-                    <th width="2%">
+                    <th width="2%" class="hide">
                         <input type="checkbox" class="form-control chk chk-trans" ng-click="checkAll($event)">
                     </th>
                     <th width="2%">#</th>
@@ -71,7 +71,7 @@
             </thead>
             <tbody>
                 <tr ng-class="{active: rule.Selected}" ng-repeat="fabricInstance in $data">
-                    <td>
+                    <td class="hide">
                         <input type="checkbox" class="form-control chk chk-trans" ng-checked="isChecked" ng-click="getChecked()" ng-checked="checkbox1">
                     </td>
                     <td>{{appServices.generateSeq(tableParams.page(), tableParams.count(), $index)}}</td>

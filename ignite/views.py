@@ -2,18 +2,18 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from serializer import POAPSerializer
-from poap import process_poap
+from serializer import IgniteSerializer
+from ignite import process_ignite
 
 
-class POAP(APIView):
+class Ignite(APIView):
 
     def post(self, request, format=None):
-        serializer = POAPSerializer(data=request.data)
+        serializer = IgniteSerializer(data=request.data)
 
         if serializer.is_valid():
-            # process the poap request
-            result = process_poap(request.data)
+            # process the ignite request
+            result = process_ignite(request.data)
 
             return Response(result, status=status.HTTP_201_CREATED)
             

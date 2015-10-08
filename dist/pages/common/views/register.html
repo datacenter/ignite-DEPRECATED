@@ -1,0 +1,58 @@
+<div>
+    <div class="login register">
+        <div class="container">
+            <div class="signin-card">
+                <div class="signin-header text-center">
+                    <img class="img-responsive" src="images/color-logo.png" alt="Logo">
+                </div>
+                <div class="signin-body">
+                    <form class="signin-form material" ng-submit="register();">
+                        <h3>REGISTER</h3>
+                        <div class="errors">
+                                <div class="red" ng-repeat="error in appServices.errors">
+                                    <div ng-repeat="(key, val) in error.msg">
+                                        {{key}} - {{val[0]}}
+                                    </div>
+                                </div>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" required class="form-control" ng-model="submit.first_name" placeholder="First Name" name="first_name"/>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" required class="form-control" ng-model="submit.last_name" placeholder="Last Name" name="last_name"/>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" required class="form-control" ng-model="submit.email" placeholder="Email" name="Email"/>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" required class="form-control" ng-model="submit.username" placeholder="Username" name="Username"/>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" required class="form-control" ng-model="submit.password" placeholder="Password" name="Password"/>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" ng-keyup="matchPassword()" required class="form-control" ng-model="confrimPassword" placeholder="Confirm Password" name="cPassword"/>
+                            <small class="red small" ng-if="!passwordMatch">
+                                Password does not match!
+                            </small>
+
+                        </div>
+
+                        
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-login login_btn btn-lg">SIGN UP</button>
+                        </div>
+                        <span class="card-txt forgot_pass">Already registered?
+                        <a href="#/login">Sign in</a> now</span>
+                    </form>
+                </div>
+                <div class="card-footer">
+                    <div class="copyright text-center">
+                        <span>All contents are Copyright &copy; 1992-2015 Cisco and/or its affiliates. All rights reserved.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

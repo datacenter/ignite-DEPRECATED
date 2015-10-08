@@ -23,7 +23,7 @@
                         </li>
                         <li ng-class="{ active: $route.current.activetab == 'configlets'}"><a href="#/configlets">Configlets</a>
                         </li>
-                        <li ng-class="{ active: $route.current.activetab == 'collections'}"><a href="#/collections">Pools</a>
+                        <li ng-class="{ active: $route.current.activetab == 'pools'}"><a href="#/pools">Pools</a>
                         </li>
                         <li ng-class="{ active: $route.current.activetab == 'configuration'}"><a href="#/configuration">Configuration</a>
                         </li>
@@ -37,8 +37,8 @@
                     <a href="#/fabricInstance">Fabrics</a>
                     <!--#/fabricInstance-->
                 </li>
-                <li>
-                    <a href="javascript:void(0);">Deployed Fabrics</a>
+                <li ng-class="{active: $route.current.activetab == 'deployedFabric'}">
+                    <a href="#/deployedFabrics">Deployed Fabrics</a>
                 </li>
                 <li>
                     <a href="javascript:void(0);">Admin</a>

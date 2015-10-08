@@ -1,0 +1,109 @@
+<div id="main" class="content container">
+    <div class="table-header-cont">
+        <div class="pull-left">
+            <h5 class="page-header">Replica Details</h5>
+            <div>
+            <h5 class="page-header normal-case"><span class="header-label">Fabric Name:</span> {{replicaDetails.fabric_name}} | <span class="header-label">Replica No.:</span> {{replicaNumber}}</h5>
+        </div>
+        </div>
+        <div class="pull-right">
+            <div class="search-cont">
+                <input type="search" class="form-control" title="Search" ng-model="search" data-toggle="tooltip" placeholder="Search">
+                <i class="glyphicon glyphicon-search"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+         <table class="table table-hover" ng-table="tableParams">
+            <thead>
+                <tr>
+                    <th width="2%">#</th>
+                    <th class="sortable" 
+                    ng-class="{
+                        'sort-asc': tableParams.isSortBy('switch_name', 'asc'),
+                        'sort-desc': tableParams.isSortBy('switch_name', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'switch_name' : tableParams.isSortBy('switch_name', 'asc') ? 'desc' : 'asc'})"
+                    >
+                    Switch Name</th>
+                    <th class="sortable" 
+                    ng-class="{
+                        'sort-asc': tableParams.isSortBy('booted', 'asc'),
+                        'sort-desc': tableParams.isSortBy('booted', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'booted' : tableParams.isSortBy('booted', 'asc') ? 'desc' : 'asc'})"
+                    >
+                    Booted</th>
+
+                    <th class="sortable" 
+                    ng-class="{
+                        'sort-asc': tableParams.isSortBy('boot_time', 'asc'),
+                        'sort-desc': tableParams.isSortBy('boot_time', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'boot_time' : tableParams.isSortBy('boot_time', 'asc') ? 'desc' : 'asc'})"
+                    >
+                    Boot Time</th>
+
+                    <th class="sortable" 
+                    ng-class="{
+                        'sort-asc': tableParams.isSortBy('system_id', 'asc'),
+                        'sort-desc': tableParams.isSortBy('system_id', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'system_id' : tableParams.isSortBy('system_id', 'asc') ? 'desc' : 'asc'})"
+                    >
+                    Serial ID</th>
+                    
+                     <th class="sortable" 
+                    ng-class="{
+                        'sort-asc': tableParams.isSortBy('match_type', 'asc'),
+                        'sort-desc': tableParams.isSortBy('match_type', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'match_type' : tableParams.isSortBy('match_type', 'asc') ? 'desc' : 'asc'})"
+                    >
+                    Match Type</th>
+
+                    <th class="sortable" 
+                    ng-class="{
+                        'sort-asc': tableParams.isSortBy('discoveryrule_id', 'asc'),
+                        'sort-desc': tableParams.isSortBy('discoveryrule_id', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'discoveryrule_id' : tableParams.isSortBy('discoveryrule_id', 'asc') ? 'desc' : 'asc'})"
+                    >
+                    Discovery Rule</th>
+
+                    <th class="sortable" 
+                    ng-class="{
+                        'sort-asc': tableParams.isSortBy('config_name', 'asc'),
+                        'sort-desc': tableParams.isSortBy('config_name', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'config_name' : tableParams.isSortBy('config_name', 'asc') ? 'desc' : 'asc'})"
+                    >
+                    Config Name</th>
+                    <th>Logs</th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-class="{active: classVal}" ng-repeat="replica in $data | filter : search">
+                    <td>{{appServices.generateSeq(tableParams.page(), tableParams.count(), $index)}}</td>
+                    <td>{{replica.switch_name}}</td>
+                    <td><any ng-if="replica.booted == true">Yes</span> <any ng-if="replica.booted != true">No</span></td>
+                    <td>{{replica.boot_time | date : appSettings.dateFormat}}</td>
+                    <td>{{replica.system_id}}</td>
+                    <td>{{replica.match_type}}</td>
+                    <td>
+                            <a href="#" ng-if="replica.discoveryrule_id != -1">{{replica.discoveryrule_id}}</a>
+                            <span ng-if="replica.discoveryrule_id == -1"> - </span>
+
+                            <!--a href="javascript:void(0)" ng-click="openRuleModal('16')">TestRule</a -->
+                    </td>
+                    <td><a href="javascript:void(0)" ng-click="openConfigModal(replica.id)">{{replica.config_name}}</a></td>
+                    <td><a href="javascript:void(0)" ng-click="openLogModal(replica.id)">View</a></td>
+                </tr>
+            </tbody>
+        </table>
+        
+    </div>
+</div>
+

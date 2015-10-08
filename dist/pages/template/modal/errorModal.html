@@ -1,0 +1,20 @@
+<div>
+    <div class="modal-header">
+        <h3 class="modal-title pull-left">Errors</h3>
+    </div>
+    <div class="modal-body">
+        <form>
+            <div class="row">
+                <div class="col-md-12">
+                    <div ng-repeat="error in appServices.errors" class="red">
+                       {{error.msg}}
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-raised btn-primary" ng-hide="action == 'view'" ng-click="ok()">Ok</button>
+</div>
+</div>

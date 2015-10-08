@@ -1,3 +1,4 @@
+<!--Collections is now Reffered to as POOLS -->
 <div id="main" class="content container">
     <div class="table-header-cont">
         <div class="pull-left">
@@ -26,7 +27,7 @@
         <table class="table table-hover" ng-table="tableParams">
             <thead>
                 <tr>
-                    <th width="2%">
+                    <th width="2%" class="hide">
                         <input type="checkbox" class="form-control chk chk-trans" ng-model="selectedAll" ng-click="checkAll()">
                     </th>
                     <th width="2%">#</th>
@@ -66,7 +67,7 @@
             </thead>
             <tbody>
                 <tr ng-class="{active: collection.Selected}" ng-repeat="collection in $data">
-                    <td width="2%" >
+                    <td width="2%" class="hide">
                         <input type="checkbox" class="form-control chk chk-trans" ng-model="checkboxes.items[collection.id]">
                     </td>
                     <td width="2%">{{appServices.generateSeq(tableParams.page(), tableParams.count(), $index)}}</td>

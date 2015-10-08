@@ -80,15 +80,15 @@
                         <select 
                         class="form-control" 
                         ng-disabled="action=='view'"
-                        ng-if="submitData.param_list[$index].param_type == 'Collection'" 
+                        ng-if="submitData.param_list[$index].param_type == 'Pool'" 
                         ng-model="submitData.param_list[$index].param_value"
-                        ng-options = "v.id.toString() as v.name for (k, v) in collections"
+                        ng-options = "v.id.toString() as v.name for (k, v) in pools"
                         >
                         <option value=''>Select</option>
                         </select>
                         <input type="text" 
                         ng-disabled="action=='view'"
-                        ng-if="submitData.param_list[$index].param_type != 'Collection'" 
+                        ng-if="submitData.param_list[$index].param_type != 'Pool'" 
                         class="form-control" 
                         ng-model="submitData.param_list[$index].param_value"
                         />

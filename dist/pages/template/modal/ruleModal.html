@@ -15,7 +15,7 @@
             <div class="col-sm-4">
                 <div class="form-group">
                     <label for="rule_name">Rule Name</label>
-                    <input type="text" class="form-control" id="rule_name" placeholder="Rule Name" ng-disabled="action == 'view'" ng-model="submitData.name">
+                    <input type="text" class="form-control" id="rule_name" placeholder="Rule Name" ng-disabled="action == 'view' || action == 'external'" ng-model="submitData.name">
                 </div>
             </div>
             <div class="col-sm-4">
@@ -23,7 +23,7 @@
                     <label>Build Configuration</label>
                     <div class="select-label">
                         <label>
-                            <select class="form-control" ng-disabled="action == 'view'" ng-model="submitData.config_id"
+                            <select class="form-control" ng-disabled="action == 'view' || action == 'external'" ng-model="submitData.config_id"
                                 ng-options="configuration.id as configuration.name for configuration in configurations">
                             </select>
                         </label>
@@ -33,7 +33,7 @@
             <div class="col-sm-4">
                 <div class="form-group">
                     <label for="rule_priority">Priority</label>
-                    <input type="text" class="form-control" id="rule_priority" placeholder="Priority" ng-disabled="action == 'view'" ng-model="submitData.priority">
+                    <input type="text" class="form-control" id="rule_priority" placeholder="Priority" ng-disabled="action == 'view' || action == 'external'" ng-model="submitData.priority">
                 </div>
             </div>
             <div class="col-sm-12">
@@ -41,19 +41,19 @@
                     <label for="rule_match" class="">Match</label>
                     <div class="radio">
                         <label>
-                            <input type="radio" name="rule_match" value="all" ng-disabled="action == 'view'" ng-model="submitData.match">
+                            <input type="radio" name="rule_match" value="all" ng-disabled="action == 'view' || action == 'external'" ng-model="submitData.match">
                             All
                         </label>
                     </div>
                     <div class="radio">
                         <label>
-                            <input type="radio" name="rule_match" value="any" ng-disabled="action == 'view'" ng-model="submitData.match">
+                            <input type="radio" name="rule_match" value="any" ng-disabled="action == 'view' || action == 'external'" ng-model="submitData.match">
                             Any
                         </label>
                     </div>
                     <div class="radio">
                         <label>
-                            <input type="radio" name="rule_match" value="serial_id" ng-disabled="action == 'view'" ng-model="submitData.match">
+                            <input type="radio" name="rule_match" value="serial_id" ng-disabled="action == 'view' || action == 'external'" ng-model="submitData.match">
                             Serial ID
                         </label>
                     </div>
@@ -81,7 +81,7 @@
                         <div class="form-group">
                             <div class="select-label">
                                 <label>
-                                    <select class="form-control" ng-disabled="action == 'view'" ng-model="subrule.rn_condition">
+                                    <select class="form-control" ng-disabled="action == 'view' || action == 'external'" ng-model="subrule.rn_condition">
                                         <option ng-selected="rnCondition.value == subrule.rn_condition" ng-repeat="rnCondition in appSettings.fieldValues.discoveryRule.rnConditions" value="{{rnCondition.value}}">{{rnCondition.label}}</option>
                                     </select>
                                 </label>
@@ -92,7 +92,7 @@
                         <div class="form-group">
                             <div class="select-label" ng-disabled="action == 'view'" >
                                 <label>
-                                    <select class="form-control" ng-model="subrule.rp_condition">
+                                    <select class="form-control" ng-disabled="action == 'view' || action == 'external'" ng-model="subrule.rp_condition">
                                         <option ng-selected="rpCondition.value == subrule.rp_condition ? true : false"
                                         ng-repeat="rpCondition in appSettings.fieldValues.discoveryRule.rpConditions"
                                         value="{{rpCondition.value}}">{{rpCondition.label}}</option>
@@ -105,7 +105,7 @@
                         <div class="form-group">
                             <div class="select-label">
                                 <label>
-                                    <select class="form-control" ng-disabled="action == 'view'" ng-model="subrule.lp_condition">
+                                    <select class="form-control" ng-disabled="action == 'view' || action == 'external'" ng-model="subrule.lp_condition">
                                         <option ng-selected="lpCondition.value == subrule.lp_condition? true : false" ng-repeat="lpCondition in appSettings.fieldValues.discoveryRule.lpConditions" value="{{lpCondition.value}}">{{lpCondition.label}}</option>
                                     </select>
                                 </label>
@@ -115,10 +115,10 @@
                     <div class="col-xs-3">
                         <div class="form-group">
                             <div class="modal-form-action">
-                                <a href="javascript:void(0);" ng-hide="submitData.subrules.length == 1 || action == 'view'" ng-click="removeSubRule($index)">
+                                <a href="javascript:void(0);" ng-hide="submitData.subrules.length == 1 || action == 'view' || action=='external'" ng-click="removeSubRule($index)">
                                     <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
                                 </a>
-                                <a href="javascript:void(0);" ng-hide="$index < submitData.subrules.length - 1 || action == 'view'" ng-click="addSubRule()">
+                                <a href="javascript:void(0);" ng-hide="$index < submitData.subrules.length - 1 || action == 'view' || action=='external'" ng-click="addSubRule()">
                                     <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
                                     <span class="hidden-xs">Add Another</span>
                                 </a>
@@ -129,17 +129,17 @@
                 <div class="row">
                     <div class="col-xs-3">
                         <div class="form-group">
-                            <input type="text" class="form-control" placeholder="RemoteNode" ng-model="subrule.rn_string"/>
+                            <input type="text"  ng-disabled="action == 'view' || action == 'external'"  class="form-control" placeholder="RemoteNode" ng-model="subrule.rn_string"/>
                         </div>
                     </div>
                     <div class="col-xs-3">
                         <div class="form-group">
-                            <input type="text" class="form-control" placeholder="RemotePort" ng-model="subrule.rp_string"/>
+                            <input type="text"  ng-disabled="action == 'view' || action == 'external'"  class="form-control" placeholder="RemotePort" ng-model="subrule.rp_string"/>
                         </div>
                     </div>
                     <div class="col-xs-3">
                         <div class="form-group">
-                            <input type="text" class="form-control" placeholder="LocalPort" ng-model="subrule.lp_string"/>
+                            <input type="text"  ng-disabled="action == 'view' || action == 'external'"  class="form-control" placeholder="LocalPort" ng-model="subrule.lp_string"/>
                         </div>
                     </div>
                 </div>
@@ -159,19 +159,19 @@
                 <div class="row">
                     <div class="col-xs-3">
                         <div class="form-group">
-                            <input type="text" class="form-control" ng-disabled="action == 'view'" placeholder="Serial ID" ng-model="submitData.subrules_serial_id[$index]"/>
+                            <input type="text" class="form-control"  ng-disabled="action == 'view' || action == 'external'"  placeholder="Serial ID" ng-model="submitData.subrules_serial_id[$index]"/>
                         </div>
                     </div>
                     <div class="col-xs-3">
                         <div class="form-group">
                             <div class="modal-form-action">
-                                <a href="javascript:void(0);" ng-hide="submitData.subrules_serial_id.length == 1 || action == 'view'" ng-click="removeSubRuleSerialID($index)">
+                                <a href="javascript:void(0);" ng-hide="submitData.subrules_serial_id.length == 1 || action == 'view' || action=='external'" ng-click="removeSubRuleSerialID($index)">
                                     <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
                                 </a>
-                                <a href="javascript:void(0);" ng-hide="$index < submitData.subrules_serial_id.length - 1 || action == 'view'" ng-click="addSubRuleSerialID()">
+                                <a href="javascript:void(0);" ng-hide="$index < submitData.subrules_serial_id.length - 1 || action == 'view' || action=='external'" ng-click="addSubRuleSerialID()">
                                     <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
                                     <span class="hidden-xs">Add Another</span>
-                                </a>
+                                </a>    
                             </div>
                         </div>
                     </div>
@@ -183,6 +183,6 @@
 </div>
 <div class="modal-footer">
     <button class="btn btn-trans btn-default btn-raised" ng-click="cancel()">Cancel</button>
-    <button class="btn btn-trans btn-raised btn-primary" ng-hide="action == 'view'" ng-click="ok()">Save</button>
+    <button class="btn btn-trans btn-raised btn-primary" ng-hide="action == 'view' || action == 'external'" ng-click="ok()">Save</button>
 </div>
 </div>

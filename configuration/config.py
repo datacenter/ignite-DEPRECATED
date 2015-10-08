@@ -6,7 +6,7 @@ import subprocess
 from datetime import datetime
 
 from models import Configlet, Configuration
-from collection.collection import generate_collection_value
+from pool.pool import generate_pool_value
 from fabric.fabric_rule import generate_instance_value
 
 import logging
@@ -67,11 +67,11 @@ def build_config(cfg_id, fabric_id, switch_name):
                 logger.debug("Instance value = " + val)
 
                 param_values[param['param_name']] = val
-            elif param['param_type'] == 'Collection':
-                val = generate_collection_value(param['param_value'], fabric_id, switch_name)
+            elif param['param_type'] == 'Pool':
+                val = generate_pool_value(param['param_value'], fabric_id, switch_name)
 
                 if val == None:
-                    logger.error("Collection returned NULL value")
+                    logger.error("Pool returned NULL value")
                     os.remove(file_path)
                     return None
 

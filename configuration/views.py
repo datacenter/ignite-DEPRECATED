@@ -227,10 +227,14 @@ class ConfigurationDetail(APIView,RequestValidator):
 
     def put(self, request, id, format=None):
         configuration = self.get_object(id)
-        serializer = ConfigurationPutSerializer(data=request.data)
+        if request.data['name'] == self.get_object(id).name:
+            serializer = ConfigurationPutSerializer(data=request.data)
+        else:
+            serializer = ConfigurationSerializer(data=request.data)
         if serializer.is_valid():
             config_obj =  self.get_object(id)
             config = json.dumps(serializer.data['construct_list'])
+            config_obj.name = serializer.data['name']
             config_obj.construct_list = config
             config_obj.submit = serializer.data['submit']
             config_obj.save()
@@ -243,6 +247,10 @@ class ConfigurationDetail(APIView,RequestValidator):
 
     def delete(self, request, id, format=None):
         configuration = self.get_object(id)
-        configuration.delete()
-        logger.debug("Configuration record deleted successfully for id :"+str(id))
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        if configuration.used:
+            logger.error("This configuration is being used by some fabric")
+            return Response("Configurations is in use", status=status.HTTP_400_BAD_REQUEST)
+        else:
+            configuration.delete()
+            logger.debug("Configuration record deleted successfully for id :"+str(id))
+            return Response(status=status.HTTP_204_NO_CONTENT)

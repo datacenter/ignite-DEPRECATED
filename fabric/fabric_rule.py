@@ -11,7 +11,7 @@ from django.db import transaction
 
 #Imports from user defined modules
 from models import Fabric, FabricRuleDB
-from collection.collection import generate_collection_value, generate_vpc_peer_dest
+from pool.pool import generate_pool_value, generate_vpc_peer_dest
 logger = logging.getLogger(__name__)
 
 
@@ -43,11 +43,13 @@ def is_empty(item):
 
 
 #{"CFG_ID":INVALID,"FABRIC_ID":INVALID,"SWITCH_ID":"switch name"}
-def build_match_response(switch_name, fabric_id, configuration_id, match_response):
+def build_match_response(switch_name, fabric_id, configuration_id, replica_num, match_type, match_response):
 
     match_response["CFG_ID"] = configuration_id
     match_response["FABRIC_ID"] = fabric_id
     match_response["SWITCH_ID"] = switch_name
+    match_response["REPLICA_NUM"] = replica_num
+    match_response["MATCH_TYPE"] = match_type
 
 
 def log_match_info(match_response):
@@ -55,6 +57,9 @@ def log_match_info(match_response):
     logger.info("Fabric ID: " + str(match_response["FABRIC_ID"]))
     logger.info("Switch Name: "+ match_response["SWITCH_ID"])
     logger.info("Configuration Id: " + str(match_response["CFG_ID"]))
+    logger.info("Discoveryrule Id: " + str(match_response["DISCOVERYRULE_ID"]))
+    logger.info("Match Type: " + str(match_response["MATCH_TYPE"]))
+    logger.info("Replica Num: " + str(match_response["REPLICA_NUM"]))
 
 
 #delete all fabric rules with fabric_id == <fabric_id>
@@ -65,7 +70,7 @@ def delete_fabric_rules(fabric_id):
 
 
 #Write to Fabric DB
-def write_to_FabricRuleDB(local_node, remote_node, local_port, remote_port, action, fabric):
+def write_to_FabricRuleDB(local_node, remote_node, local_port, remote_port, action, fabric, replica_num):
 
     fabricRuleDB_obj                = FabricRuleDB()
     fabricRuleDB_obj.local_node     = local_node
@@ -74,6 +79,7 @@ def write_to_FabricRuleDB(local_node, remote_node, local_port, remote_port, acti
     fabricRuleDB_obj.local_port     = local_port
     fabricRuleDB_obj.action         = action
     fabricRuleDB_obj.fabric         = fabric
+    fabricRuleDB_obj.replica_num    = replica_num
     fabricRuleDB_obj.save()
 
 
@@ -122,7 +128,7 @@ def generate_fabric_rules(fabric_name ,num_instance, fabric, switch_config_info,
                     action = INVALID
                     logger.error("No Configuration provided for switch: " + switch1 + " Adding Configuraion ID: INVALID")
                 if switch1 not in core_switch_list:
-                    write_to_FabricRuleDB(switch1, switch2, link[PORTLIST_1][index], link[PORTLIST_2][index], action, fabric)
+                    write_to_FabricRuleDB(switch1, switch2, link[PORTLIST_1][index], link[PORTLIST_2][index], action, fabric, inst+1)
 
                 try:
                     action = switch_to_configuration_id[link[SWITCH_2]]
@@ -130,7 +136,7 @@ def generate_fabric_rules(fabric_name ,num_instance, fabric, switch_config_info,
                     action = INVALID
                     logger.error("No Configuration provided for switch: " + switch2 + " Adding Configuraion ID: INVALID")
                 if switch2 not in core_switch_list:
-                    write_to_FabricRuleDB(switch2, switch1, link[PORTLIST_2][index], link[PORTLIST_1][index], action, fabric)
+                    write_to_FabricRuleDB(switch2, switch1, link[PORTLIST_2][index], link[PORTLIST_1][index], action, fabric, inst+1)
 
     logger.info("Write To Fabric Rule DB successfull")
     return True
@@ -240,6 +246,7 @@ def match_fabric_rules(poap_info):
     fabricRuleDB_obj= FabricRuleDB
     remote_node  = ""
     local_node = ""
+    replica_num = INVALID
     fabric_id = INVALID
     match_response = dict(FABRIC_MATCH_RESPONSE)
 
@@ -255,6 +262,7 @@ def match_fabric_rules(poap_info):
                 fabric_id = fabricRuleDB_obj.fabric.id
                 fabric_name = fabricRuleDB_obj.fabric.name
                 local_node = fabricRuleDB_obj.local_node
+                replica_num = fabricRuleDB_obj.replica_num
                 logger.debug("FabricRuleDB DB Match Success")
                 break
             except FabricRuleDB.DoesNotExist:
@@ -265,7 +273,7 @@ def match_fabric_rules(poap_info):
             instance_num = get_instance_number(fabric_name, local_node)
             fabric_name = fabric_name + "_" + instance_num + "_"
             build_fabric_map(fabric_name, topology_obj, local_node)
-            build_match_response(local_node, fabric_id, configuration_id, match_response)
+            build_match_response(local_node, fabric_id, configuration_id, replica_num, MATCH_TYPE_NEIGHBOUR, match_response)
             log_match_info(match_response)
             try:
                 build_vpc_detail(local_node)
@@ -310,7 +318,7 @@ def generate_instance_value(param_name, fabric_id, switch_name):
             logger.error("Parameter VPC_PEER_DEST is NOT Valid for switch: " + switch_name)
         return ip_str
 
-    if  param_name == 'HOST_INTERFACE':
+    if  param_name == 'HOST_PORTS':
         try:
             port_list = SWITCH_HOST_IF_MAP[switch_type_map[switch_name]]
             if is_empty(port_list):
@@ -323,7 +331,7 @@ def generate_instance_value(param_name, fabric_id, switch_name):
         return port_str
             
              
-    if  param_name == 'FABRIC_PORTS':
+    if  param_name == 'TRUNK_PORTS':
         port_list  = switch_fabric_if_list
         if port_list:
             port_str = "[ \'" + '\',\''.join(port_list) + "\' ]"
