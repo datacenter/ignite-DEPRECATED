@@ -15,11 +15,25 @@ Ignite provides bootstrapping with the following capabilities:
 # Getting Started
 
 ### Option 1: Download OVA from link below:
-https://cisco.box.com/shared/static/7om0zdujm98e0u9g7kpbergau0znphq4.ova
+https://cisco.box.com/s/b0d92hkh1pvpko6rrml3kl2bwqm8mps6
 
 Username/password: ignite/ignite
 
 Follow steps 4-7 below (skip step 6)
+
+	a. Deploy OVA
+	b. Login with ignite/ignite
+	c. Change directory to ~/ignite/ignite (cd ~/ignite/ignite)
+	d. Change to sudo (sudo su)
+	e. Edit configure.sh to edit parameter values of following parameters
+	   	ignite_ip :  IP address on which to run the server
+	    ignite_port: port on which to run the server
+	    vmusername: username for the server
+	    vmpassword: password for the server
+	f. Run configure.sh (sh configure.sh)
+	g. Run ignite server (python manage.py runserver ip:port ) where IP is the address provided in ignite_ip and port is value provided in ignite_port.
+
+Setup users as mentioned in step-6 below.
 
 ### Option 2: Create a new Ignite VM/Server with code from git
 
