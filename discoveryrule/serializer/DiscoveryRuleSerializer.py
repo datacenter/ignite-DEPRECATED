@@ -106,6 +106,7 @@ class DiscoveryRuleGetSerializer(serializers.Serializer):
     last_modified = serializers.DateTimeField()
     config_id = serializers.IntegerField()
     match = serializers.CharField(max_length=10,required=True)
+    fabric_id = serializers.IntegerField()
     #subrules = JSONSerializerField()
     
 class DiscoveryRuleGetDetailSerializer(serializers.Serializer):

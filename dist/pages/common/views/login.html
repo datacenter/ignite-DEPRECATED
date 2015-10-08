@@ -1,9 +1,9 @@
-<div ng-controller="LoginCtrl">
+<div>
     <div class="login">
         <div class="container">
             <div class="signin-card">
                 <div class="signin-header text-center">
-                    <img class="img-responsive" src="images/color-logo.png" alt="Logo">
+                        <img class="img-responsive" src="images/color-logo.png" alt="Logo">
                 </div>
                 <div class="signin-body">
                     <form class="signin-form material" ng-submit="login();">
@@ -22,7 +22,15 @@
                         <div class="form-group">
                             <button type="submit" class="btn btn-login login_btn btn-lg">SIGN IN</button>
                         </div>
-                        <a class="card-txt forgot_pass" href="javascript:void(0);">Forgot password ?</a>
+                        <div class="card-txt forgot_pass">
+                        <a  href="javascript:void(0);">Forgot password?</a> 
+
+                        <span class="pull-right">
+                            New User?
+                            <a href="#/register">Register here</a>
+                        </span>
+                        </div> 
+                        
                     </form>
                 </div>
                 <div class="card-footer">

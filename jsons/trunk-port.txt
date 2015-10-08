@@ -1,0 +1,4 @@
+for TRUNK_PORT in $$TRUNK_PORTS$$:
+    print "interface ethernet", TRUNK_PORT
+    print "no shutdown" 
+    print "switchport mode trunk"

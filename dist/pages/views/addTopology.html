@@ -10,36 +10,36 @@
                         <a href="javascript:void(0);" ng-click="changeAction('edit')" ng-hide="action == 'add' || action == 'edit'"><span class="glyphicon glyphicon-pencil"></span>Edit</a>
                         <a href="javascript:void(0);" ng-hide="action == 'add' || action == 'edit'" ng-click="cloneTopology(topology.id)"><span class="glyphicon glyphicon-forward"></span> Clone</a>
                         <a href="javascript:void(0);" ng-hide="action == 'add' || action == 'edit'" ng-click="deleteTopology(topology.id, 0)"><span class="glyphicon glyphicon-trash"></span> Delete</a>
-                        <button type="button" class="btn btn-default" ng-click="action == 'edit' ? changeAction('view') : goBack('/topology')">Cancel</button>
-                        <button type="button" ng-hide="action == 'view'" class="btn btn-primary" ng-click="saveTopology()">Save</button>
-                        <button type="button" ng-hide="action == 'view'" class="btn btn-default" ng-click="submitTopology()">Submit</button>
+                        <button type="button" class="btn btn-sm btn-default" ng-click="action == 'edit' ? changeAction('view') : goBack('/topology')">Cancel</button>
+                        <button type="button" ng-hide="action == 'view'" class="btn btn-sm btn-primary" ng-click="saveTopology()">Save</button>
+                        <button type="button" ng-hide="action == 'view'" class="btn btn-sm btn-default" ng-click="submitTopology()">Submit</button>
                         </a>
                     </div>
                 </div>
             </div>
             <div class="container">
                 <div class="row topology_tools">
-                    <div class="col-sm-5">
+                    <div class="col-sm-3">
                         Name:
-                        <input type="text" ng-disabled="action == 'view'" ng-model="topology.name">
-                        <span class="alert alert-danger" ng-if="topology.name==''">Please enter a topology name</span>
+                        <input type="text" ng-disabled="action == 'view'" placeholder="Topology name" ng-model="topology.name">
+                        <span class="alert alert-danger hide" ng-if="topology.name==''">Please enter a topology name</span>
                     </div>
-                    <div class="col-sm-3 toolbox">
+                    <div class="col-sm-5 toolbox">
                         <div class="btn-group">
-                            <button type="button" class="btn btn-default" ng-disabled="action == 'view'" ng-click="addCore();" data-toggle="tooltip" title="Add a Core ({{coreLeft}} core left)"><i class="glyphicon glyphicon-plus"></i> Core 
+                            <button type="button" class="btn btn-sm btn-default" ng-disabled="action == 'view'" ng-click="addCore();" data-toggle="tooltip" title="Add a Core ({{coreLeft}} core added)"><i class="glyphicon glyphicon-plus"></i> Core ({{coreLeft}})
                                 <span class="hide">
                                     (<span ng-bind="coreLeft"></span>)
                                 </span>
                             </button>
-                            <button type="button" class="btn btn-default" ng-disabled="action == 'view'" ng-click="addSpine();" data-toggle="tooltip" title="Add a Spine ({{spineLeft}} spine left)"><i class="glyphicon glyphicon-plus"></i> Spine 
+                            <button type="button" class="btn btn-sm btn-default" ng-disabled="action == 'view'" ng-click="addSpine();" data-toggle="tooltip" title="Add a Spine ({{spineLeft}} spine added)"><i class="glyphicon glyphicon-plus"></i> Spine ({{spineLeft}})
                                 <span class="hide">(<span ng-bind="spineLeft"></span>)</span>
                             </button>
-                            <button type="button" class="btn btn-default" ng-disabled="action == 'view'" ng-click="addLeaf();" data-toggle="tooltip" title="Add a Leaf ({{leafLeft}} leaves left)"><i class="glyphicon glyphicon-plus"></i> Leaf 
+                            <button type="button" class="btn btn-sm btn-default" ng-disabled="action == 'view'" ng-click="addLeaf();" data-toggle="tooltip" title="Add a Leaf ({{leafLeft}} leaves added)"><i class="glyphicon glyphicon-plus"></i> Leaf ({{leafLeft}})
                                 <span class="hide">(<span ng-bind="leafLeft"></span>)</span>
                             </button>
                             <!-- Link button -->
                             <div class="btn-group">
-                              <button type="button" class="btn btn-default dropdown-toggle" ng-disabled="action == 'view'" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              <button type="button" class="btn btn-sm btn-default dropdown-toggle" ng-disabled="action == 'view'" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="glyphicon glyphicon-plus"></i> Link <span class="caret"></span>
                               </button>
                               <ul class="dropdown-menu">
@@ -53,11 +53,11 @@
                         </div>
                     </div>
                     <div class="col-sm-4 text-right">
-                        <button class="btn btn-default" ng-disabled="action == 'view'" ng-click="newTopology()">Clear & Start Over</button>
-                        <button class="btn btn-default" ng-disabled="action == 'view'" ng-click="doReset()">Reset</button>
+                        <button class="btn btn-sm btn-default" ng-disabled="action == 'view'" ng-click="newTopology()">Clear</button>
+                        <button class="btn btn-sm btn-default" ng-disabled="action == 'view'" ng-click="doReset()">Reset</button>
                         Details
                         <input type="checkbox" checked data-toggle="toggle" data-size="mini" ng-model="toggleDetailsModel" ng-click="toggleDetails();">
-                        
+
                         <span class="pl-10">
                             Set Defaults
                             <input type="checkbox"  data-toggle="toggle" data-size="mini" ng-model="toggleDefaultsModel" ng-click="toggleDefault();">
@@ -114,29 +114,46 @@
                                 <div class="topology_table_title">Default Settings</div>
                                     <div class="form-group">
                                         <label>Spine Switch</label>
-                                        <select class="form-control" ng-model="defaultSpine">
-                                            <option ng-repeat="spine in spineTypes" value="{{spine}}" ng-selected="$index == 0">
-                                                {{spine}}
-                                            </option>
+
+                                      <select class="form-control" ng-disabled="action == 'view'" ng-model="topology.defaults.spine_switch" ng-options="spine as spine for spine in spineTypes"></select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Spine Switch Image</label>
+
+                                       <select class="form-control" ng-disabled="action == 'view'" >
+                                            <option selected>N9000-dk9.7.0.3.I1.3.bin</option>
+                                            <option>N9000-dk9.7.0.3.I1.2.bin</option>
+                                            <option>N9000-dk9.7.0.3.I1.1b.bin</option>
+                                            <option>N9000-dk9.7.0.3.I1.1a.bin</option>
                                         </select>
                                     </div>
-                                    
+
                                     <div class="form-group">
                                         <label>Leaf Switch</label>
-                                        <select class="form-control" ng-model="defaultLeaf">
-                                            <option ng-repeat="leaf in leafTypes" value="{{leaf}}" ng-selected="$index == 0">
-                                                {{leaf}}
-                                            </option>
-                                        </select>
+                                        <select class="form-control" ng-disabled="action == 'view'" ng-model="topology.defaults.leaf_switch" ng-options="leaf as leaf for leaf in leafTypes"></select>
                                     </div>
+
+                                    <div class="form-group">
+                                        <label>Leaf Switch Image</label>
+
+                                        <select class="form-control" ng-disabled="action == 'view'" >
+                                            <option selected>N9000-dk9.7.0.3.I1.3.bin</option>
+                                            <option>N9000-dk9.7.0.3.I1.2.bin</option>
+                                            <option>N9000-dk9.7.0.3.I1.1b.bin</option>
+                                            <option>N9000-dk9.7.0.3.I1.1a.bin</option>
+                                        </select>
+                                    </div>                                    
 
                                     <div class="form-group">
                                         <label>Spine <span class="glyphicon glyphicon-resize-horizontal"></span> Leaf Link </label>
-                                        <select class="form-control" ng-model="defaultSpineLeafLink" ng-options="obj.link_type as obj.link_type group by obj.link_group for obj in linkTypes" ng-init="defaultSpineLeafLink = 'Linkset-1Link'"></select>
+                                        <select class="form-control" ng-disabled="action == 'view'" ng-model="topology.defaults.spine_leaf_link_index"  ng-options="key as value.link_type group by value.link_group for (key, value) in linkTypes | filter_link:['spine','leaf']" ng-init="topology.defaults.spine_leaf_link_index=topology.defaults.spine_leaf_link_index + ''">
+                                        </select>
+
                                     </div>
 
                                     <hr>
-                                    <button class="btn btn-primary">Apply</button> <!--ng-click="applyDefault(defaultSpine, defaultLeaf, defaultSpineLeafLink)"-->
+                                    <button class="btn btn-primary"  ng-disabled="action == 'view'" ng-click="applyDefault(topology.defaults.spine_switch, topology.defaults.leaf_switch, topology.defaults.spine_leaf_link_index)">Apply</button>
                                 </div>
                         </div>
                     </div>

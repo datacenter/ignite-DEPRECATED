@@ -29,7 +29,8 @@ class FabricGetDetailSerializer(serializers.Serializer):
     validate = serializers.IntegerField()
     booted = serializers.IntegerField()
     instance = serializers.IntegerField()
-    config_json = JSONSerializerField() 
+    config_json = JSONSerializerField()
+    system_id = JSONSerializerField() 
     created_date = serializers.DateTimeField()
     updated_date = serializers.DateTimeField()
 
@@ -39,6 +40,10 @@ class ConfigurationSerializer(serializers.Serializer):
     configuration_id = serializers.IntegerField(required = True)
     image_name = serializers.CharField(required = False)
 
+class SystemIdSerializer(serializers.Serializer):
+    name = serializers.CharField(required = True)
+    system_id = serializers.CharField(required = True)
+    
 class FabricPutSerializer(serializers.Serializer):
     name = serializers.CharField()
     topology_id = serializers.IntegerField()
@@ -47,6 +52,7 @@ class FabricPutSerializer(serializers.Serializer):
     validate = serializers.IntegerField()
     submit = serializers.CharField(max_length=10)
     config_json = ConfigurationSerializer(required = True, many = True)
+    system_id = SystemIdSerializer(required = False, many = True)
 
 class FabricSerializer(serializers.Serializer):
     name = serializers.CharField(validators=[UniqueValidator(queryset=Fabric.objects.all())])
@@ -56,6 +62,7 @@ class FabricSerializer(serializers.Serializer):
     validate = serializers.IntegerField()
     submit = serializers.CharField(max_length=10)
     config_json = ConfigurationSerializer(required = True, many = True)
+    system_id = SystemIdSerializer(required = False, many = True)
 
 
 class FabricRuleDBGetSerializer(serializers.Serializer):

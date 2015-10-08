@@ -6,6 +6,7 @@ class Topology(models.Model):
     name = models.CharField(max_length=100, unique=True)
     topology_json = models.TextField()
     config_json = models.TextField()
+    defaults = models.TextField()
     used = models.IntegerField(default=0)
     user_id = models.IntegerField(default=0)
     status = models.BooleanField(default=True)
@@ -17,6 +18,7 @@ class Fabric(models.Model):
 
     name = models.CharField(max_length=100, unique=True)
     config_json = models.TextField()
+    system_id = models.TextField()
     locked = models.BooleanField(default=True)
     validate = models.BooleanField(default=True)
     instance = models.IntegerField(default = 1)
@@ -38,3 +40,20 @@ class FabricRuleDB(models.Model):
     fabric =  models.ForeignKey('Fabric')
     action = models.IntegerField(default=-1)
     status = models.BooleanField(default=True)
+    replica_num = models.IntegerField(default=0)
+
+
+class DeployedFabricStats(models.Model):
+    
+    fabric_id = models.IntegerField(default= -1)
+    replica_num = models.IntegerField(default = -1)
+    switch_name = models.CharField(max_length=100)
+    config_id = models.IntegerField(default=-1)
+    booted = models.BooleanField(default=False)
+    boot_time = models.DateTimeField(auto_now=True)
+    config_name = models.CharField(max_length=100)
+    discoveryrule_id = models.IntegerField(default=-1)
+    system_id = models.CharField(max_length=100)
+    match_type = models.CharField(max_length=100)
+    configuration_generated = models.CharField(max_length=100)
+    logs = models.CharField(max_length=100, default = 'logs')

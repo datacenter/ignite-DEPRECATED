@@ -43,15 +43,19 @@ class DiscoveryRuleList(APIView,RequestValidator):
         discoveryrule = DiscoveryRule.objects.all()
         serializer = DiscoveryRuleGetSerializer(discoveryrule, many=True)
         index = 0
+        resp = []
         for item in serializer.data:
             try:
-                item['user_name'] = User.objects.get(id=discoveryrule[index].user_id).username
+                if item['fabric_id'] == -1:
+                    item['user_name'] = User.objects.get(id=discoveryrule[index].user_id).username
+                    del item['fabric_id']
+                    resp.append(item)
             except User.DoesNotExist:
                 #TODO : log
                 logger.error("Username does not exist")
                 raise Http404
             index = index + 1
-        return Response(serializer.data)
+        return Response(resp)
 
     def post(self, request, format=None):
         me = RequestValidator(request.META)
@@ -122,10 +126,14 @@ class DiscoveryRuleDetailList(APIView,RequestValidator):
         me = RequestValidator(request.META)
         discoveryrule=self.get_object(id)
         if request.data['match']!='serial_id':
-            serializer = DiscoveryRulePutSerializer(data=request.data)
+            if request.data['name'] == self.get_object(id).name:
+                serializer = DiscoveryRulePutSerializer(data=request.data)
+            else:
+                serializer = DiscoveryRuleSerializer(data=request.data)
             if serializer.is_valid():
                 rule_object = self.get_object(id)
                 subrules = json.dumps(serializer.data['subrules'])
+                rule_object.name = serializer.data['name']
                 rule_object.subrules = subrules
                 rule_object.priority = serializer.data['priority']
                 rule_object.user_id = me.user_is_exist().user_id
@@ -137,12 +145,16 @@ class DiscoveryRuleDetailList(APIView,RequestValidator):
                 resp['subrules'] = json.loads(resp['subrules'])
                 return Response(resp)
         else:
-            serializer = DiscoveryRuleIDPutSerializer(data=request.data)
+            if request.data['name'] == self.get_object(id).name:
+                serializer = DiscoveryRuleIDPutSerializer(data=request.data)
+            else:
+                serializer = DiscoveryRuleSerialIDSerializer(data=request.data)
             if serializer.is_valid():
                 rule_object = self.get_object(id)
                 for i in range(len(serializer.data['subrules'])):
                     serializer.data['subrules'][i]=str(serializer.data['subrules'][i])
                 subrules = str(serializer.data['subrules'])
+                rule_object.name = serializer.data['name']
                 rule_object.subrules = subrules
                 rule_object.priority = serializer.data['priority']
                 rule_object.user_id = me.user_is_exist().user_id

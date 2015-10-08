@@ -9,6 +9,6 @@ from views import DiscoveryRuleDetailList
 
 
 urlpatterns = patterns('',
-    url(r'^$',DiscoveryRuleList.as_view(),name='Full_Collections'),
-    url(r'^(?P<id>\w+)/$',DiscoveryRuleDetailList.as_view(),name='Full_Collections'),
+    url(r'^$',DiscoveryRuleList.as_view(),name='Full_Pools'),
+    url(r'^(?P<id>\w+)/$',DiscoveryRuleDetailList.as_view(),name='Full_Pools'),
 )

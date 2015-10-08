@@ -1,22 +1,28 @@
-Getting started with Ignite:
+1. Install python dependencies
+#pip install -r requirement.txt
 
+2. Install postgresql
+#apt-get install postgresql-9.3 postgresql-common
 
-Option 1: Download OVA from link below:
-https://cisco.box.com/shared/static/7om0zdujm98e0u9g7kpbergau0znphq4.ova
-Follow steps 4-7 below (skip step 6)
-
-
-Option 2: Create a new Ignite VM/Server with code from git 
-1. Install postgresql
-# apt-get install postgresql-9.3 postgresql-common  
-
-2. Set up database
-# psql  –U postgres
-# create database  DATABASE_NAME;
+3. Set up database
+#psql  –U postgres
+#create database  DATABASE_NAME;
 Disconnect from psql.
- 
-2. Update server settings
-Edit  following section in ~/ignite/ignite/prod.py
+
+In case of authentication issues in postgres please refer following docs.
+
+3.a. How to setup password for postgres user ? 
+http://www.postgresql.org/message-id/4D958A35.8030501@hogranch.com
+
+3.b. Various postgres authentication methods ?
+http://www.postgresql.org/docs/9.1/static/auth-methods.html
+
+
+4. Update server settings
+#cd ~poap_server/ignite/ignite/
+
+
+4.a. Edit  following section in prod.py
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
@@ -28,19 +34,43 @@ DATABASES = {
     }
 }
 
-3. Create tables in database
-# python ~ignite/ignite/manage.py makemigrations
-# python ~ignite/ignite/manage.py migrate
 
-4. Edit following line ~ignite/ignite/dist/scripts/utils/settings.*.js to ignite server ip and port. 
-"baseURL" : "http://localhost:9010"
+4.b. In prod.py set
+UI_ROOT to '~ignite/ignite/dist'
 
-5.Run server
-# python manage.py runserver <ip:port>
 
-6. Run following command to create user on server
-# curl -X POST -i -H "Content-type: application/json" http://ip:port/auth/register/  -d '{"username”:”admin”, "password”:”admin”, "email":"username@xyz.com"}'
+5. Update UI server setting to point to ignite server ip:port
+#cd  ~ignite/ignite/dist/scripts/utils
 
-7. Run UI on web browser
+
+5.a. Edit folllowing section
+    "appAPI": {
+        "baseURL": "http://127.0.0.1:8888",     #configure ignite server ip:port
+        "configlets" : {
+       
+
+6. Create tables in database
+#cd ~/ignite/ignite/
+#python manage.py makemigrations
+#python manage.py migrate
+
+
+7.Run server
+#python manage.py runserver <ip:port>
+
+
+8. Run following command to create user on server on a different server
+#curl -X POST -i -H "Content-type: application/json" http://ip:port/auth/register/  -d '{"username":"username", "password":"pwd", "email":"username@xyz.com"}'
+
+
+9. Run UI on web browser
 http://ip:port/ui/index.html#/
-Login using credentials: admin/admin
+Login using username and password used in step 5.
+
+
+10. Stop the server
+To stop the srver kill the server process
+
+
+11. Server logs 
+Ignite server logs are stored in file ignite.log at ~ignite/ignite/.

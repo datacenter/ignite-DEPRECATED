@@ -20,8 +20,12 @@ from django.http import JsonResponse
 from django.http import HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from pprint import *
+from fabric.const import FABRIC_MATCH_RESPONSE,INVALID, MATCH_TYPE_NEIGHBOUR, MATCH_TYPE_SYSTEM_ID
+from fabric.models import Fabric
+from fabric.fabric_rule import build_fabric_map, build_vpc_detail
 
 logger = logging.getLogger(__name__)
+
 
 def regex_match(condition,string,value):
     if(condition=='contain'):
@@ -66,7 +70,8 @@ def match_none(subrule,neighbor_list):
 def match_discovery_rules(cdp_nei_list):
     neighbor_list = cdp_nei_list['neighbor_list']
     discoveryrule = DiscoveryRule.objects.exclude(match='serial_id').order_by('priority')
-    config_id=0
+    match_response = dict(FABRIC_MATCH_RESPONSE)
+    config_id = INVALID
     
     if len(neighbor_list) > 0:
         for single_obj in discoveryrule.iterator():
@@ -100,10 +105,12 @@ def match_discovery_rules(cdp_nei_list):
 
             if all_subrule_match_flag == 1:
                 config_id = single_obj.config_id
+                match_response["DISCOVERYRULE_ID"] = single_obj.id
+                match_response["MATCH_TYPE"] = MATCH_TYPE_NEIGHBOUR
                 logger.debug("The matching discoveryrule id is: "+str(single_obj.id))
                 break
         
-    if config_id==0:
+    if config_id==INVALID:
         discoveryrule = DiscoveryRule.objects.filter(match='serial_id').order_by('priority')
         serial_id = cdp_nei_list['system_id']
         for single_obj in discoveryrule.iterator():
@@ -111,10 +118,34 @@ def match_discovery_rules(cdp_nei_list):
             for subrule_serial_id in subrules_list:
                 if serial_id == subrule_serial_id:
                     config_id=single_obj.config_id
+                    match_response["DISCOVERYRULE_ID"] = single_obj.id
+                    match_response["MATCH_TYPE"] = MATCH_TYPE_SYSTEM_ID
                     logger.debug("The matching discoveryrule with serial-id is: "+str(single_obj.id))
                     break
-            if config_id!=0:
+            if config_id!=INVALID:
                 break
     logger.debug("The configuration id is: "+str(config_id))
+    if config_id != INVALID: 
+        match_response["CFG_ID"] = config_id
+        match_response["SWITCH_ID"] = cdp_nei_list['system_id']
+        # calling build functions from fabric
+        dis_obj = DiscoveryRule.objects.get(id = match_response["DISCOVERYRULE_ID"])
+        if dis_obj.fabric_id != INVALID:
+            # filling match_response for serialId match
+            match_response['FABRIC_ID'] = dis_obj.fabric_id
+            match_response['REPLICA_NUM'] = dis_obj.replica_num
+            match_response['SWITCH_ID'] = dis_obj.switch_name
+            
+            fabric_obj = Fabric.objects.get(id = dis_obj.fabric_id)
+            fabric_name = fabric_obj.name
+            fabric_name = fabric_name + "_" + str(dis_obj.replica_num) + "_"
+            topology_obj = fabric_obj.topology
+            local_node = dis_obj.switch_name
+            build_fabric_map(fabric_name, topology_obj, local_node)
+            try:
+                build_vpc_detail(local_node)
+            except KeyError,e:
+                logger.error("Key:" + str(e) + " not found")
+                return match_response
     
-    return config_id
+    return match_response

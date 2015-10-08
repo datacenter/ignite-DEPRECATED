@@ -18,7 +18,7 @@
 
             //API URL
             "appAPI": {
-                "baseURL": "http://172.31.219.152:8000",
+                "baseURL": "http://12.36.118.92:8888",
                 "configlets" : {
                   "list" : {
                      // "url" : "http://localhost:9010/data/configlets-list.json",
@@ -62,29 +62,29 @@
                      "auth" : "true"
                   }
                 },
-                "collections" : {
+                "pools" : {
                   "list" : {
-                      "url" : "/api/collection/",
+                      "url" : "/api/pool/",
                       "method" : "GET",
                       "auth" : "true"
                     },
                     "add" : {
-                        "url" : "/api/collection/",
+                        "url" : "/api/pool/",
                         "method" : "POST",
                         "auth" : "true"
                     },
                     "getById" : {
-                      "url" : "/api/collection/",
+                      "url" : "/api/pool/",
                       "method" : "GET",
                       "auth" : "true"
                     },
                     "edit" : {
-                      "url" : "/api/collection/",
+                      "url" : "/api/pool/",
                       "method" : "PUT",
                       "auth" : "true"
                     },
                     "delete" : {
-                      "url" : "/api/collection/",
+                      "url" : "/api/pool/",
                       "method" : "DELETE",
                       "auth" : "true"
                     }
@@ -216,10 +216,30 @@
                         "method": "DELETE",
                         "auth": "true"
                     }
+                },
+                "deployedFabrics" : {
+                    "list": {
+                        "url": "/api/fabric/deployed",
+                        "method": "GET",
+                        "auth": "true"
+                    },
+                    "replicaDetails": {
+                        "url": "/api/fabric/deployed/",
+                        "method": "GET",
+                        "auth": "true"
+                    },
+
+                    "getConfig": {
+                        "url": "/api/fabric/deployed/config/",
+                        "method": "GET",
+                        "auth": "true"
+                    },
+                    "getLog": {
+                        "url": "/api/fabric/deployed/logs/",
+                        "method": "GET",
+                        "auth": "true"
+                    }
                 }
-
-
-
             },
             "dateFormat": 'dd/MMM/yyyy hh:mm:ss a',
             "fieldValues": {
@@ -232,7 +252,7 @@
                         "label": "Script"
                     }]
                 },
-                "collections" : {
+                "pools" : {
                   "types" : [
                     {
                       "value" : "AutoGenerate",
@@ -283,7 +303,7 @@
                       "label" : "Append script"
                   }],
                   'paramTypes' : [{
-                      "value" : "Collection",
+                      "value" : "Pool",
                       "label" : "Pool"
                     },{
                       "value" : "Instance",
@@ -323,10 +343,6 @@
                       "label" : "any"
                     },
                     {
-                      "value" : "exact",
-                      "label" : "exact"
-                    },
-                    {
                       "value" : "oneof",
                       "label" : "oneof"
                     },
@@ -355,10 +371,6 @@
                     {
                       "value" : "any",
                       "label" : "any"
-                    },
-                    {
-                      "value" : "exact",
-                      "label" : "exact"
                     },
                     {
                       "value" : "oneof",
@@ -391,10 +403,6 @@
                       "label" : "any"
                     },
                     {
-                      "value" : "exact",
-                      "label" : "exact"
-                    },
-                    {
                       "value" : "oneof",
                       "label" : "oneof"
                     },
@@ -404,12 +412,13 @@
                     }
                   ]
                 }
+
             },
             "defaultData": {
                 "configlets": {
                     "config_type": "template"
                 },
-                "collections" : {
+                "pools" : {
                     "type" : "AutoGenerate",
                     "scope" : "global"
                 },
@@ -418,7 +427,8 @@
                     "rpCondition" : "match",
                     "lpCondition" : "match",
                     "match" : "all",
-                    "buildConfigurationId" : 1
+                    "buildConfigurationId" : 1,
+                    "priority" : 1
                 },
                 "topology" : {
                     "buildConfigurationId" : 1,

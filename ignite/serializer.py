@@ -6,6 +6,6 @@ class Neighbor(serializers.Serializer):
     remote_node = serializers.CharField(required=True, max_length=100)
     remote_port = serializers.CharField(required=True, max_length=100)
 
-class POAPSerializer(serializers.Serializer):
+class IgniteSerializer(serializers.Serializer):
     system_id = serializers.CharField(required=True, max_length=100)
     neighbor_list = Neighbor(required=True, many=True)

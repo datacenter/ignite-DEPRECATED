@@ -1,135 +1,197 @@
 {
-    "name":"Topology2",
-
-    "submit":"false",
-
-    "topology_json":{
-
-        "core_list" : [
-        {
-            "id" : "1",
-            "name" : "core1",
-            "type" : "BGPCore"
-        }
+  "name": "Topo1",
+  "submit": "false",
+  "topology_json": {
+    "core_list": [
+      {
+        "id": 1,
+        "name": "core1",
+        "type": "BGPCore"
+      }
+    ],
+    "spine_list": [
+      {
+        "id": 1,
+        "name": "spine1",
+        "type": "NX9508"
+      },
+      {
+        "id": 2,
+        "name": "spine2",
+        "type": "NX9508"
+      }
+    ],
+    "leaf_list": [
+      {
+        "id": 1,
+        "name": "leaf1",
+        "type": "NX9332PQ"
+      },
+      {
+        "id": 2,
+        "name": "leaf2",
+        "type": "NX9332PQ"
+      },
+      {
+        "id": 3,
+        "name": "leaf3",
+        "type": "NX9332PQ"
+      }
+    ],
+    "link_list": [
+      {
+        "id_2": 1,
+        "switch_2": "spine1",
+        "port_list_2": [
+          "e2/1"
         ],
-
-
-        "spine_list" : [
-        {
-            "id" : "1",
-            "name" : "spine1",
-            "type" : "Spine2Slots"
-        },
-        {
-            "id" : "2",
-            "name" : "spine2",
-            "type" : "Spine2Slots"
-        }
+        "id_1": 1,
+        "switch_1": "core1",
+        "port_list_1": [
+          "e1/1"
         ],
-
-
-        "leaf_list" : [
-        {
-            "id" : "1",
-            "name" : "leaf1",
-            "type" : "Leaf48+2"
-        },
-        {
-            "id" : "2",
-            "name" : "leaf2",
-            "type" : "Leaf48+2"
-        },
-        {
-            "id" : "3",
-            "name" : "leaf3",
-            "type" : "Leaf48+2"
-        }
+        "link_type": "Linkset-1Link"
+      },
+      {
+        "id_2": 2,
+        "switch_2": "spine2",
+        "port_list_2": [
+          "e2/1"
         ],
-
-
-        "link_list":[
-                    {
-                "id_2" : "1",
-                        "switch_2":"spine1",
-                        "port_list_2":["e2/1"],
-                "id_1" : "1",
-                        "switch_1":"core1",
-                        "port_list_1":["e1/1"],
-                        "link_type":"Linkset-1Link"
-                    },
-                    {
-                "id_2" : "2",
-                        "switch_2":"spine2",
-                        "port_list_2":["e2/1"],
-                "id_1" : "1",
-                        "switch_1":"core1",
-                        "port_list_1":["e1/2"],
-                        "link_type":"Linkset-1Link"
-                    },
-                    {
-                "id_2" : "1",
-                        "switch_2":"leaf1",
-                        "port_list_2":["e1/1"],
-                "id_1" : "1",
-                        "switch_1":"spine1",
-                        "port_list_1":["e1/1"],
-                        "link_type":"Linkset-1Link"
-                    },
-                    {
-                "id_2" : "2",
-                        "switch_2":"leaf2",
-                        "port_list_2":["e1/1"],
-                "id_1" : "1",
-                        "switch_1":"spine1",
-                        "port_list_1":["e1/2"],
-                        "link_type":"Linkset-1Link"
-                    },
-                    {
-                "id_2" : "3",
-                        "switch_2":"leaf3",
-                        "port_list_2":["e1/1"],
-                "id_1" : "1",
-                        "switch_1":"spine1",
-                        "port_list_1":["e1/3"],
-                        "link_type":"Linkset-1Link"
-                    },
-                    {
-                "id_2" : "1",
-                        "switch_2":"leaf1",
-                        "port_list_2":["e1/2"],
-                "id_1" : "2",
-                        "switch_1":"spine2",
-                        "port_list_1":["e1/1"],
-                        "link_type":"Linkset-1Link"
-                    },
-                    {
-                "id_2" : "2",
-                        "switch_2":"leaf2",
-                        "port_list_2":["e1/2"],
-                "id_1" : "2",
-                        "switch_1":"spine2",
-                        "port_list_1":["e1/2"],
-                        "link_type":"Linkset-1Link"
-                    },
-                    {
-                "id_2" : "3",
-                        "switch_2":"leaf3",
-                        "port_list_2":["e1/2"],
-                "id_1" : "2",
-                        "switch_1":"spine2",
-                        "port_list_1":["e1/3"],
-                        "link_type":"Linkset-1Link"
-                    },
-                    {
-                "id_2" : "2",
-                        "switch_2":"leaf2",
-                        "port_list_2":["e2/1","e2/2"],
-                "id_1" : "1",
-                        "switch_1":"leaf1",
-                        "port_list_1":["e2/1","e2/2"],
-                        "link_type":"VPC-2Link"
-                    }
-        ]
+        "id_1": 1,
+        "switch_1": "core1",
+        "port_list_1": [
+          "e1/2"
+        ],
+        "link_type": "Linkset-1Link"
+      },
+      {
+        "id_2": 1,
+        "switch_2": "leaf1",
+        "port_list_2": [
+          "e1/1"
+        ],
+        "id_1": 1,
+        "switch_1": "spine1",
+        "port_list_1": [
+          "e1/1"
+        ],
+        "link_type": "Linkset-1Link"
+      },
+      {
+        "id_2": 2,
+        "switch_2": "leaf2",
+        "port_list_2": [
+          "e1/1"
+        ],
+        "id_1": 1,
+        "switch_1": "spine1",
+        "port_list_1": [
+          "e1/2"
+        ],
+        "link_type": "Linkset-1Link"
+      },
+      {
+        "id_2": 3,
+        "switch_2": "leaf3",
+        "port_list_2": [
+          "e1/1"
+        ],
+        "id_1": 1,
+        "switch_1": "spine1",
+        "port_list_1": [
+          "e1/3"
+        ],
+        "link_type": "Linkset-1Link"
+      },
+      {
+        "id_2": 1,
+        "switch_2": "leaf1",
+        "port_list_2": [
+          "e1/2"
+        ],
+        "id_1": 2,
+        "switch_1": "spine2",
+        "port_list_1": [
+          "e1/1"
+        ],
+        "link_type": "Linkset-1Link"
+      },
+      {
+        "id_2": 2,
+        "switch_2": "leaf2",
+        "port_list_2": [
+          "e1/2"
+        ],
+        "id_1": 2,
+        "switch_1": "spine2",
+        "port_list_1": [
+          "e1/2"
+        ],
+        "link_type": "Linkset-1Link"
+      },
+      {
+        "id_2": 3,
+        "switch_2": "leaf3",
+        "port_list_2": [
+          "e1/2"
+        ],
+        "id_1": 2,
+        "switch_1": "spine2",
+        "port_list_1": [
+          "e1/3"
+        ],
+        "link_type": "Linkset-1Link"
+      },
+      {
+        "id_2": 2,
+        "switch_2": "leaf2",
+        "port_list_2": [
+          "e2/1",
+          "e2/2"
+        ],
+        "id_1": 1,
+        "switch_1": "leaf1",
+        "port_list_1": [
+          "e2/1",
+          "e2/2"
+        ],
+        "link_type": "VPC-2Link"
+      }
+    ]
+  },
+  "config_json": [
+    {
+      "name": "spine1",
+      "configuration_id": 1,
+      "image_name": "NX-OS 5.1"
+    },
+    {
+      "name": "spine2",
+      "configuration_id": 1,
+      "image_name": "NX-OS 5.1"
+    },
+    {
+      "name": "leaf1",
+      "configuration_id": 1,
+      "image_name": "NX-OS 5.1"
+    },
+    {
+      "name": "leaf2",
+      "configuration_id": 1,
+      "image_name": "NX-OS 5.1"
+    },
+    {
+      "name": "leaf3",
+      "configuration_id": 1,
+      "image_name": "NX-OS 5.1"
+    }
+  ],
+  "defaults": {
+    "spine_switch": "NX9508",
+    "leaf_switch": "NX9332PQ",
+    "spine_leaf_link": "Linkset-1Link",
+    "spine_leaf_link_index": 1
   }
 }
 

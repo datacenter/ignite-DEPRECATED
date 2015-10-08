@@ -6,7 +6,7 @@ from configuration.models import Configuration
 from rest_framework.validators import UniqueValidator
 import re
 
-PARAM_TYPE_CHOICES = [ 'Fixed', 'Instance', 'Collection', 'Value', 'Autogenerate' ]
+PARAM_TYPE_CHOICES = [ 'Fixed', 'Instance', 'Pool', 'Value', 'Autogenerate' ]
 CONSTRUCT_TYPE_CHOICES = ['append_configlet','append_script']
 
 class JSONSerializerField(serializers.Field):

@@ -34,4 +34,5 @@ class Configuration(models.Model):
     last_modified_by = models.ForeignKey(User)
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_date = models.DateTimeField(auto_now=True)
+    used = models.IntegerField(default = 0)
 

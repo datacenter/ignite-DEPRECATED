@@ -15,3 +15,6 @@ class DiscoveryRule(models.Model):
     config_id = models.IntegerField(default=0)
     subrules = models.TextField()
     match = models.CharField(max_length=10,default="all")
+    fabric_id = models.IntegerField(default= -1)
+    replica_num = models.IntegerField(default= -1)
+    switch_name = models.CharField(max_length=100,default=' ')

@@ -29,7 +29,7 @@ class SwitchSerializer(serializers.Serializer):
         '''
         TBD
         '''
-        return Collection.objects.create(**validated_data)   
+        return Pool.objects.create(**validated_data)   
         
 class SwitchGetSerializer(serializers.Serializer):
 
