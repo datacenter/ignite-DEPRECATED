@@ -32,6 +32,8 @@ Follow steps 4-7 below (skip step 6)
 	    vmpassword: password for the server
 	f. Run configure.sh (sh configure.sh)
 	g. Run ignite server (python manage.py runserver ip:port ) where IP is the address provided in ignite_ip and port is value provided in ignite_port.
+	h. To launch UI use http://<ipaddress>:<port>/ui/index.html
+	i. Use New User registration link in the UI to create a new user credential. Login to the page using this credential.
 
 Setup users as mentioned in step-6 below.
 
@@ -90,9 +92,8 @@ curl -X POST -i -H "Content-type: application/json" http://<ignite_vm_ip>:<port>
 ```
 
 7.Run UI on web browser
-http://<ignite_vm_ip>:<port>/ui/index.html
-
-Login using credentials: admin/admin
+  To launch UI use http://<ipaddress>:<port>/ui/index.html
+  Use New User registration link in the UI to create a new user credential. Login to the page using this credential.
 
 # License
 
