@@ -2,6 +2,8 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from fabric.models import Fabric
 
+PROTOCOL_LIST = ['http', 'scp', 'ftp']
+
 class JSONSerializerField(serializers.Field):
     """ Serializer for JSONField -- required to make field writable"""
     def to_internal_value(self, data):
@@ -31,6 +33,7 @@ class FabricGetDetailSerializer(serializers.Serializer):
     instance = serializers.IntegerField()
     config_json = JSONSerializerField()
     system_id = JSONSerializerField() 
+    image_details = JSONSerializerField()
     created_date = serializers.DateTimeField()
     updated_date = serializers.DateTimeField()
 
@@ -44,6 +47,10 @@ class SystemIdSerializer(serializers.Serializer):
     name = serializers.CharField(required = True)
     system_id = serializers.CharField(required = True)
     
+class ImageDetailSerializer(serializers.Serializer):
+    leaf_switch = serializers.CharField(required = True)
+    spine_switch = serializers.CharField(required = True)
+    
 class FabricPutSerializer(serializers.Serializer):
     name = serializers.CharField()
     topology_id = serializers.IntegerField()
@@ -53,6 +60,7 @@ class FabricPutSerializer(serializers.Serializer):
     submit = serializers.CharField(max_length=10)
     config_json = ConfigurationSerializer(required = True, many = True)
     system_id = SystemIdSerializer(required = False, many = True)
+    image_details = ImageDetailSerializer(required=False)
 
 class FabricSerializer(serializers.Serializer):
     name = serializers.CharField(validators=[UniqueValidator(queryset=Fabric.objects.all())])
@@ -63,6 +71,7 @@ class FabricSerializer(serializers.Serializer):
     submit = serializers.CharField(max_length=10)
     config_json = ConfigurationSerializer(required = True, many = True)
     system_id = SystemIdSerializer(required = False, many = True)
+    image_details = ImageDetailSerializer(required=False)
 
 
 class FabricRuleDBGetSerializer(serializers.Serializer):
@@ -73,3 +82,10 @@ class FabricRuleDBGetSerializer(serializers.Serializer):
     local_port =  serializers.CharField()
     action = serializers.IntegerField()
 
+class ImagePostSerializer(serializers.Serializer):
+    image_profile_name = serializers.CharField()
+    image = serializers.CharField()
+    imageserver_ip = serializers.CharField()
+    username = serializers.CharField()
+    password = serializers.CharField()
+    access_protocol = serializers.ChoiceField(PROTOCOL_LIST)

@@ -4,13 +4,42 @@ from fabric.const import INVALID
 from fabric.fabric_rule import match_fabric_rules 
 from pool.pool import generate_pool_value
 import os
-from fabric.models import DeployedFabricStats, FabricRuleDB, Fabric
+from fabric.models import DeployedFabricStats, FabricRuleDB, Fabric, Topology
 from configuration.models import Configuration
 from fabric.const import *
+import json
+import re
+from fabric.image_profile import image_obejcts
  
 import logging
 logger = logging.getLogger(__name__)
 
+def swtType(switch, topology, fab_name, replica_num):
+    for sw in topology['spine_list']:
+        switchName = fab_name+'_'+str(replica_num)+'_'+sw['name']
+        if str(switch) == switchName:
+            return SPINE_SWITCH_TYPE
+    for sw in topology['leaf_list']:
+        switchName = fab_name+'_'+str(replica_num)+'_'+sw['name']
+        if str(switch) == switchName:
+            return LEAF_SWITCH_TYPE
+
+def fillResult(result,file_name,image_name,imageserver_ip,image_username,image_password,access_protocol):
+    result["status"] = True
+    result["imagename"] = image_name
+    result["imageserver"] = imageserver_ip
+    result["image_username"] = image_username
+    result["image_password"] = image_password
+
+    result["config_filename"] = file_name
+    result["config_username"] = "ignite"
+    result["config_password"] = "ignite"
+    result["config_file_loc"] = os.getcwd() + "/repo/"
+    result['protocol'] = access_protocol
+    
+    logger.debug("Config file = " + file_name)
+    logger.debug("POAP End")
+    return result
 
 def process_ignite(info):
 
@@ -31,19 +60,36 @@ def process_ignite(info):
         return result
     
     insert_deployed_fabric_stats(match_response, info["system_id"], file_name)
+    
+    image_name = '6.1.2.I3.2'
+    imageserver_ip = '172.31.216.138'
+    image_username = 'root'
+    image_password = 'cisco123'
+    access_protocol = 'scp'
 
-    result["status"] = True
-    result["config_filename"] = file_name
-    result["imagename"] = "6.1.2.I3.2"
-    result["imageserver"] = "172.31.216.138"
-    result["config_username"] = "vmignite"
-    result["config_password"] = "cisco123"
-    result["config_file_loc"] = os.getcwd() + "/repo/"
-    logger.debug("Config file = " + file_name)
-    logger.debug("POAP End")
-    
+    if match_response["FABRIC_ID"] != INVALID:
+        fabric_obj = Fabric.objects.get(id = match_response["FABRIC_ID"])
+        img_detail = json.loads(fabric_obj.image_details)
+        switch = match_response["SWITCH_ID"]
+        topo_id = fabric_obj.topology.id
+        topology_obj = Topology.objects.get(id=topo_id)
+        topology = json.loads(topology_obj.topology_json)
+        image = ' '
+        type = swtType(switch,topology, fabric_obj.name, match_response["REPLICA_NUM"])
+        image = img_detail[type]
+        try:
+            for detail in image_obejcts:
+                if detail['image_profile_name'] == image:
+                    image_name = detail['image']
+                    imageserver_ip = detail['imageserver_ip']
+                    image_username = detail['username']
+                    image_password = detail['password']
+                    access_protocol = detail['access_protocol']
+        except:
+            logger.error('Failed to read image details')
+
+    result = fillResult(result,file_name,image_name,imageserver_ip,image_username,image_password,access_protocol)
     #clear_repo(result["config_file_loc"])
-    
     return result
 
 def match_info(result,info):

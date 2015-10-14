@@ -135,6 +135,7 @@ def match_discovery_rules(cdp_nei_list):
             match_response['FABRIC_ID'] = dis_obj.fabric_id
             match_response['REPLICA_NUM'] = dis_obj.replica_num
             match_response['SWITCH_ID'] = dis_obj.switch_name
+            match_response["DISCOVERYRULE_ID"] = INVALID
             
             fabric_obj = Fabric.objects.get(id = dis_obj.fabric_id)
             fabric_name = fabric_obj.name

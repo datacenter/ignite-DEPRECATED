@@ -1,7 +1,7 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from views import TopologyList, TopologyDetail, FabricList, FabricDetail, FabricRuleDBDetail,\
-                  DeployedFabric, DeployedFabricDetail, DeployedConfig, DeployedLogs
+                  DeployedFabric, DeployedFabricDetail, DeployedConfig, DeployedLogs, ImageList
 
 urlpatterns = patterns('',
     # Examples:
@@ -15,4 +15,5 @@ urlpatterns = patterns('',
      url(r'^deployed/(?P<fabric_id>[0-9]+)/(?P<replica_num>[0-9]+)$', DeployedFabricDetail.as_view(), name='detail_view'),
      url(r'^deployed/config/(?P<id>[0-9]+)$', DeployedConfig.as_view(), name='detail_view'),
      url(r'^deployed/logs/(?P<id>[0-9]+)$', DeployedLogs.as_view(), name='detail_view'),
+     url(r'^images$', ImageList.as_view(), name='home'),
 )
