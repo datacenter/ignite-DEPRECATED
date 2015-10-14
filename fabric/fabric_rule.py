@@ -26,6 +26,9 @@ spine_list = []
 core_list = []
 
 
+def purge_domainname(switch_name):
+	return switch_name.split(".",1)[0]
+
 def get_instance_number(fabric_name, remote_node):
     regex = fabric_name + "(_)([1-9][0-9]*)(_)"
     instance_num = INVALID
@@ -252,7 +255,7 @@ def match_fabric_rules(poap_info):
 
     if not is_empty(cdp_neighbors):
         for link in cdp_neighbors:
-            remote_node = link[REMOTE_NODE]
+            remote_node = purge_domainname(link[REMOTE_NODE])
             remote_port = link[REMOTE_PORT]
             local_port = link[LOCAL_PORT]
             logger.debug("Neighbour" + str(link))
