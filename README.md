@@ -95,6 +95,18 @@ curl -X POST -i -H "Content-type: application/json" http://<ignite_vm_ip>:<port>
   To launch UI use http://<ipaddress>:<port>/ui/index.html
   Use New User registration link in the UI to create a new user credential. Login to the page using this credential.
 
+Installing poap.py in the script server
+
+1.Ignite_poap.py – sample poap.py script is available in github
+2.Modify ignite_poap.py to assign ip address and port number of the ignite server (see the ip address and port number used while executing manage.py run server)
+	a. Search for “ignite server” in poap.py and change the following values
+		#ignite server
+		hostname = "172.31.219.76"
+		port = "8001"
+	b. Save the changes
+	c. Copy and rename the file to “poap.py” in the script server directory /var/lib/tftpboot
+3.Please note, poap.py should be installed in the script server whose address is returned in the DHCP OFFER during the dhcp discover process
+
 # License
 
 Copyright 2015 Cisco Systems, Inc.
