@@ -110,7 +110,7 @@ curl -X POST -i -H "Content-type: application/json" http://<ignite_vm_ip>:<port>
 	c. Copy and rename the file to “poap.py” in the script server directory /var/lib/tftpboot
 ```
 3.Please note, poap.py should be installed in the script server whose address is returned in the DHCP OFFER during the dhcp discover process
-```
+
 # License
 
 Copyright 2015 Cisco Systems, Inc.
