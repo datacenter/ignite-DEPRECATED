@@ -95,7 +95,7 @@ curl -X POST -i -H "Content-type: application/json" http://<ignite_vm_ip>:<port>
   To launch UI use http://<ipaddress>:<port>/ui/index.html
   Use New User registration link in the UI to create a new user credential. Login to the page using this credential.
 
-Installing poap.py in the script server
+# Installing poap.py in the script server
 
 1.Ignite_poap.py – sample poap.py script is available in github
 2.Modify ignite_poap.py to assign ip address and port number of the ignite server (see the ip address and port number used while executing manage.py run server)
