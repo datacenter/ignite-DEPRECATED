@@ -15,7 +15,7 @@ Ignite provides bootstrapping with the following capabilities:
 # Getting Started
 
 ### Option 1: Download OVA from link below:
-https://cisco.box.com/s/2ctbs4ebx7oycowusf9vxznvhcworx2k
+https://cisco.box.com/s/4mdfja1cbev3065vmwst4fvc7nj9vpe2
 
 Username/password: ignite/ignite
 
