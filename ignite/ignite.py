@@ -32,8 +32,8 @@ def fillResult(result,file_name,image_name,imageserver_ip,image_username,image_p
     result["image_password"] = image_password
 
     result["config_filename"] = file_name
-    result["config_username"] = "ignite"
-    result["config_password"] = "ignite"
+    result["config_username"] = "vmignite"
+    result["config_password"] = "cisco123"
     result["config_file_loc"] = os.getcwd() + "/repo/"
     result['protocol'] = access_protocol
     
@@ -61,12 +61,20 @@ def process_ignite(info):
     
     insert_deployed_fabric_stats(match_response, info["system_id"], file_name)
     
-    image_name = '6.1.2.I3.2'
-    imageserver_ip = '172.31.216.138'
-    image_username = 'root'
-    image_password = 'cisco123'
-    access_protocol = 'scp'
-
+    image_name = ''
+    imageserver_ip = ''
+    image_username = ''
+    image_password = ''
+    access_protocol = ''
+    # Getting default values from json
+    for img in image_obejcts:
+        if img['image_profile_name'] == 'default_image':
+            image_name = img['image']
+            imageserver_ip = img['imageserver_ip']
+            image_username = img['username']
+            image_password = img['password']
+            access_protocol = img['access_protocol']
+    # For Valid Fabric
     if match_response["FABRIC_ID"] != INVALID:
         fabric_obj = Fabric.objects.get(id = match_response["FABRIC_ID"])
         img_detail = json.loads(fabric_obj.image_details)
@@ -87,6 +95,13 @@ def process_ignite(info):
                     access_protocol = detail['access_protocol']
         except:
             logger.error('Failed to read image details')
+    # If anything fails, Providing Default(worst case)
+    if image_name =='' or imageserver_ip=='' or image_username=='' or image_password=='' or access_protocol=='':
+        image_name = "6.1.2.I3.2"
+        imageserver_ip = "172.31.216.138"
+        image_username = "root"
+        image_password = "cisco123"
+        access_protocol = "scp"
 
     result = fillResult(result,file_name,image_name,imageserver_ip,image_username,image_password,access_protocol)
     #clear_repo(result["config_file_loc"])
