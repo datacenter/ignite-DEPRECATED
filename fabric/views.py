@@ -379,9 +379,28 @@ class FabricDetail(APIView):
         fabric = self.get_object(id)
         serializer = FabricGetDetailSerializer(fabric)
         data = dict(serializer.data)
-        data['config_json'] = json.loads(data['config_json'])
-        data['system_id'] = json.loads(data['system_id'])
-        data['image_details'] = json.loads(data['image_details'])
+
+        try:
+            data['config_json'] = json.loads(data['config_json'])
+        except:
+            logger.error("No config details details found for Fabic Id %s" %id)
+            data['config_json'] = json.loads("{}")
+            pass
+
+        try:
+            data['system_id'] = json.loads(data['system_id'])
+        except:
+            logger.error("No system Id details found for Fabic Id %s" %id)
+            data['system_id'] = json.loads("{}")
+            pass
+
+        try:
+            data['image_details'] = json.loads(data['image_details'])
+        except:
+            logger.error("No image details details found for Fabic Id %s" %id)
+            data['image_details'] = json.loads("{}")
+            pass
+
         try:
             topology = Topology.objects.get(id=fabric.topology.id)
         except Topology.DoesNotExist:
