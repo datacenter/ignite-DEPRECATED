@@ -30,7 +30,7 @@ class Fabric(models.Model):
     updated_date = models.DateTimeField(auto_now=True)
     submit = models.CharField(max_length=10, default="false")
     image_details = models.TextField()
-
+#    profiles = models.TextField()
 
 class FabricRuleDB(models.Model):
 

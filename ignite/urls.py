@@ -20,4 +20,7 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^auth/', include('djoser.urls')),
     url(r'^api/ignite', Ignite.as_view(), name='home'),
+    url(r'^api/fabric_profile/', include('fabric_profile.urls')),
+
+    #url(r'^docs/', include('rest_framework_swagger.urls')),
 )

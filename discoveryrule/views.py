@@ -19,6 +19,9 @@ from serializer.DiscoveryRuleSerializer import DiscoveryRuleGetDetailSerializer
 from serializer.DiscoveryRuleSerializer import DiscoveryRuleSerialIDSerializer
 from serializer.DiscoveryRuleSerializer import DiscoveryRulePutSerializer
 from serializer.DiscoveryRuleSerializer import DiscoveryRuleIDPutSerializer
+from fabric.models import DeployedFabricStats
+from fabric.const import INVALID
+from fabric.serializer.deployed_serializer import DeployedFabricDetailGetSerializer
 
 from usermanagement.utils import RequestValidator
 from django.http import JsonResponse
@@ -168,3 +171,32 @@ class DiscoveryRuleDetailList(APIView,RequestValidator):
         discoveryrule = self.get_object(id)
         discoveryrule.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class DeployedByGlobal(APIView,RequestValidator):
+
+    def dispatch(self, request, *args, **kwargs):
+        me = RequestValidator(request.META)
+        if me.user_is_exist():
+            return super(DeployedByGlobal, self).dispatch(request,*args, **kwargs)
+        else:
+            resp = me.invalid_token()
+            return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request,format=None):
+        resp = {}
+        try:
+            dis_object = DeployedFabricStats.objects.exclude(discoveryrule_id = INVALID)
+            serializer = DeployedFabricDetailGetSerializer(dis_object, many=True)
+            for switch in serializer.data:
+                try:
+                    dis_name = DiscoveryRule.objects.get(pk=switch['discoveryrule_id'])
+                    switch['discoveryrule_name'] = dis_name.name
+                except:
+                    resp['Error'] = 'Failed to read discovery rule with id :'+str(switch['discoveryrule_id'])
+                    logger.error(resp['Error'])
+                    return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data)
+        except:
+            resp['Error'] = 'Failed to get Deployed switches by Global discovery rules.'
+            logger.error(resp['Error'])
+            return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)

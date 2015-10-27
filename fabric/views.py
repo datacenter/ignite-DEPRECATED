@@ -7,7 +7,6 @@ from usermanagement.utils import RequestValidator
 from django.contrib.auth.models import User
 import json
 import logging
-import pprint
 import os
 import string
 from django.core.servers.basehttp import FileWrapper
@@ -21,14 +20,14 @@ from models import Topology, Fabric, FabricRuleDB, DeployedFabricStats
 from fabric_rule import generate_fabric_rules, delete_fabric_rules
 from serializer.topology_serializer import TopologyGetSerializer, TopologySerializer, TopologyGetDetailSerializer, TopologyPutSerializer
 from serializer.fabric_serializer import FabricSerializer, FabricGetSerializer, FabricGetDetailSerializer, FabricPutSerializer
-from serializer.fabric_serializer import FabricRuleDBGetSerializer, ImagePostSerializer
+from serializer.fabric_serializer import FabricRuleDBGetSerializer, ImagePostSerializer, ImageDetailSerializer, ProfilesSerializer
 from serializer.deployed_serializer import DeployedFabricGetSerializer, DeployedFabricDetailGetSerializer
 from configuration.models import Configuration
 from discoveryrule.models import DiscoveryRule
 from fabric.const import INVALID, LOG_SEARCH_COL
 from discoveryrule.models import DiscoveryRule
 from discoveryrule.serializer.DiscoveryRuleSerializer import DiscoveryRuleGetDetailSerializer
-from fabric.image_profile import image_obejcts
+from fabric.image_profile import image_objects
 
 logger = logging.getLogger(__name__)
 
@@ -242,6 +241,8 @@ class TopologyDetail(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+
+
 class FabricList(APIView):
     """
     Fetch Fabric List or Add a new entry to Fabric
@@ -261,6 +262,12 @@ class FabricList(APIView):
         for item in serializer.data:
             item['topology_name'] = fabric_list[index].topology.name
             item['topology_id']  = fabric_list[index].topology.id
+            """
+            try:
+                item['profiles'] = json.loads(data['profiles'])
+            except:
+                item['profiles'] = {}
+            """
             try:
                 item['user_name']   = User.objects.get(id=fabric_list[index].user_id).username
             except User.DoesNotExist:
@@ -311,10 +318,16 @@ class FabricList(APIView):
                     fabric_obj.system_id = json.dumps(request.data['system_id'])
                 except:
                     fabric_obj.system_id = []
+                """
+                try:
+                    fabric_obj.profiles = json.dumps(request.data['profiles'])
+                except:
+                    fabric_obj.profiles = json.dumps({})
+                """    
                 try:   # fill image details
                     fabric_obj.image_details = json.dumps(request.data['image_details'])
                 except:
-                    fabric_obj.image_details = []
+                    fabric_obj.image_details = json.dumps({})
                 try:  # save object
                     fabric_obj.save()
                 except:
@@ -355,7 +368,10 @@ class FabricList(APIView):
                     return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
                         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+        
+            
+ 
+        
 class FabricDetail(APIView):
     """
     Retrieve, update or delete a Fabric instance.
@@ -379,28 +395,18 @@ class FabricDetail(APIView):
         fabric = self.get_object(id)
         serializer = FabricGetDetailSerializer(fabric)
         data = dict(serializer.data)
-
-        try:
-            data['config_json'] = json.loads(data['config_json'])
+        data['config_json'] = json.loads(data['config_json'])
+        data['system_id'] = json.loads(data['system_id'])
+	try:
+	    data['image_details'] = json.loads(data['image_details'])
         except:
-            logger.error("No config details details found for Fabic Id %s" %id)
-            data['config_json'] = json.loads("{}")
-            pass
-
-        try:
-            data['system_id'] = json.loads(data['system_id'])
-        except:
-            logger.error("No system Id details found for Fabic Id %s" %id)
-            data['system_id'] = json.loads("{}")
-            pass
-
-        try:
-            data['image_details'] = json.loads(data['image_details'])
-        except:
-            logger.error("No image details details found for Fabic Id %s" %id)
             data['image_details'] = json.loads("{}")
-            pass
-
+	"""
+        try:
+            data['profiles'] = json.loads(data['profiles'])
+        except:
+            data['profiles'] = {}
+        """
         try:
             topology = Topology.objects.get(id=fabric.topology.id)
         except Topology.DoesNotExist:
@@ -462,7 +468,13 @@ class FabricDetail(APIView):
                     fabric_obj.image_details = json.dumps(request.data['image_details'])
                 except:
                     pass
-                # filling discovery rule db
+                # filling profiles
+                """
+                try:
+                    fabric_obj.profiles = json.loads(request.data['profiles'])
+                except:pass
+                """
+                                # filling discovery rule db
                 try:
                     DiscoveryRule.objects.filter(fabric_id=id).delete()
                 except:
@@ -506,6 +518,7 @@ class FabricDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, id, format=None):
+        resp = {}
         fabric = self.get_object(id)
         topology = Topology.objects.get(id=fabric.topology.id)
         config_in_fabric = json.loads(fabric.config_json)
@@ -517,17 +530,47 @@ class FabricDetail(APIView):
             topology.used -= 1
             topology.save()
         except:
-            logger.error("Failed to update topology used information" + str(topology.id))
+            logger.error('Failed to update topology used information' + str(topology.id))
         # deleting discovery rules formed form fabric
         try:
             DiscoveryRule.objects.filter(fabric_id = id).delete()
         except:
-            logger.error('failed to delete discoveryRules with fabric_id: '+str(id))
+            logger.error('Failed to delete discoveryRules with fabric_id: '+str(id))
+        try:
+            DeployedFabricStats.objects.filter(fabric_id = id).delete()
+        except:
+            logger.error('Failed to delete Deployed stats with fabric_id: '+str(id))
         if delete_fabric_rules(id):
             fabric.delete()
         else:
-            logger.error("Failed to delete Rules from fabric Rule DB for Fabric id: " + str(id))
+            logger.error('Failed to delete Rules from fabric Rule DB for Fabric id: ' + str(id))
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+       
+class Profiles(APIView):
+    def dispatch(self,request, *args, **kwargs):
+        me = RequestValidator(request.META)
+        if me.user_is_exist():
+            return super(Profiles, self).dispatch(request,*args, **kwargs)
+        else:
+            resp = me.invalid_token()
+            return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
+
+            
+    def put(self,request,id,format=None):
+        serializer = ProfilesSerializer(data=request.data)
+        if serializer.is_valid():    
+            resp = {}
+            try:
+                fabric_obj = Fabric.objects.get(pk=id)
+                fabric_obj.profiles = json.dumps(serializer.data)
+                fabric_obj.save()
+            except:
+                logger.error('Failed to load profile data')
+                resp['Error'] = 'Failed to load profile data for fabric_id: '+str(id)
+                return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse(serializer.data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class FabricRuleDBDetail(APIView):
@@ -572,14 +615,16 @@ class DeployedFabric(APIView):
             return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
         
     def get(self, request, format=None):
-        fabric_list = DeployedFabricStats.objects.order_by('fabric_id').distinct('fabric_id')
+        fabric_list = DeployedFabricStats.objects.order_by('fabric_id').distinct('fabric_id').exclude(fabric_id=INVALID)
         data = []
+        resp = {}
         for fab in fabric_list:
             try:
                 fabric = Fabric.objects.get(id = fab.fabric_id)
             except:
-                logger.error("Fabric not found with id: " + str(fab.fabric_id))
-                pass
+                resp['Error'] = "Fabric not found with id: " + str(fab.fabric_id)
+                logger.error(resp['Error'])
+                return Response(resp, status=status.HTTP_400_BAD_REQUEST)
             fabric_dict = {}
             fabric_dict['fabric_id'] = fab.fabric_id
             if fabric_dict['fabric_id'] != INVALID:
@@ -688,7 +733,6 @@ class DeployedLogs(APIView):
             words = line.split()
             if key1 == words[LOG_SEARCH_COL] or key2 == words[LOG_SEARCH_COL]:
                 partial_log_file.append(string.rstrip(line))
-        print partial_log_file
         return partial_log_file
 
     def get(self, request, id, format=None):
@@ -729,7 +773,7 @@ class ImageList(APIView):
     
     def get(self, request,format=None):
         try:
-            serializer = ImagePostSerializer(data = image_obejcts,many=True)
+            serializer = ImagePostSerializer(data = image_objects,many=True)
             if serializer.is_valid():
                 img_data = serializer.data
                 resp = []
@@ -743,3 +787,30 @@ class ImageList(APIView):
             logger.error('Failed to access image profiles')
             resp = {'Error':'Failed to access image profiles'}
             return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
+
+
+class FabricImageEdit(APIView):
+    """
+    GET fabric_stats
+    """
+    def dispatch(self,request, *args, **kwargs):
+        me = RequestValidator(request.META)
+        if me.user_is_exist():
+            return super(FabricImageEdit, self).dispatch(request,*args, **kwargs)
+        else:
+            resp = me.invalid_token()
+            return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request,id,format=None):
+        resp = {}
+        serializer = ImageDetailSerializer(data = request.data)
+        if serializer.is_valid():
+            try:
+                fabric_obj = Fabric.objects.get(pk=id)
+                fabric_obj.image_details = json.dumps(serializer.data)
+                fabric_obj.save()
+            except:
+                resp['Error'] = 'Failed to update Image details for fabric_id: '+str(id)
+                return Response(resp, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

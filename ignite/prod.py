@@ -31,19 +31,22 @@ ALLOWED_HOSTS = []
 
 
 INSTALLED_APPS = (
+    # apps by django
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-    'pool',
-    'discoveryrule',
-    'configuration',
-    'fabric',
     'rest_framework.authtoken',
-    'djoser'
+    'rest_framework',
+    'djoser',
+    #User apps
+    'configuration',
+    'discoveryrule',
+    'fabric_profile',
+    'fabric',
+    'pool',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -75,9 +78,9 @@ WSGI_APPLICATION = 'ignite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'ignitedb',                      # Or path to database file if using sqlite3.
+        'NAME': 'ignite_db3',                      # Or path to database file if using sqlite3.
         'USER': 'postgres',
-        'PASSWORD': 'password',
+        'PASSWORD': '123456',
         'HOST': 'localhost',                      # Empty for localhost through domain sockets or           '127.0.0.1' for localhost through TCP.
         'PORT': '',                      # Set to empty string for default.
     }
@@ -156,6 +159,40 @@ LOGGING = {
             'handlers': ['file'],
             'level': 'DEBUG',
         },
+        'fabric_profile': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+        },
     }
 }
 #DJANGO_LOG_LEVEL=DEBUG
+
+
+
+SWAGGER_SETTINGS = {
+    'exclude_namespaces': [],
+    'api_version': '0.1',
+    'api_path': '/',
+    'enabled_methods': [
+        'get',
+        'post',
+        'put',
+        'patch',
+        'delete'
+    ],
+    'api_key': '',
+    'is_authenticated': False,
+    'is_superuser': False,
+    'permission_denied_handler': None,
+    'resource_access_handler': None,
+    'base_path':'127.0.0.1:8000/docs',
+    'info': {
+        'contact': 'saleem.sheikh@maplelabs.com',
+        'description': '',
+        'license': 'Apache 2.0',
+        'licenseUrl': 'http://www.apache.org/licenses/LICENSE-2.0.html',
+        'termsOfServiceUrl': 'http://127.0.0.1:8000/terms/',
+        'title': 'Ignite REST API documentation',
+    },
+    'doc_expansion': 'none',
+}

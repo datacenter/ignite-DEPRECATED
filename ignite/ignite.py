@@ -9,7 +9,7 @@ from configuration.models import Configuration
 from fabric.const import *
 import json
 import re
-from fabric.image_profile import image_obejcts
+from fabric.image_profile import image_objects
  
 import logging
 logger = logging.getLogger(__name__)
@@ -23,6 +23,7 @@ def swtType(switch, topology, fab_name, replica_num):
         switchName = fab_name+'_'+str(replica_num)+'_'+sw['name']
         if str(switch) == switchName:
             return LEAF_SWITCH_TYPE
+    return INVALID
 
 def fillResult(result,file_name,image_name,imageserver_ip,image_username,image_password,access_protocol):
     result["status"] = True
@@ -67,7 +68,7 @@ def process_ignite(info):
     image_password = ''
     access_protocol = ''
     # Getting default values from json
-    for img in image_obejcts:
+    for img in image_objects:
         if img['image_profile_name'] == 'default_image':
             image_name = img['image']
             imageserver_ip = img['imageserver_ip']
@@ -78,23 +79,25 @@ def process_ignite(info):
     if match_response["FABRIC_ID"] != INVALID:
         fabric_obj = Fabric.objects.get(id = match_response["FABRIC_ID"])
         img_detail = json.loads(fabric_obj.image_details)
-        switch = match_response["SWITCH_ID"]
-        topo_id = fabric_obj.topology.id
-        topology_obj = Topology.objects.get(id=topo_id)
-        topology = json.loads(topology_obj.topology_json)
-        image = ' '
-        type = swtType(switch,topology, fabric_obj.name, match_response["REPLICA_NUM"])
-        image = img_detail[type]
-        try:
-            for detail in image_obejcts:
-                if detail['image_profile_name'] == image:
-                    image_name = detail['image']
-                    imageserver_ip = detail['imageserver_ip']
-                    image_username = detail['username']
-                    image_password = detail['password']
-                    access_protocol = detail['access_protocol']
-        except:
-            logger.error('Failed to read image details')
+        if bool(img_detail):
+            switch = match_response["SWITCH_ID"]
+            topo_id = fabric_obj.topology.id
+            topology_obj = Topology.objects.get(id=topo_id)
+            topology = json.loads(topology_obj.topology_json)
+            image = ' '
+            type = swtType(switch,topology, fabric_obj.name, match_response["REPLICA_NUM"])
+            if type != INVALID:
+                image = img_detail[type]
+                try:
+                    for detail in image_objects:
+                        if detail['image_profile_name'] == image:
+                            image_name = detail['image']
+                            imageserver_ip = detail['imageserver_ip']
+                            image_username = detail['username']
+                            image_password = detail['password']
+                            access_protocol = detail['access_protocol']
+                except:
+                    logger.error('Failed to read image details')
     # If anything fails, Providing Default(worst case)
     if image_name =='' or imageserver_ip=='' or image_username=='' or image_password=='' or access_protocol=='':
         image_name = "6.1.2.I3.2"
