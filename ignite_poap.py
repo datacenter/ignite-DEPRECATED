@@ -42,6 +42,7 @@ image_dir_dst           = "bootflash:poap"
 system_image_dst        = n9k_system_image_src
 config_file_dst         = "volatile:poap.cfg"
 md5sum_ext_src          = "md5"
+new_image_name  	= ""
 # Required space on /bootflash (for config and system images)
 required_space          = 350000
 
@@ -120,6 +121,8 @@ cl_cdp_interface=None  # Command Line version of cdp-interface
 cl_serial_number=None  # can overwrite the corresp. env var
 cl_protocol=None       # can overwride the script's default
 cl_download_only=None  # dont write boot variables
+
+image_change = False
 
 def parse_cdp_response():
       resp = clid("show cdp nei")
@@ -439,6 +442,7 @@ def same_images (filename_src, filename_dst):
                 poap_log("INFO: Same source and destination images" ) 
                 return True
     poap_log("INFO: Different source and destination images" ) 
+    image_change = True
     return False
 
 # Will run our CLI command to test MD5 checksum and if files are valid images
@@ -510,12 +514,13 @@ def get_config ():
 # get system image file from server
 def get_system_image ():
     if not same_images(system_image_src, system_image_dst):
+    #if same_images(system_image_src, system_image_dst):
         doCopy(protocol, host, system_image_src, system_image_dst_tmp, vrf, system_timeout, username, password)  
-        poap_log("INFO: Completed Copy of System Image" ) 
+        poap_log("INFO: Completed Copy of System Image") 
         # get file's md5 from server (if any) and verify it, failure is fatal (exit)
         check_md5sum(system_image_src, system_image_dst_tmp, "system_image")
-        run_cli("move %s %s" % (system_image_dst_tmp, system_image_dst))
-
+	#run_cli("delete bottflash:poap")
+        run_cli("move %s %s" % (system_image_dst_tmp, image_dir_dst))
 
 def wait_box_online ():
     while 1:
@@ -538,7 +543,11 @@ def install_it ():
     try: shutil.rmtree("%s.new" % image_dir_dst_u)
     except: pass
     try:
-        run_cli("config terminal ; boot nxos %s" % system_image_dst)
+        if  image_change:
+            run_cli("config terminal ; boot nxos %s/%s" % (image_dir_dst, new_image_name))
+        else:
+            run_cli("config terminal ; boot nxos %s/%s" % (image_dir_dst, n9k_system_image_src))
+   
         run_cli("copy running-config startup-config")
         run_cli('copy %s scheduled-config' % config_file_dst)
     except:
@@ -653,6 +662,13 @@ def do_it():
     host = str(resp_data['imageserver'])
     username = str(resp_data['image_username'])
     password = str(resp_data['image_password'])
+    global system_image_src
+    global system_image_dst_tmp
+    global new_image_name
+    new_image_name = "n9000-dk9.%s.bin" %(resp_data['imagename'])
+    system_image_dst_tmp    = "%s%s/%s"     % (image_dir_dst, ".new", new_image_name )
+    system_image_src        = "%s/%s"       % (image_dir_src, new_image_name )
+
     get_system_image()
     
     host = hostname
