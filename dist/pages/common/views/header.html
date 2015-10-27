@@ -37,16 +37,22 @@
                     <a href="#/fabricInstance">Fabrics</a>
                     <!--#/fabricInstance-->
                 </li>
-                <li ng-class="{active: $route.current.activetab == 'deployedFabric'}">
-                    <a href="#/deployedFabrics">Deployed Fabrics</a>
+                <li ng-class="{ active: $route.current.activemenu == 'deployed'}" >
+                    <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="tfalserue">Deployed <span class="caret"></span></a>
+                    <ul class="dropdown-menu dropdown_mobile">
+                        <li ng-class="{active: $route.current.activetab == 'deployedFabric'}"><a href="#/deployedFabrics">Fabrics</a></li>
+                        <li ng-class="{active: $route.current.activetab == 'deployedSwitches'}"><a href="#/deployedSwitches">Switches</a></li>
+                    </ul>
                 </li>
-                <li>
+                <!--li>
                     <a href="javascript:void(0);">Admin</a>
-                </li>
+                </li-->
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li class="user-profile">
-                    <a href="javascript:void(0);" class="dropdown-toggle userimg" data-toggle="dropdown" role="button" aria-expanded="false"><img src="images/icon-person.jpg" alt="Profile Pic"></a>
+                    <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                        <span class="username">{{userDetails.username}} <span class="caret"></span></span>
+                    </a>
                     <ul class="dropdown-menu dropdown_mobile">
                         <li class="hide">
                         <button type="button" class="close dropdown_close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>

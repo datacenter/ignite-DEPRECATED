@@ -12,7 +12,14 @@
         <div class="col-sm-3 pull-right text-right">
           Details
           <input checked data-size="mini" data-toggle="toggle" ng-click="toggleDetails();" ng-model="toggleDetailsModel" type="checkbox">
+          <span class="pl-10">
+                            Set Defaults
+                            <input type="checkbox" data-toggle="toggle" 
+                            data-size="mini" ng-model="toggleDefaultsModel" 
+                            ng-click="toggleDefault();" />
+                        </span>
         </div>
+
       </div>
       <div class="col-sm-12 svgbox" id="svgBox">
         <div class="row">
@@ -63,6 +70,28 @@
               </table>
             </div>
           </div>
+          <div class="col-sm-3" id="default_config" style="padding-right:0px" ng-if="toggleDefaultsModel">
+                            <div class="topology_table scrollbar">
+                                <div class="topology_table_title">Default Settings</div>
+                                    <div class="form-group">
+                                       <label>Spine Switch Image</label>
+                                       <select ng-disabled="action == 'view'" class="form-control" ng-model="imageData.spineSwitchImage">
+                                            <option value="">Select</option>
+                                            <option ng-selected="image.image_profile_name == imageData.spineSwitchImage" ng-repeat="image in images" value="{{image.image_profile_name}}">{{image.image_profile_name}}</option>
+                                       </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Leaf Switch Image</label>
+                                        <select ng-disabled="action == 'view'" class="form-control" ng-model="imageData.leafSwitchImage">
+                                            <option value="">Select</option>
+                                            <option ng-selected="image.image_profile_name == imageData.leafSwitchImage" ng-repeat="image in images" value="{{image.image_profile_name}}">{{image.image_profile_name}}</option>
+                                        </select>
+                                    </div>                                    
+                                    <hr>
+                                    <button ng-disabled="action == 'view'" class="btn btn-primary" ng-click="applyDefault()">Apply</button>
+                                </div>
+                        </div>
         </div>
 <!-- ******************************************* Pop Edit *************************************************-->
         <div class="popEdit" id="popEdit">

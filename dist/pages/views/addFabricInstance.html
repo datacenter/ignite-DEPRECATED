@@ -79,7 +79,7 @@
         <div class="form-group col-md-4 col-xs-6">
           <label></label>
           <button class="btn btn-raised btn-default set_configbtn" ng-click="setConfigModal('lg')" type="button">Set Configuration</button>
-          <button class="btn btn-raised btn-default set_configbtn" ng-click="setSerailIDModal('lg')" type="button">Switch Identity</button>
+          <button class="btn btn-raised btn-default set_configbtn" ng-click="setSerialIDModal('lg')" type="button">Switch Identity</button>
         </div>
         
 
@@ -105,5 +105,8 @@
   </div>
 </div>
 <div class="table-header-cont">
-  <topology-viewer ng-if="topologyData !='';" topology="topologyData" prefix="fabricData.name"></topology-viewer>
+  <topology-viewer ng-if="topologyData !=''" 
+  action = "action" 
+  selected-images = "fabricData.image_details" 
+  topology="topologyData" images='images' prefix="fabricData.name"></topology-viewer>
 </div>

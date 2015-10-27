@@ -18,7 +18,7 @@
 
             //API URL
             "appAPI": {
-                "baseURL": "http://12.36.118.92:8888",
+                "baseURL": "http://172.31.219.76:8001",
                 "configlets" : {
                   "list" : {
                      // "url" : "http://localhost:9010/data/configlets-list.json",
@@ -238,6 +238,20 @@
                         "url": "/api/fabric/deployed/logs/",
                         "method": "GET",
                         "auth": "true"
+                    }
+                },
+                'deployedSwitches' : {
+                  "list": {
+                        "url": "/api/discoveryrule/deployed",
+                        "method": "GET",
+                        "auth": "true"
+                  }
+                },
+                "images" : {
+                    "list" : {
+                      "url": "/api/fabric/images",
+                      "method": "GET",
+                      "auth": "true"
                     }
                 }
             },

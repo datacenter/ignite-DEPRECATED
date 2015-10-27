@@ -56,11 +56,14 @@
                         <button class="btn btn-sm btn-default" ng-disabled="action == 'view'" ng-click="newTopology()">Clear</button>
                         <button class="btn btn-sm btn-default" ng-disabled="action == 'view'" ng-click="doReset()">Reset</button>
                         Details
+                        
                         <input type="checkbox" checked data-toggle="toggle" data-size="mini" ng-model="toggleDetailsModel" ng-click="toggleDetails();">
 
                         <span class="pl-10">
                             Set Defaults
-                            <input type="checkbox"  data-toggle="toggle" data-size="mini" ng-model="toggleDefaultsModel" ng-click="toggleDefault();">
+                            <input type="checkbox" data-toggle="toggle" 
+                            data-size="mini" ng-model="toggleDefaultsModel" 
+                            ng-click="toggleDefault();" />
                         </span>
                     </div>
                 </div>
@@ -118,7 +121,7 @@
                                       <select class="form-control" ng-disabled="action == 'view'" ng-model="topology.defaults.spine_switch" ng-options="spine as spine for spine in spineTypes"></select>
                                     </div>
 
-                                    <div class="form-group">
+                                    <!--div class="form-group">
                                         <label>Spine Switch Image</label>
 
                                        <select class="form-control" ng-disabled="action == 'view'" >
@@ -127,14 +130,14 @@
                                             <option>N9000-dk9.7.0.3.I1.1b.bin</option>
                                             <option>N9000-dk9.7.0.3.I1.1a.bin</option>
                                         </select>
-                                    </div>
+                                    </div-->
 
                                     <div class="form-group">
                                         <label>Leaf Switch</label>
                                         <select class="form-control" ng-disabled="action == 'view'" ng-model="topology.defaults.leaf_switch" ng-options="leaf as leaf for leaf in leafTypes"></select>
                                     </div>
 
-                                    <div class="form-group">
+                                    <!--div class="form-group">
                                         <label>Leaf Switch Image</label>
 
                                         <select class="form-control" ng-disabled="action == 'view'" >
@@ -143,7 +146,7 @@
                                             <option>N9000-dk9.7.0.3.I1.1b.bin</option>
                                             <option>N9000-dk9.7.0.3.I1.1a.bin</option>
                                         </select>
-                                    </div>                                    
+                                    </div-->                                    
 
                                     <div class="form-group">
                                         <label>Spine <span class="glyphicon glyphicon-resize-horizontal"></span> Leaf Link </label>

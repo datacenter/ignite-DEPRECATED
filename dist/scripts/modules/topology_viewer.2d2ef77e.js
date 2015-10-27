@@ -10,7 +10,10 @@ angular.module('topologyModule', [])
         restrict: 'E',
         scope:{
           topology: '=',
-          prefix: '='
+          prefix: '=',
+          images : '=',
+          selectedImages : '=',
+          action : '='
         },
         link: function (scope, iElement, iAttrs) {
           scope.$watch('prefix', function(newValue, oldValue) {
@@ -83,6 +86,7 @@ angular.module('topologyModule', [])
   console.log($scope.prefix);
   console.log('-------*-*-*-*-*-*-*--*-*----------------------')
   console.log($scope.topology);
+
 
     //Default types and link combinations
     $scope.coreTypes = ["BGPCore"];
@@ -203,7 +207,7 @@ angular.module('topologyModule', [])
     $scope.toggleDetailsModel = true;
 
 
-    $scope.toggleDetails = function() {
+   /* $scope.toggleDetails = function() {
 
         if ($scope.toggleDetailsModel) {
             document.getElementById('popEdit').style.right = "25%";
@@ -216,7 +220,55 @@ angular.module('topologyModule', [])
             document.getElementById('topology_container').className = "col-sm-12";
         }
 
+    } */
+
+    $scope.toggleDetailsModel = true;
+    $scope.toggleDefaultsModel = false;
+
+    $scope.resizeSvgArea = function() {
+      document.getElementById('popEdit').style.right = "25%";
+      document.getElementById('popEditLink').style.right = "25%";
+      document.getElementById('topology_container').className = "col-sm-9";
     }
+
+    $scope.resetSvgArea = function() {
+      document.getElementById('popEdit').style.right = "0%";
+      document.getElementById('popEditLink').style.right = "0%";
+      document.getElementById('topology_container').className = "col-sm-12";
+    }
+
+    $scope.toggleDetails = function() {
+      if ($scope.toggleDetailsModel) {
+        $scope.resizeSvgArea();
+        $scope.toggleDefaultsModel = false;
+      } else {
+        $scope.resetSvgArea();
+      }
+    }
+
+    $scope.toggleDefault = function() {
+      if ($scope.toggleDefaultsModel) {
+        $scope.resizeSvgArea();
+        $scope.toggleDetailsModel = false;
+      } else {
+        $scope.resetSvgArea();
+      }
+    }
+
+    $scope.$watch(function() {
+        return $scope.$parent.selectedImages.spine_switch
+    }, function() {
+        $scope.imageData = {
+            spineSwitchImage : $scope.$parent.selectedImages.spine_switch,
+            leafSwitchImage : $scope.$parent.selectedImages.leaf_switch
+        }    
+    })
+    
+
+    $scope.applyDefault = function() {
+      $scope.$parent.selectedImages.leaf_switch = $scope.imageData.leafSwitchImage;
+      $scope.$parent.selectedImages.spine_switch = $scope.imageData.spineSwitchImage;
+    };
 
     $scope.PopEdit = function(id){
       PopEdit(id);
@@ -226,8 +278,15 @@ angular.module('topologyModule', [])
       PopEditLink(id);
     }
 
+    $scope.$watch(function() {
+        return $scope.$parent.action;
+    }, function() {
+        $scope.action = $scope.$parent.action;
+    });
+
     /*Initialize the topology*/
     $scope.init = function() {
+        
 
         $("button").tooltip({
             'container': 'body',
