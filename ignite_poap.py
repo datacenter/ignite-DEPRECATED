@@ -665,7 +665,7 @@ def do_it():
     global system_image_src
     global system_image_dst_tmp
     global new_image_name
-    new_image_name = "n9000-dk9.%s.bin" %(resp_data['imagename'])
+    new_image_name = resp_data['imagename']
     system_image_dst_tmp    = "%s%s/%s"     % (image_dir_dst, ".new", new_image_name )
     system_image_src        = "%s/%s"       % (image_dir_src, new_image_name )
 
