@@ -23,7 +23,7 @@ DBPORT=''
 #Example: if manage.py is located inside /var/www/ignite/ignite PROJECT_DIR should be as following
 #PROJECT_DIR = '/ignite/ignite/'
 #Example: if manage.py is located inside /home/linux-user/workspace/ignite/ignite PROJECT_DIR should be as following
-#PROJECT_DIR = '../../home/linux-user/workspace/ignite/ignite/'
+#PROJECT_DIR = '/../../home/linux-user/workspace/ignite/ignite/'
 
 #If not hosted using Apache2
 PROJECT_DIR = '/'
