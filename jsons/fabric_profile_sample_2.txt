@@ -1,0 +1,86 @@
+{
+  "name": "Sampleconfig3",
+  "submit": "true",
+  "construct_list": [
+    {
+      "template_id": 8,
+      "param_list": [
+        {
+          "param_name": "NTP_ENABLED",
+          "param_type": "Fixed",
+          "param_value": "True"
+        },
+        {
+          "param_name": "NTP_SERVER_IP",
+          "param_type": "Fixed",
+          "param_value": "10.11.0.30"
+        }
+      ]
+    },
+    {
+      "template_id": 9,
+      "param_list": [
+        {
+          "param_name": "asn_number",
+          "param_type": "Fixed",
+          "param_value": "4"
+        }
+      ]
+    },
+    {
+      "template_id": 10,
+      "param_list": [
+        {
+          "param_name": "SNMP_ENABLED",
+          "param_type": "Fixed",
+          "param_value": "1"
+        },
+        {
+          "param_name": "SNMP_BGP_ENABLED",
+          "param_type": "Fixed",
+          "param_value": "1"
+        },
+        {
+          "param_name": "SNMP_BRIDGE_ENABLED",
+          "param_type": "Fixed",
+          "param_value": "1"
+        },
+        {
+          "param_name": "SNMP_AAA_ENABLED",
+          "param_type": "Fixed",
+          "param_value": "1"
+        },
+        {
+          "param_name": "SNMP_CALLHOME_ENABLED",
+          "param_type": "Fixed",
+          "param_value": "1"
+        },
+        {
+          "param_name": "SNMP_SNMP_ENABLED",
+          "param_type": "Fixed",
+          "param_value": "1"
+        },
+        {
+          "param_name": "SNMP_SERVER_IP_1",
+          "param_type": "Fixed",
+          "param_value": "1"
+        },
+        {
+          "param_name": "SNMP_UDP_PORT",
+          "param_type": "Fixed",
+          "param_value": "1"
+        },
+        {
+          "param_name": "SNMP_VERSION",
+          "param_type": "Fixed",
+          "param_value": "1"
+        },
+        {
+          "param_name": "SNMP_SERVER_IP_2",
+          "param_type": "Fixed",
+          "param_value": "1"
+        }
+      ]
+    }
+  ]
+}

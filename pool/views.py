@@ -26,9 +26,7 @@ from django.http import JsonResponse
 logger = logging.getLogger(__name__)
 
 class PoolList(APIView):
-    """
-    List all Pools, or create a new Pools.
-    """
+
     def dispatch(self,request, *args, **kwargs):
         me = RequestValidator(request.META)
         if me.user_is_exist():
@@ -39,6 +37,9 @@ class PoolList(APIView):
             
             
     def get(self, request, format=None):
+        """
+        To fetch the list of all the pools
+        """
         pool = Pool.objects.all()
         serializer = PoolGetSerializer(pool, many=True)
         for single_obj in serializer.data:
@@ -48,6 +49,12 @@ class PoolList(APIView):
 
     @transaction.atomic
     def post(self, request, format=None):
+        """
+        To create a new pool
+        ---
+  serializer: "PoolSerializer"
+
+        """
         serializer = PoolSerializer(data=request.data)
         if serializer.is_valid():
 
@@ -118,8 +125,6 @@ class PoolList(APIView):
         
 
 class PoolDetailList(APIView):
-    '''
-    '''
     
     def dispatch(self,request, *args, **kwargs):
         me = RequestValidator(request.META)
@@ -138,7 +143,9 @@ class PoolDetailList(APIView):
             
            
     def get(self,request,id,format=None):
-    
+        """
+        To fetch a Pool
+        """
         pool=self.get_object(id)
         serializer=PoolGetSerializer(pool)
         collect_details = serializer.data
@@ -157,6 +164,12 @@ class PoolDetailList(APIView):
         return Response(collect_details)
         
     def put(self,request,id,format=None):
+        """
+        To edit an existing Pool
+        ---
+  serializer: "PoolGetSerializer"
+
+        """ 
         col_object = self.get_object(id)
         serializer = PoolGetSerializer(col_object)
         collect_details = serializer.data
@@ -203,8 +216,8 @@ class PoolDetailList(APIView):
             
             if type =='IP' or type =='MgmtIP' or type =='IPv6':
                 for i in range(0,len(serializer.data['range'])):
-                    start_ip = IPNetwork(str(serializer.data['range'][0]['start']))
-                    end_ip = IPNetwork(str(serializer.data['range'][0]['end']))
+                    start_ip = IPNetwork(str(serializer.data['range'][i]['start']))
+                    end_ip = IPNetwork(str(serializer.data['range'][i]['end']))
 
                     for ip_val in range (start_ip.ip,end_ip.ip+1):
                         coll = PoolDetail()
@@ -228,7 +241,9 @@ class PoolDetailList(APIView):
         
 
     def delete(self,request,id,format=None):
-
+        """
+        To delete a particular Pool
+        """
         pool = self.get_object(id)
         if pool.scope == 'global':
             if pool.used == 0:

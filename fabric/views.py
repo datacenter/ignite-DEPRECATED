@@ -17,19 +17,29 @@ import gzip
 
 #Imports from user defined modules
 from models import Topology, Fabric, FabricRuleDB, DeployedFabricStats
-from fabric_rule import generate_fabric_rules, delete_fabric_rules
+from fabric_rule import generate_fabric_rules, delete_fabric_rules, generate_config, build_fabric_profiles
 from serializer.topology_serializer import TopologyGetSerializer, TopologySerializer, TopologyGetDetailSerializer, TopologyPutSerializer
 from serializer.fabric_serializer import FabricSerializer, FabricGetSerializer, FabricGetDetailSerializer, FabricPutSerializer
-from serializer.fabric_serializer import FabricRuleDBGetSerializer, ImagePostSerializer, ImageDetailSerializer, ProfilesSerializer
+from serializer.fabric_serializer import FabricRuleDBGetSerializer, ImagePostSerializer, ImageDetailSerializer, ProfilesDictSerializer
 from serializer.deployed_serializer import DeployedFabricGetSerializer, DeployedFabricDetailGetSerializer
 from configuration.models import Configuration
 from discoveryrule.models import DiscoveryRule
-from fabric.const import INVALID, LOG_SEARCH_COL
+from fabric.const import INVALID, LOG_SEARCH_COL, IMAGE_KEY, PROFILE_KEY, CONFIG_KEY,LEAF_LIST, \
+                            SPINE_LIST, LINK_LIST, SWITCH_NAME, SWITCH_1, SWITCH_2, CONFIGURATION_ID
 from discoveryrule.models import DiscoveryRule
 from discoveryrule.serializer.DiscoveryRuleSerializer import DiscoveryRuleGetDetailSerializer
 from fabric.image_profile import image_objects
+from server_configuration import PROJECT_DIR, REPO, REMOTE_SYSLOG_PATH
+
 
 logger = logging.getLogger(__name__)
+
+POAP_LOG_START = 'Started the execution at do_it function'
+POAP_LOG_END = 'POAP End'
+SYSLOG_PATH = '/var/log/syslog*'
+
+BASE_PATH = os.getcwd() + PROJECT_DIR + REPO
+
 
 # Create your views here.
 
@@ -58,30 +68,26 @@ def uniqueSystenmId(data, fabric_id):
                 break
     return err_msg
             
-def add_dis_rule(data,success,resp,fabric_id):
+def add_dis_rule(data, success, resp, fabric_id, switch_to_configuration_id):
     try:
         sys_id_obj = data['system_id']
-        config_obj = data['config_json']
         regex  =  data['name'] + '(_)([1-9][0-9]*)(_)([a-zA-Z]*-[1-9])'
         dis_bulk_obj = []
         for switch_systemId_info in sys_id_obj:
             switch_name = (re.search(regex, switch_systemId_info['name'])).group(4)
             replica_num = int((re.search(regex, switch_systemId_info['name'])).group(2))
             system_id = switch_systemId_info['system_id']
-            for config in config_obj:
-                if switch_name == config['name']:
-                    discoveryrule_name = 'serial_'+switch_systemId_info['system_id']
-                    
-                    dis_rule_obj = DiscoveryRule()
-                    dis_rule_obj.priority = 100
-                    dis_rule_obj.name = discoveryrule_name
-                    dis_rule_obj.config_id = config['configuration_id']
-                    dis_rule_obj.match = 'serial_id'
-                    dis_rule_obj.subrules = [system_id]
-                    dis_rule_obj.fabric_id = fabric_id
-                    dis_rule_obj.replica_num = replica_num
-                    dis_rule_obj.switch_name = switch_systemId_info['name']
-                    dis_bulk_obj.append(dis_rule_obj)
+            discoveryrule_name = 'serial_'+switch_systemId_info['system_id']
+            dis_rule_obj = DiscoveryRule()
+            dis_rule_obj.priority = 100
+            dis_rule_obj.name = discoveryrule_name
+            dis_rule_obj.config_id = switch_to_configuration_id[switch_name]
+            dis_rule_obj.match = 'serial_id'
+            dis_rule_obj.subrules = [system_id]
+            dis_rule_obj.fabric_id = fabric_id
+            dis_rule_obj.replica_num = replica_num
+            dis_rule_obj.switch_name = switch_systemId_info['name']
+            dis_bulk_obj.append(dis_rule_obj)
 #                     dis_rule_obj.save()
         return success, resp, dis_bulk_obj
     except:
@@ -101,20 +107,84 @@ def getFile_list(syslog_path):
         pass
     return fName_list
 
-class JSONResponse(HttpResponse):
-    """
-    An HttpResponse that renders its content into JSON.
-    """
+def getConfig_id(data_json, spine_list, leaf_list):
+    switch_with_id = {}
+    complete_switch_list = spine_list.union(leaf_list)
+    try:
+        for sw_name in complete_switch_list:
+            found = False
+            for item in data_json[CONFIG_KEY]:
+                if item[SWITCH_NAME] == str(sw_name):
+                    found = True
+                    switch_with_id[sw_name] = item[CONFIGURATION_ID]
+            if not(found):
+                if sw_name in spine_list:
+                    switch_with_id[sw_name] = data_json['spine_config_id']
+                elif sw_name in leaf_list:
+                    switch_with_id[sw_name] = data_json['leaf_config_id']
+        return switch_with_id
+    except:
+        logger.error('Got error while parsing config json')
+        return switch_with_id
 
+def getSwitch_list(topology_json, key):
+    sw_set = set()
+    for item in topology_json[key]:
+        sw_set.add(str(item[SWITCH_NAME]))
+    return sw_set
+
+def fill_config_used(id, incr_val):
+    try:
+        config_obj = Configuration.objects.get(id = id)
+        config_obj.used += incr_val
+        config_obj.save()
+        return True
+    except:
+        return False
+
+def update_config_count(config_json, spine_list, leaf_list, key):
+    leaf_count = 0
+    spine_count = 0
+    err = {}
+    try:
+        for config in config_json[CONFIG_KEY]:
+            try:
+                if config[SWITCH_NAME] in spine_list:
+                    spine_count += 1
+                elif config[SWITCH_NAME] in leaf_list:
+                    leaf_count += 1
+                if key:
+                    status = fill_config_used(config['configuration_id'], 1)
+                else:
+                    status = fill_config_used(config['configuration_id'], -1)        
+            except:
+                err['Error'] = 'Configuration not found wiht id :' +str(config['configuration_id'])
+                logger.error(err['Error'])
+                return err, False
+        leaf_common_count = len(leaf_list) - leaf_count
+        if not key:
+            leaf_common_count = 0 - (leaf_common_count)
+        status = fill_config_used(config_json['leaf_config_id'], leaf_common_count)
+        spine_common_count = len(spine_list) - spine_count
+        if not key:
+            spine_common_count = 0- spine_common_count
+        status = fill_config_used(config_json['spine_config_id'], spine_common_count)
+        return err, True
+    except:
+        err['Error'] = 'Failed to update Config used count variable'
+        logger.error(err['Error'])
+        return err, False
+
+
+class JSONResponse(HttpResponse):
+    
     def __init__(self, data, **kwargs):
         content = JSONRenderer().render(data)
         kwargs['content_type'] = 'application/json'
         super(JSONResponse, self).__init__(content, **kwargs)
 
 class TopologyList(APIView):
-    """
-    Fetch Topology List or Add a new entry to Topology
-    """
+    
     def dispatch(self,request, *args, **kwargs):
         me = RequestValidator(request.META)
         if me.user_is_exist():
@@ -124,6 +194,9 @@ class TopologyList(APIView):
             return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, format=None):
+        """
+        To fetch the list of Topologies
+        """
         topology_list = Topology.objects.filter(status = True).order_by('name')
         serializer = TopologyGetSerializer(topology_list, many=True)
         index = 0
@@ -136,6 +209,12 @@ class TopologyList(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
+        """
+        To add a new Topology
+        ---
+  serializer: "TopologySerializer"
+
+        """
         serializer = TopologySerializer(data=request.data)
         me = RequestValidator(request.META)
         if serializer.is_valid():
@@ -158,9 +237,7 @@ class TopologyList(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class TopologyDetail(APIView):
-    """
-    Retrieve, update or delete a Topology instance.
-    """
+    
     def dispatch(self,request, *args, **kwargs):
         me = RequestValidator(request.META)
         if me.user_is_exist():
@@ -176,6 +253,9 @@ class TopologyDetail(APIView):
             raise Http404
 
     def get(self, request, id, format=None):
+        """
+        To fetch a particular topology
+        """
         topology = self.get_object(id)
         serializer = TopologyGetDetailSerializer(topology)
         topo_detail = serializer.data
@@ -191,6 +271,13 @@ class TopologyDetail(APIView):
         return Response(topo_detail)
 
     def put(self, request, id, format=None):
+        """
+        To edit an existing Topology
+        
+        ---
+  serializer: "TopologyPutSerializer"
+
+        """
         topology = self.get_object(id)
         if request.data['name'] == self.get_object(id).name:
             serializer = TopologyPutSerializer(data=request.data)
@@ -231,6 +318,9 @@ class TopologyDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, id, format=None):
+        """
+        To delete a topology
+        """
         topology = self.get_object(id)
         count = Fabric.objects.filter(topology = topology).count()
         if count:
@@ -241,12 +331,8 @@ class TopologyDetail(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-
-
 class FabricList(APIView):
-    """
-    Fetch Fabric List or Add a new entry to Fabric
-    """
+   
     def dispatch(self,request, *args, **kwargs):
         me = RequestValidator(request.META)
         if me.user_is_exist():
@@ -256,18 +342,16 @@ class FabricList(APIView):
             return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, format=None):
+        """
+        To fetch the list of Fabrics
+        """
         fabric_list = Fabric.objects.filter(status = True).order_by('id')
         serializer = FabricGetSerializer(fabric_list, many=True)
         index = 0
         for item in serializer.data:
             item['topology_name'] = fabric_list[index].topology.name
             item['topology_id']  = fabric_list[index].topology.id
-            """
-            try:
-                item['profiles'] = json.loads(data['profiles'])
-            except:
-                item['profiles'] = {}
-            """
+        
             try:
                 item['user_name']   = User.objects.get(id=fabric_list[index].user_id).username
             except User.DoesNotExist:
@@ -276,7 +360,12 @@ class FabricList(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        
+        """
+        To add a new Fabric
+        ---
+  serializer: "FabricSerializer"
+
+        """
         success = True
         resp = {}
         resp['Error'] = ' '
@@ -289,13 +378,22 @@ class FabricList(APIView):
                 logger.error("Fabric Instances cannot be less than 1")
             else:
                 fabric_obj = Fabric()
-                find_dup_data = {'system_id':['system_id','name'], 'config_json':['name']}
+                find_dup_data = {'name' : [{'system_id':'system_id'},{'config_json':CONFIG_KEY}, \
+                                            {'image_details':IMAGE_KEY},{'profiles':PROFILE_KEY}],\
+                                 'system_id':[{'system_id':'system_id'}]}
                 for key,val in find_dup_data.iteritems():
                     for value in val:
-                        err_msg, isError = findDuplicate(request.data[key], value)
-                        if isError:
-                            resp['Error'] = err_msg
-                            return Response(resp, status=status.HTTP_400_BAD_REQUEST)
+                        data_list = []
+                        try:
+                            if value.keys()[0] == 'system_id':
+                                data_list = request.data[value.values()[0]]
+                            else:
+                                data_list = request.data[value.keys()[0]][value.values()[0]]
+                            err_msg, isError = findDuplicate(data_list, key)
+                            if isError:
+                                resp['Error'] = err_msg
+                                return Response(resp, status=status.HTTP_400_BAD_REQUEST)
+                        except:pass
                 err = uniqueSystenmId(request.data['system_id'],fabric_obj.id)
                 if err != "":
                     resp['Error'] = err
@@ -308,24 +406,40 @@ class FabricList(APIView):
                 fabric_obj.instance = request.data['instance']
                 fabric_obj.validate = request.data['validate']
                 fabric_obj.locked = request.data['locked']
+                if request.data['config_json']['leaf_config_id'] == INVALID or \
+                    request.data['config_json']['spine_config_id'] == INVALID or \
+                    request.data['config_json']['leaf_config_id'] == '-1' or\
+                     request.data['config_json']['spine_config_id'] == '-1':
+                    resp['Error'] = 'Config Id can not be None at Tier Level'
+                    return Response(resp, status=status.HTTP_400_BAD_REQUEST)
+                # getting config id for every switch and updatin config used count
+                leaf_set = set()
+                spine_set = set()
+                leaf_set = getSwitch_list(topology_json, LEAF_LIST)
+                spine_set = getSwitch_list(topology_json, SPINE_LIST)
+                switch_to_configuration_id = getConfig_id(request.data['config_json'], spine_set,leaf_set)
                 fabric_obj.config_json = json.dumps(request.data['config_json'])
-                for config in request.data['config_json']:
-                    config_obj = Configuration.objects.get(id = config['configuration_id'])
-                    config_obj.used += 1
-                    config_obj.save()
+                errmsg, err_bool = update_config_count(request.data['config_json'], spine_set, leaf_set, True) 
+                if not(err_bool):
+                    return Response(errmsg, status=status.HTTP_400_BAD_REQUEST)
                 fabric_obj.submit = request.data['submit']
                 try:
                     fabric_obj.system_id = json.dumps(request.data['system_id'])
                 except:
                     fabric_obj.system_id = []
-                """
                 try:
                     fabric_obj.profiles = json.dumps(request.data['profiles'])
                 except:
                     fabric_obj.profiles = json.dumps({})
-                """    
+                    
                 try:   # fill image details
                     fabric_obj.image_details = json.dumps(request.data['image_details'])
+                    if request.data['image_details']['leaf_image_profile'] == '-1' or \
+                       request.data['image_details']['spine_image_profile'] == '-1' or \
+                       request.data['image_details']['leaf_image_profile'] == INVALID or \
+                       request.data['image_details']['spine_image_profile'] == INVALID : 
+                        resp['Error'] = 'Image Profile can not be None at Tier Level'
+                        return Response(resp, status=status.HTTP_400_BAD_REQUEST)
                 except:
                     fabric_obj.image_details = json.dumps({})
                 try:  # save object
@@ -336,11 +450,11 @@ class FabricList(APIView):
                     return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
                                 
                 # filling discovery rule with system_id
-                success, resp, dis_bulk_obj = add_dis_rule(request.data,success,resp,fabric_obj.id)
+                success, resp, dis_bulk_obj = add_dis_rule(request.data,success,resp,fabric_obj.id,switch_to_configuration_id )
                 
                 if success:   
                     if (generate_fabric_rules(request.data['name'],\
-                    request.data['instance'], fabric_obj, request.data['config_json'],\
+                    request.data['instance'], fabric_obj, switch_to_configuration_id,\
                     topology_json)):
                         serializer = FabricGetSerializer(fabric_obj)
                         logger.info("Successfully created Fabric id: " + str(fabric_obj.id))
@@ -369,13 +483,9 @@ class FabricList(APIView):
                         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-            
- 
-        
+
 class FabricDetail(APIView):
-    """
-    Retrieve, update or delete a Fabric instance.
-    """
+   
     def dispatch(self,request, *args, **kwargs):
         me = RequestValidator(request.META)
         if me.user_is_exist():
@@ -391,22 +501,23 @@ class FabricDetail(APIView):
             raise Http404
 
     def get(self, request, id, format=None):
+        """
+        To fetch a particular Fabric
+        """
         topo_detail = {}
         fabric = self.get_object(id)
         serializer = FabricGetDetailSerializer(fabric)
         data = dict(serializer.data)
         data['config_json'] = json.loads(data['config_json'])
         data['system_id'] = json.loads(data['system_id'])
-	try:
-	    data['image_details'] = json.loads(data['image_details'])
+        try:
+            data['image_details'] = json.loads(data['image_details'])
         except:
-            data['image_details'] = json.loads("{}")
-	"""
+            data['image_details'] = {}
         try:
             data['profiles'] = json.loads(data['profiles'])
         except:
             data['profiles'] = {}
-        """
         try:
             topology = Topology.objects.get(id=fabric.topology.id)
         except Topology.DoesNotExist:
@@ -423,6 +534,12 @@ class FabricDetail(APIView):
         return Response(data)
 
     def put(self, request, id, format=None):
+        """
+        To edit an existing Fabric 
+        ---
+  serializer: "FabricPutSerializer"
+
+        """
         success = True
         resp = {}
         resp['Error'] = ' '
@@ -440,53 +557,82 @@ class FabricDetail(APIView):
                 fabric_obj.user_id = me.user_is_exist().user_id
                 fabric_obj.validate = request.data['validate']
                 fabric_obj.locked = request.data['locked']
-                find_dup_data = {'system_id':['system_id','name'], 'config_json':['name']}
+                find_dup_data = {'name' : [{'system_id':'system_id'},{'config_json':CONFIG_KEY}, \
+                                            {'image_details':IMAGE_KEY},{'profiles':PROFILE_KEY}],\
+                                 'system_id':[{'system_id':'system_id'}]}
                 for key,val in find_dup_data.iteritems():
                     for value in val:
-                        err_msg, isError = findDuplicate(request.data[key], value)
-                        if isError:
-                            resp['Error'] = err_msg
-                            return Response(resp, status=status.HTTP_400_BAD_REQUEST)
+                        try:
+                            data_list = []
+                            if value.keys()[0] == 'system_id':
+                                data_list = request.data[value.values()[0]]
+                            else:
+                                data_list = request.data[value.keys()[0]][value.values()[0]]
+                            err_msg, isError = findDuplicate(data_list, key)
+                            if isError:
+                                resp['Error'] = err_msg
+                                return Response(resp, status=status.HTTP_400_BAD_REQUEST)
+                        except:pass
                 err = uniqueSystenmId(request.data['system_id'], fabric_obj.id)
                 if err !="":
                     resp['Error'] = err
                     return Response(resp, status=status.HTTP_400_BAD_REQUEST)
-                config_in_fabric = json.loads(fabric_obj.config_json)
-                for config in config_in_fabric:
-                    config_obj = Configuration.objects.get(id = config['configuration_id'])
-                    config_obj.used -= 1
-                    config_obj.save()
+                if request.data['config_json']['leaf_config_id'] == INVALID or \
+                    request.data['config_json']['spine_config_id'] == INVALID or \
+                    request.data['config_json']['leaf_config_id'] == '-1' or\
+                     request.data['config_json']['spine_config_id'] == '-1':
+                    resp['Error'] = 'Config Id can not be None at Tier Level'
+                    return Response(resp, status=status.HTTP_400_BAD_REQUEST)
+                # getting config id for every switch and updatin config used count
+                leaf_set = set()
+                spine_set = set()
+                leaf_set = getSwitch_list(topology_json, LEAF_LIST)
+                spine_set = getSwitch_list(topology_json, SPINE_LIST)
+                switch_to_configuration_id = getConfig_id(request.data['config_json'], spine_set,leaf_set)
+                config_json = json.loads(fabric_obj.config_json)
+                errmsg, err_bool = update_config_count(config_json, spine_set, leaf_set, False) 
+                if not(err_bool):
+                    return Response(errmsg, status=status.HTTP_400_BAD_REQUEST)
+                errmsg, err_bool = update_config_count(request.data['config_json'], spine_set, leaf_set, True) 
+                if not(err_bool):
+                    return Response(errmsg, status=status.HTTP_400_BAD_REQUEST)
                 fabric_obj.config_json = json.dumps(request.data['config_json'])
-                for config in request.data['config_json']:
-                    config_obj = Configuration.objects.get(id = config['configuration_id'])
-                    config_obj.used += 1
-                    config_obj.save()
                 fabric_obj.submit = request.data['submit']
                 fabric_obj.instance = request.data['instance']
                 # filling image details
                 try: 
                     fabric_obj.image_details = json.dumps(request.data['image_details'])
+                    if request.data['image_details']['leaf_image_profile'] == '-1' or \
+                       request.data['image_details']['spine_image_profile'] == '-1' or \
+                       request.data['image_details']['leaf_image_profile'] == INVALID or \
+                       request.data['image_details']['spine_image_profile'] == INVALID : 
+                        resp['Error'] = 'Image Profile can not be None at Tier Level'
+                        return Response(resp, status=status.HTTP_400_BAD_REQUEST)
                 except:
                     pass
                 # filling profiles
-                """
                 try:
-                    fabric_obj.profiles = json.loads(request.data['profiles'])
+                    fabric_obj.profiles = json.dumps(request.data['profiles'])
                 except:pass
-                """
-                                # filling discovery rule db
+                
+                try:
+                    fabric_obj.system_id = json.dumps(request.data['system_id'])
+                except:pass
+                
+                #Add discovery rule
                 try:
                     DiscoveryRule.objects.filter(fabric_id=id).delete()
                 except:
                     logger.error('Failed to delete Discovery rules with fabric_id:'+str(id))
                     resp['Error'] = ['Failed to delete Discovery rules']
                     return Response(resp, status=status.HTTP_400_BAD_REQUEST)
-                success, resp, dis_bulk_obj = add_dis_rule(request.data,success,resp,fabric_obj.id)
+                
+                success, resp, dis_bulk_obj = add_dis_rule(request.data,success,resp,fabric_obj.id,switch_to_configuration_id )
                 
                 if success:
                     if delete_fabric_rules(id):
                         if (generate_fabric_rules(request.data['name'],\
-                            request.data['instance'], fabric_obj, request.data['config_json'],\
+                            request.data['instance'], fabric_obj, switch_to_configuration_id,\
                             topology_json)):
                             logger.info("Successfully  update Fabric id: " + str(id))
                             serializer = FabricGetDetailSerializer(fabric_obj)
@@ -499,7 +645,11 @@ class FabricDetail(APIView):
                             try: # image details
                                 data['image_details'] = json.loads(data['image_details'])
                             except:
-                                data['image_details'] = []
+                                data['image_details'] = {}
+                            try:
+                                data['profiles'] = json.loads(data['profiles'])
+                            except:
+                                data['profiles'] = {}
                             for obj in dis_bulk_obj:
                                 obj.save()
                             fabric_obj.save()
@@ -518,14 +668,25 @@ class FabricDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, id, format=None):
+        """
+        To delete a particular fabric
+        """
         resp = {}
         fabric = self.get_object(id)
         topology = Topology.objects.get(id=fabric.topology.id)
+        topology_json = json.loads(topology.topology_json)
         config_in_fabric = json.loads(fabric.config_json)
-        for config in config_in_fabric:
-                    config_obj = Configuration.objects.get(id = config['configuration_id'])
-                    config_obj.used -= 1
-                    config_obj.save()
+        leaf_set = set()
+        spine_set = set()
+        leaf_set = getSwitch_list(topology_json, LEAF_LIST)
+        spine_set = getSwitch_list(topology_json, SPINE_LIST)
+        try:
+            errmsg, err_bool = update_config_count(config_in_fabric, spine_set, leaf_set, False) 
+            if not(err_bool):
+                logger.error(errmsg['Error'])
+                return Response(errmsg, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            logger.error('Failed to update config_used count')
         try:
             topology.used -= 1
             topology.save()
@@ -558,7 +719,14 @@ class Profiles(APIView):
 
             
     def put(self,request,id,format=None):
-        serializer = ProfilesSerializer(data=request.data)
+        
+        """
+        To update the profiles of fabric
+        ---
+  serializer: "ProfilesSerializer"
+
+        """
+        serializer = ProfilesDictSerializer(data=request.data)
         if serializer.is_valid():    
             resp = {}
             try:
@@ -566,8 +734,8 @@ class Profiles(APIView):
                 fabric_obj.profiles = json.dumps(serializer.data)
                 fabric_obj.save()
             except:
-                logger.error('Failed to load profile data')
                 resp['Error'] = 'Failed to load profile data for fabric_id: '+str(id)
+                logger.error(resp['Error'])
                 return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
             return JsonResponse(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -583,6 +751,9 @@ class FabricRuleDBDetail(APIView):
             return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, format=None):
+        """
+        To fetch the list of Fabric Rules 
+        """
         try:
             fabricrule_list = FabricRuleDB.objects.filter(status = True).order_by('id')
         except  FabricRuleDB.DoesNotExist:
@@ -595,17 +766,24 @@ class FabricRuleDBDetail(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
+        """
+        Not Allowed
+        """
         return Response(status=status.HTTP_400_BAD_REQUEST)
     def delete(self, request, id, format=None):
+        """
+        Not Allowed
+        """
         return Response(status=status.HTTP_400_BAD_REQUEST)
     def put(self, request, id, format=None):
+        """
+        Not Allowed
+        """
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class DeployedFabric(APIView):
-    """
-    GET deployed fabrics
-    """
+
     def dispatch(self,request, *args, **kwargs):
         me = RequestValidator(request.META)
         if me.user_is_exist():
@@ -615,6 +793,9 @@ class DeployedFabric(APIView):
             return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
         
     def get(self, request, format=None):
+        """
+        To fetch the list of switches deployed form Fabric
+        """
         fabric_list = DeployedFabricStats.objects.order_by('fabric_id').distinct('fabric_id').exclude(fabric_id=INVALID)
         data = []
         resp = {}
@@ -642,9 +823,7 @@ class DeployedFabric(APIView):
     
 
 class DeployedFabricDetail(APIView):
-    """
-    GET detailed deployed stats
-    """
+
     def dispatch(self,request, *args, **kwargs):
         me = RequestValidator(request.META)
         if me.user_is_exist():
@@ -654,6 +833,9 @@ class DeployedFabricDetail(APIView):
             return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
         
     def get(self, request, fabric_id, replica_num, format=None):
+        """
+        To get detail of switch deployed by Fabric
+        """
         try:
             fabric = Fabric.objects.get(id = fabric_id)
         except:
@@ -670,23 +852,21 @@ class DeployedFabricDetail(APIView):
         
         serializer = DeployedFabricDetailGetSerializer(deployed_list, many = True)
         resp = serializer.data
-        
         for stat in resp:
             config = Configuration.objects.get(id = stat['config_id'])
-            stat['config_name'] = config.name
+            #stat['config_name'] = config.name
+            stat['config_name'] = "View"
 
         data = {}
-        data['fabric.id'] = fabric_id
+        data['fabric_id'] = fabric.id
         data['fabric_name'] = fabric.name
         data['stats'] = resp
-            
+
         return Response(data)
 
 
 class DeployedConfig(APIView):
-    """
-    GET fabric_stats
-    """
+    
     def dispatch(self,request, *args, **kwargs):
         me = RequestValidator(request.META)
         if me.user_is_exist():
@@ -696,13 +876,16 @@ class DeployedConfig(APIView):
             return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
     
     def get(self, request, id, format=None):
+        """
+        To get deployed switch config file
+        """
         try:
             obj = DeployedFabricStats.objects.get(id = id)
         except:
             logger.error("stats not found with id: " + str(id))
             raise Http404
         
-        config_full_path = os.getcwd()+"/repo/"+obj.configuration_generated
+        config_full_path = BASE_PATH + obj.configuration_generated
 
         try:
             wrapper = FileWrapper(file(config_full_path))
@@ -716,9 +899,7 @@ class DeployedConfig(APIView):
 
 
 class DeployedLogs(APIView):
-    """
-    GET fabric_stats
-    """
+    
     def dispatch(self,request, *args, **kwargs):
         me = RequestValidator(request.META)
         if me.user_is_exist():
@@ -727,16 +908,46 @@ class DeployedLogs(APIView):
             resp = me.invalid_token()
             return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
     
-    def preparelogs(self,file_obj,  key1, key2):
-        partial_log_file = []
-        for line in file_obj:
-            words = line.split()
-            if key1 == words[LOG_SEARCH_COL] or key2 == words[LOG_SEARCH_COL]:
-                partial_log_file.append(string.rstrip(line))
-        return partial_log_file
-
+    def preparelogs(self,fName_list,  key1, key2, start_str, end_str, flag):
+        sys_fo = ''
+        for sysfile in fName_list:
+            partial_log_file = []
+            if sysfile.endswith('.gz'):
+                sys_fo = gzip.open(sysfile,'r')
+            else:
+                sys_fo = open(sysfile, 'r')
+            if sys_fo != '':
+                start_string_handler = INVALID
+                lines = sys_fo.readlines()
+                for index, line in enumerate(lines):
+                    words = line.split()
+                    try:
+                        if flag:
+                            if key1 == words[LOG_SEARCH_COL] or key2 == words[LOG_SEARCH_COL]:
+                                if start_str in line:
+                                    start_string_handler = index
+                        else:
+                            if start_str in line:
+                                start_string_handler = index
+                    except:
+                        pass
+                if start_string_handler != INVALID :
+                    for ln in lines[start_string_handler:]:
+                        if flag:
+                            words = ln.split()
+                            if key1 == words[LOG_SEARCH_COL] or key2 == words[LOG_SEARCH_COL]:
+                                partial_log_file.append(ln)
+                                if end_str in ln:
+                                    break
+                        else:
+                            partial_log_file.append(ln)
+                            if end_str in ln:
+                                break
+            return partial_log_file
+        return []
+ 
     def get(self, request, id, format=None):
-        syslog_path = '/var/log/syslog*'
+        syslog_path = SYSLOG_PATH
         try:
             logs_name = DeployedFabricStats.objects.get(id = id)
         except:
@@ -744,25 +955,42 @@ class DeployedLogs(APIView):
             resp = {'error':'Logs not found'}
             return JsonResponse(resp, status=status.HTTP_400_BAD_REQUEST)
         fName_list = getFile_list(syslog_path)
+        try:
+            if not logs_name.booted :
+                loggger.error('log requested for not booted switch '+ logs_name.switch_name)
+                return Response([])
+            file_with_switch = [REMOTE_SYSLOG_PATH + logs_name.system_id + '.log']
+        except:
+            file_with_switch = []
         log_file = []
-        for sysfile in fName_list:
+        start_str = POAP_LOG_START
+        end_str = POAP_LOG_END
+        try:
+            log_file += [self.preparelogs(file_with_switch, logs_name.system_id, logs_name.switch_name, start_str, end_str, False)]            
+            log_file += [self.preparelogs(fName_list, logs_name.system_id, logs_name.switch_name, start_str, end_str, True)]
+            time_list = []
+            for item in log_file:
+                if len(item):
+                    time_list.append(item[0].split()[2])
             try:
-                if sysfile.endswith('.gz'):
-                    sys_fh = gzip.open(sysfile,'r')
-                    one_log_list= self.preparelogs(sys_fh, logs_name.system_id, logs_name.switch_name)
-                    log_file += one_log_list
+                if len(time_list)>1:
+                    if time_list[0]>time_list[1]:
+                        return Response(log_file[0])
+                    else:
+                        return Response(log_file[1])
                 else:
-                    sys_fh = open(sysfile, 'r')
-                    log_file += self.preparelogs(sys_fh, logs_name.system_id, logs_name.switch_name)
+                    for item in log_file:
+                        if len(item):
+                            return Response(item)
             except:
-                resp ={'Error':'Failed to read Syslogs.'}
-                return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
-        return Response(log_file)
+                return Response([])
+        except:
+            resp ={'Error':'Failed to read Syslogs.'}
+            return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
+        return Response([])
 
 class ImageList(APIView):
-    """
-    GET fabric_stats
-    """
+    
     def dispatch(self,request, *args, **kwargs):
         me = RequestValidator(request.META)
         if me.user_is_exist():
@@ -772,6 +1000,9 @@ class ImageList(APIView):
             return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
     
     def get(self, request,format=None):
+        """
+        To get list of images
+        """
         try:
             serializer = ImagePostSerializer(data = image_objects,many=True)
             if serializer.is_valid():
@@ -788,11 +1019,8 @@ class ImageList(APIView):
             resp = {'Error':'Failed to access image profiles'}
             return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
 
-
 class FabricImageEdit(APIView):
-    """
-    GET fabric_stats
-    """
+   
     def dispatch(self,request, *args, **kwargs):
         me = RequestValidator(request.META)
         if me.user_is_exist():
@@ -802,6 +1030,11 @@ class FabricImageEdit(APIView):
             return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request,id,format=None):
+        """
+        To update an existing Fabric Image
+        ---
+  serializer: "ImageDetailSerializer"
+        """
         resp = {}
         serializer = ImageDetailSerializer(data = request.data)
         if serializer.is_valid():
@@ -814,3 +1047,29 @@ class FabricImageEdit(APIView):
                 return Response(resp, status=status.HTTP_400_BAD_REQUEST)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class BuildConfig(APIView):
+    def dispatch(self,request, *args, **kwargs):
+        me = RequestValidator(request.META)
+        if me.user_is_exist():
+            return super(BuildConfig, self).dispatch(request,*args, **kwargs)
+        else:
+            resp = me.invalid_token()
+            return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
+    
+
+    def put(self, request, id, format=None):
+        error = ""
+        fabric_obj = ""
+        try:
+            fabric_obj = Fabric.objects.get(id=id)
+        except:
+            error = "Could not find fabric with id %s" %id
+            logger.error(error)
+            return Response(error, status=status.HTTP_400_BAD_REQUEST)
+
+        generate_config(fabric_obj)
+        build_fabric_profiles(fabric_obj)   
+        return Response("Call to build configs completed",status=status.HTTP_200_OK) 

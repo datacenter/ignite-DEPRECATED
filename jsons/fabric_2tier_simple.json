@@ -5,49 +5,100 @@
   "submit": "true",
   "locked": 1,
   "validate": 1,
-  "config_json": [
-    {
-      "name": "spine1",
-      "configuration_id": 1,
-      "image_name": "NX-OS 5.1"
-    },
-    {
-      "name": "spine2",
-      "configuration_id": 1,
-      "image_name": "NX-OS 5.1"
-    },
-    {
-      "name": "leaf1",
-      "configuration_id": 2,
-      "image_name": "NX-OS 5.1"
-    },
-    {
-      "name": "leaf2",
-      "configuration_id": 2,
-      "image_name": "NX-OS 5.1"
-    },
-    {
-      "name": "leaf3",
-      "configuration_id": 2,
-      "image_name": "NX-OS 5.1"
-    }
-  ],
+  "config_json": {
+    "leaf_config_id": 1,
+    "spine_config_id": 1,
+    "switch_config_id": [
+      {
+        "name": "Spine-1",
+        "configuration_id": 1
+      },
+      {
+        "name": "Spine-2",
+        "configuration_id": 2
+      },
+      {
+        "name": "Leaf-1",
+        "configuration_id": 1
+      },
+      {
+        "name": "Leaf-2",
+        "configuration_id": 2
+      },
+      {
+        "name": "Leaf-3",
+        "configuration_id": 3
+      }
+    ]
+  },
   "system_id": [
     {
       "name": "PodA_1_Spine-1",
-      "system_id": "NX11"
+      "system_id": "ab1"
     },
     {
       "name": "PodA_1_Spine-2",
-      "system_id": "NX12"
+      "system_id": "ab2"
     },
     {
       "name": "PodA_1_Leaf-1",
-      "system_id": "NX11"
+      "system_id": "ab3"
     },
     {
       "name": "PodA_1_Leaf-2",
-      "system_id": "NX12"
+      "system_id": "ab4"
     }
-  ]
+  ],
+  "image_details": {
+    "leaf_image_profile": "leaf_image",
+    "spine_image_profile": "spine_image",
+    "switch_image_profile": [
+      {
+        "name": "Spine-1",
+        "image_profile": "spine_image"
+      },
+      {
+        "name": "Spine-2",
+        "image_profile": "spine_image"
+      },
+      {
+        "name": "Leaf-1",
+        "image_profile": "leaf_image"
+      },
+      {
+        "name": "Leaf-2",
+        "image_profile": "leaf_image"
+      },
+      {
+        "name": "Leaf-3",
+        "image_profile": "leaf_image"
+      }
+    ]
+  },
+  "profiles": {
+    "leaf_profile_id": 1,
+    "spine_profile_id": 1,
+    "switch_profile_id": [
+      {
+        "name": "Spine-1",
+        "profile_id": 2
+      },
+      {
+        "name": "Spine-2",
+        "profile_id": 3
+      },
+      {
+        "name": "Leaf-1",
+        "profile_id": 2
+      },
+      {
+        "name": "Leaf-2",
+        "profile_id": 3
+      },
+      {
+        "name": "Leaf-3",
+        "profile_id": 2
+      }
+    ]
+  }
 }

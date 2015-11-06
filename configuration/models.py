@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 # Create your models here.
 
 def generate_groupname(self, filename):
-    url = "%s/%s" % (self.group,self.name)
+    url = "configlets/%s/%s" % (self.group,self.name)
     return url
 
 class Configlet(models.Model):
@@ -21,7 +21,7 @@ class Configlet(models.Model):
     group = models.CharField(max_length=100)
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_date = models.DateTimeField(auto_now=True)
-
+    used_count = models.IntegerField(default = 0)
 
 class Configuration(models.Model):
 

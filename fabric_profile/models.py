@@ -13,7 +13,7 @@ class ProfileTemplate(models.Model):
     group=models.CharField(max_length=100)
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_date = models.DateTimeField(auto_now=True)
-
+    used_count = models.IntegerField(default = 0)
 
 class FabricProfile(models.Model):
     name = models.CharField(max_length=100)
@@ -26,3 +26,4 @@ class FabricProfile(models.Model):
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_date = models.DateTimeField(auto_now=True)
     used = models.IntegerField(default = 0)
+    

@@ -11,17 +11,6 @@ class JSONSerializerField(serializers.Field):
     def to_representation(self, value):
         return value
 
-class Switch_profileSerializers(serializers.Serializer):
-    switch_id = serializers.CharField(max_length=100)
-    profile_id = serializers.IntegerField()
-
- 
-class ProfilesSerializer(serializers.Serializer):
-    leaf_profile = serializers.IntegerField()
-    spine_profile = serializers.IntegerField()
-    switch_profile = Switch_profileSerializers(many = True)
-
-
 class FabricGetSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField()
@@ -47,20 +36,39 @@ class FabricGetDetailSerializer(serializers.Serializer):
     image_details = JSONSerializerField()
     created_date = serializers.DateTimeField()
     updated_date = serializers.DateTimeField()
-    #profiles = JSONSerializerField()
+    profiles = JSONSerializerField()
+
+class ProfilesSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    profile_id = serializers.IntegerField()
 
 class ConfigurationSerializer(serializers.Serializer):
-    name = serializers.CharField(required = True)
-    configuration_id = serializers.IntegerField(required = True)
+    name = serializers.CharField()
+    configuration_id = serializers.IntegerField()
     image_name = serializers.CharField(required = False)
 
 class SystemIdSerializer(serializers.Serializer):
-    name = serializers.CharField(required = True)
-    system_id = serializers.CharField(required = True)
+    name = serializers.CharField()
+    system_id = serializers.CharField()
     
 class ImageDetailSerializer(serializers.Serializer):
-    leaf_switch = serializers.CharField(required = True)
-    spine_switch = serializers.CharField(required = True)
+    name = serializers.CharField()
+    image_profile = serializers.CharField()
+
+class ConfigurationDictSerializer(serializers.Serializer):
+    leaf_config_id = serializers.IntegerField()
+    spine_config_id = serializers.IntegerField()
+    switch_config_id = ConfigurationSerializer(many=True)
+
+class ImageDetailDictSerializer(serializers.Serializer):
+    leaf_image_profile = serializers.CharField()
+    spine_image_profile = serializers.CharField()
+    switch_image_profile = ImageDetailSerializer(many=True)
+
+class ProfilesDictSerializer(serializers.Serializer):
+    leaf_profile_id = serializers.IntegerField()
+    spine_profile_id = serializers.IntegerField()
+    switch_profile_id = ProfilesSerializer(many=True)
     
 class FabricPutSerializer(serializers.Serializer):
     name = serializers.CharField()
@@ -69,10 +77,10 @@ class FabricPutSerializer(serializers.Serializer):
     instance = serializers.IntegerField()
     validate = serializers.IntegerField()
     submit = serializers.CharField(max_length=10)
-    config_json = ConfigurationSerializer(required = True, many = True)
+    config_json = ConfigurationDictSerializer()
     system_id = SystemIdSerializer(required = False, many = True)
-    image_details = ImageDetailSerializer(required=False)
-    #profiles = ProfilesSerializer(required=False)
+    image_details = ImageDetailDictSerializer(required=False)
+    profiles = ProfilesDictSerializer(required=False)
     
 class FabricSerializer(serializers.Serializer):
     name = serializers.CharField(validators=[UniqueValidator(queryset=Fabric.objects.all())])
@@ -81,10 +89,10 @@ class FabricSerializer(serializers.Serializer):
     instance = serializers.IntegerField()
     validate = serializers.IntegerField()
     submit = serializers.CharField(max_length=10)
-    config_json = ConfigurationSerializer(required = True, many = True)
-    system_id = SystemIdSerializer(required = False, many = True)
-    image_details = ImageDetailSerializer(required=False)
-    #profiles = ProfilesSerializer(required=False)
+    config_json = ConfigurationDictSerializer()
+    system_id = SystemIdSerializer(required = False, many=True)
+    image_details = ImageDetailDictSerializer(required=False,)
+    profiles = ProfilesDictSerializer(required=False)
 
 class FabricRuleDBGetSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)

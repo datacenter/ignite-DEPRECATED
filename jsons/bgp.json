@@ -1,0 +1,4 @@
+"bgp":
+	{
+	   "asn":"$$asn_number$$"
+	}

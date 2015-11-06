@@ -19,9 +19,9 @@ from serializer.DiscoveryRuleSerializer import DiscoveryRuleGetDetailSerializer
 from serializer.DiscoveryRuleSerializer import DiscoveryRuleSerialIDSerializer
 from serializer.DiscoveryRuleSerializer import DiscoveryRulePutSerializer
 from serializer.DiscoveryRuleSerializer import DiscoveryRuleIDPutSerializer
+from fabric.serializer.deployed_serializer import DeployedFabricDetailGetSerializer
 from fabric.models import DeployedFabricStats
 from fabric.const import INVALID
-from fabric.serializer.deployed_serializer import DeployedFabricDetailGetSerializer
 
 from usermanagement.utils import RequestValidator
 from django.http import JsonResponse
@@ -30,9 +30,6 @@ from django.views.decorators.csrf import csrf_exempt
 
 
 class DiscoveryRuleList(APIView,RequestValidator):
-    """
-    List all DiscoveryRule, or create a new Rule.
-    """
     
     def dispatch(self,request, *args, **kwargs):
         me = RequestValidator(request.META)
@@ -43,6 +40,9 @@ class DiscoveryRuleList(APIView,RequestValidator):
             return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
             
     def get(self, request, format=None):
+        """
+        To get the list of Discover Rules 
+        """
         discoveryrule = DiscoveryRule.objects.all()
         serializer = DiscoveryRuleGetSerializer(discoveryrule, many=True)
         index = 0
@@ -61,6 +61,12 @@ class DiscoveryRuleList(APIView,RequestValidator):
         return Response(resp)
 
     def post(self, request, format=None):
+        """
+        To add a new Discover rule
+        ---
+  serializer: "DiscoveryRuleSerializer"
+
+        """
         me = RequestValidator(request.META)
         if request.data['match']!='serial_id':
             serializer = DiscoveryRuleSerializer(data=request.data)
@@ -93,8 +99,7 @@ class DiscoveryRuleList(APIView,RequestValidator):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
 class DiscoveryRuleDetailList(APIView,RequestValidator):
-    '''
-    '''
+
     def dispatch(self,request, *args, **kwargs):
         me = RequestValidator(request.META)
         if me.user_is_exist():
@@ -111,6 +116,10 @@ class DiscoveryRuleDetailList(APIView,RequestValidator):
             raise Http404 
            
     def get(self,request,id,format=None):
+        """
+        To get a particular Discover Rule
+        """
+        
         discoveryrule=self.get_object(id)
         serializer1 = DiscoveryRuleGetSerializer(discoveryrule)
         if serializer1.data['match']!='serial_id':
@@ -126,6 +135,12 @@ class DiscoveryRuleDetailList(APIView,RequestValidator):
             return Response(data)
         
     def put(self, request, id, format=None):
+        """
+        To edit an existing Discovery Rule
+        ---
+  serializer: "DiscoveryRulePutSerializer"
+
+        """
         me = RequestValidator(request.META)
         discoveryrule=self.get_object(id)
         if request.data['match']!='serial_id':
@@ -168,6 +183,9 @@ class DiscoveryRuleDetailList(APIView,RequestValidator):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self,request,id,format=None):
+        """
+        To delete a DIscovery Rule
+        """
         discoveryrule = self.get_object(id)
         discoveryrule.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -183,6 +201,9 @@ class DeployedByGlobal(APIView,RequestValidator):
             return JsonResponse(resp,status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request,format=None):
+        """
+        To get the switches deployed by Global Rules
+        """  
         resp = {}
         try:
             dis_object = DeployedFabricStats.objects.exclude(discoveryrule_id = INVALID)

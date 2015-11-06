@@ -11,10 +11,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.7/ref/settings/
 """
 
+from server_configuration import PROJECT_DIR, DBNAME, DBUSER, DBPASSWORD, DBHOST, DBPORT
+
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
+#BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+BASE_DIR = os.getcwd() + PROJECT_DIR
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
@@ -39,6 +42,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework.authtoken',
+    #'rest_framework_swagger',
     'rest_framework',
     'djoser',
     #User apps
@@ -65,7 +69,9 @@ MIDDLEWARE_CLASSES = (
 #XS_SHARING_ALLOWED_HEADERS = ['Content-Type', '*', 'Authorization','X-CSRFToken']
 
 # UI code
-UI_ROOT = os.getcwd()+ '/dist'
+PROJECT_DIR = '/Ignite/ignite/'
+UI_ROOT = BASE_DIR + '/dist'
+#UI_ROOT = '/home/ignite/igniteml/Ignite/ignite/dist'
 UI_URL = 'ui/'
 
 ROOT_URLCONF = 'ignite.urls'
@@ -75,14 +81,26 @@ WSGI_APPLICATION = 'ignite.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
+"""
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'ignite_db3',                      # Or path to database file if using sqlite3.
+        'NAME': 'ignitedb',                      # Or path to database file if using sqlite3.
         'USER': 'postgres',
-        'PASSWORD': '123456',
+        'PASSWORD': 'password',
         'HOST': 'localhost',                      # Empty for localhost through domain sockets or           '127.0.0.1' for localhost through TCP.
         'PORT': '',                      # Set to empty string for default.
+    }
+}
+"""
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': DBNAME,                      # Or path to database file if using sqlite3.
+        'USER': DBUSER,
+        'PASSWORD': DBPASSWORD,
+        'HOST': DBHOST,                      # Empty for localhost through domain sockets or           '127.0.0.1' for localhost through TCP.
+        'PORT': DBPORT,                      # Set to empty string for default.
     }
 }
 # Internationalization
@@ -110,9 +128,8 @@ REST_FRAMEWORK = {
     ),
 }
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'configlets')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'templates')
 MEDIA_URL = '/configlets/'
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -160,6 +177,14 @@ LOGGING = {
             'level': 'DEBUG',
         },
         'fabric_profile': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+        },
+        'usermanagement': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+        },
+        'usermanagement.utils': {
             'handlers': ['file'],
             'level': 'DEBUG',
         },

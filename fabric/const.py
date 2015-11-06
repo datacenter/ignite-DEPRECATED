@@ -27,6 +27,11 @@ LOCAL_PORT     = "local_port"
 #Fabric JSON
 CONFIGURATION_ID = "configuration_id"
 
+#Apply Fabric Profle
+LEAF_PROFILE = 'leaf_profile_id'
+SPINE_PROFILE = 'spine_profile_id'
+PROFILE_ID = 'profile_id'
+
 #VPC Peer Detail Response
 VPC_PEER_SWITCH = "vpc_peer_switches"
 VPC_SWITCH_LOCALPORT = "vpc_switch_localport"
@@ -40,6 +45,35 @@ FABRIC_MATCH_RESPONSE = \
 {"CFG_ID":INVALID,"FABRIC_ID":INVALID,"SWITCH_ID":"","DISCOVERYRULE_ID": INVALID, \
   "MATCH_TYPE": "", "REPLICA_NUM":INVALID}
 
-LEAF_SWITCH_TYPE = 'leaf_switch'
-SPINE_SWITCH_TYPE = 'spine_switch'
+LEAF_IMAGE_PROFILE = 'leaf_image_profile'
+SPINE_IMAGE_PROFILE = 'spine_image_profile'
 
+#ANK DS and Apply Profile JSON keys
+MGMT_IP_BLOCK = 'mgmt_block'
+IP_BLOCK = "192.168.1.0/24"
+ID = "id"
+CONFIGS = "configs"
+DEVICE_PROFILE = "device_profile"
+PROFILES = "profiles"
+SWITCH_PROFILE = "switch_profile_id"
+ANK={DEVICE_PROFILE:{MGMT_IP_BLOCK:IP_BLOCK}}
+
+#Build method for configuration.config.build_file 
+BUILD_PROFILE = 1
+BUILD_CONFIG = 2
+#Build type for configuration.config.build_file 
+BUILD_OFF = 1
+BUILD_ON = 2
+
+
+#Config File extensions
+#Generated using buildconfig
+#CONFIG_OFF_EXT = '_off.cfg'
+CONFIG_OFF_EXT = '.cfg'
+#Generated using CDP
+CONFIG_ON_EXT = '.cfg'
+
+#Keys for fabric_json/image_profile, fabric_json/config_json, fabric_json/fabric_profiles
+IMAGE_KEY = 'switch_image_profile'
+PROFILE_KEY = 'switch_profile_id'
+CONFIG_KEY = 'switch_config_id'

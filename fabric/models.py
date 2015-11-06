@@ -1,5 +1,6 @@
 from django.db import models
 # Create your models here.
+from django.utils import timezone
 
 class Topology(models.Model):
 
@@ -30,7 +31,7 @@ class Fabric(models.Model):
     updated_date = models.DateTimeField(auto_now=True)
     submit = models.CharField(max_length=10, default="false")
     image_details = models.TextField()
-#    profiles = models.TextField()
+    profiles = models.TextField()
 
 class FabricRuleDB(models.Model):
 
@@ -51,7 +52,8 @@ class DeployedFabricStats(models.Model):
     switch_name = models.CharField(max_length=100)
     config_id = models.IntegerField(default=-1)
     booted = models.BooleanField(default=False)
-    boot_time = models.DateTimeField(auto_now=True)
+    boot_time = models.DateTimeField(default=timezone.now)
+    build_time = models.DateTimeField(default=timezone.now)
     config_name = models.CharField(max_length=100)
     discoveryrule_id = models.IntegerField(default=-1)
     system_id = models.CharField(max_length=100)

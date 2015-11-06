@@ -24,6 +24,7 @@ class DeployedFabricDetailGetSerializer(serializers.Serializer):
     config_name = serializers.CharField()
     booted = serializers.BooleanField()
     boot_time = serializers.DateTimeField()
+    build_time = serializers.DateTimeField()
     discoveryrule_id = serializers.IntegerField()
     system_id = serializers.CharField()
     match_type = serializers.CharField()
