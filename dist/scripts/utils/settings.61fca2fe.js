@@ -18,7 +18,7 @@
 
             //API URL
             "appAPI": {
-                "baseURL": "http://172.31.219.76:8001",
+                "baseURL": "http://12.36.118.92:8888",
                 "configlets" : {
                   "list" : {
                      // "url" : "http://localhost:9010/data/configlets-list.json",
@@ -215,6 +215,11 @@
                         "url": "/api/fabric/",
                         "method": "DELETE",
                         "auth": "true"
+                    },
+                    "buildConfig" : {
+                      "url": "/api/fabric/",
+                      "method": "PUT",
+                      "auth": "true"
                     }
                 },
                 "deployedFabrics" : {
@@ -253,6 +258,66 @@
                       "method": "GET",
                       "auth": "true"
                     }
+                },
+                "profileTemplates" : {
+                    "list" : {
+                        "url" : "/api/fabric_profile/profile_template/",
+                        "method" : "GET",
+                        "auth" : "true"
+                      },
+                    "add" : {
+                        "url" : "/api/fabric_profile/profile_template/",
+                        "method" : "POST",
+                        "auth" : "true"
+                    },
+                    "upload" : {
+                       "url" : "/api/fabric_profile/profile_template/",
+                        "method" : "PUT",
+                        "auth" : "true"
+                    },
+                    "getById" : {
+                      "url" : "/api/fabric_profile/profile_template/",
+                        "method" : "GET",
+                        "auth" : "true"
+                    },
+                    "edit" : {
+                      "url" : "/api/fabric_profile/profile_template/",
+                        "method" : "PUT", 
+                        "auth" : "true"
+                    },
+                    "delete" : {
+                      "url" : "/api/fabric_profile/profile_template/",
+                       "method" : "DELETE",
+                       "auth" : "true"
+                    }
+                },
+
+                "fabricProfile" : {
+                    "list": {
+                        "url": "/api/fabric_profile/",
+                        "method": "GET",
+                        "auth": "true"
+                    },
+                    "add" : {
+                        "url": "/api/fabric_profile/",
+                        "method": "POST",
+                        "auth": "true"
+                    },
+                    "view" : {
+                        "url": "/api/fabric_profile/",
+                        "method": "GET",
+                        "auth": "true"
+                    },
+                    "edit" : {
+                        "url": "/api/fabric_profile/",
+                        "method": "PUT",
+                        "auth": "true"
+                    },
+                    "delete" : {
+                        "url": "/api/fabric_profile/",
+                        "method": "DELETE",
+                        "auth": "true"
+                    }
                 }
             },
             "dateFormat": 'dd/MMM/yyyy hh:mm:ss a',
@@ -268,10 +333,6 @@
                 },
                 "pools" : {
                   "types" : [
-                    {
-                      "value" : "AutoGenerate",
-                      "label" : "Auto"
-                    },
                     {
                       "value" : "Integer",
                       "label" : "Integer"
@@ -297,14 +358,6 @@
                     {
                       "value" : "global",
                       "label" : "global"
-                    },
-                    {
-                      "value" : "fabric",
-                      "label" : "fabric"
-                    },
-                    {
-                      "value" : "switch",
-                      "label" : "switch"
                     }
                   ]
                 },
@@ -333,6 +386,16 @@
                       "label" : "Autogenerate"
                     }
                   ]
+                },
+                'fabricConstruct' : {
+                    "types" : [{
+                      "value" : "append_template",
+                      "label" : "Append Template"
+                    }],
+                    'paramTypes' : [{
+                      "value" : "Fixed",
+                      "label" : "Fixed"
+                    }]
                 },
                 'discoveryRule' : {
                   "rnConditions" : [
@@ -433,7 +496,7 @@
                     "config_type": "template"
                 },
                 "pools" : {
-                    "type" : "AutoGenerate",
+                    "type" : "Integer",
                     "scope" : "global"
                 },
                 "discoveryRule" : {

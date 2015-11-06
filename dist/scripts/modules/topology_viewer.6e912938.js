@@ -255,14 +255,14 @@ angular.module('topologyModule', [])
       }
     }
 
-    $scope.$watch(function() {
+   /* $scope.$watch(function() {
         return $scope.$parent.selectedImages.spine_switch
     }, function() {
         $scope.imageData = {
             spineSwitchImage : $scope.$parent.selectedImages.spine_switch,
             leafSwitchImage : $scope.$parent.selectedImages.leaf_switch
         }    
-    })
+    })*/
     
 
     $scope.applyDefault = function() {

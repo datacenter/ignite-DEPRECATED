@@ -65,12 +65,12 @@
 
                     <th class="sortable" 
                     ng-class="{
-                        'sort-asc': tableParams.isSortBy('discoveryrule_id', 'asc'),
-                        'sort-desc': tableParams.isSortBy('discoveryrule_id', 'desc')
+                        'sort-asc': tableParams.isSortBy('build_time', 'asc'),
+                        'sort-desc': tableParams.isSortBy('build_time', 'desc')
                     }"
-                    ng-click="tableParams.sorting({'discoveryrule_id' : tableParams.isSortBy('discoveryrule_id', 'asc') ? 'desc' : 'asc'})"
+                    ng-click="tableParams.sorting({'build_time' : tableParams.isSortBy('build_time', 'asc') ? 'desc' : 'asc'})"
                     >
-                    Discovery Rule</th>
+                    Build Time</th>
 
                     <th class="sortable" 
                     ng-class="{
@@ -79,7 +79,7 @@
                     }"
                     ng-click="tableParams.sorting({'config_name' : tableParams.isSortBy('config_name', 'asc') ? 'desc' : 'asc'})"
                     >
-                    Config Name</th>
+                    Config.</th>
                     <th>Logs</th>
                     
                 </tr>
@@ -88,16 +88,19 @@
                 <tr ng-class="{active: classVal}" ng-repeat="replica in $data | filter : search">
                     <td>{{appServices.generateSeq(tableParams.page(), tableParams.count(), $index)}}</td>
                     <td>{{replica.switch_name}}</td>
-                    <td><any ng-if="replica.booted == true">Yes</span> <any ng-if="replica.booted != true">No</span></td>
+                    <td><span ng-if="replica.booted == true">Yes</span> 
+                        <span ng-if="replica.booted != true">No</span>
+                        </td>
                     <td>{{replica.boot_time | date : appSettings.dateFormat}}</td>
                     <td>{{replica.system_id}}</td>
                     <td>{{replica.match_type}}</td>
-                    <td>
+                    <td>{{replica.build_time | date : appSettings.dateFormat}}</td>
+                    <!--td>
                             <a href="#" ng-if="replica.discoveryrule_id != -1">{{replica.discoveryrule_id}}</a>
                             <span ng-if="replica.discoveryrule_id == -1"> - </span>
 
-                            <!--a href="javascript:void(0)" ng-click="openRuleModal('16')">TestRule</a -->
-                    </td>
+                            <!--a href="javascript:void(0)" ng-click="openRuleModal('16')">TestRule</a>
+                    </td -->
                     <td><a href="javascript:void(0)" ng-click="openConfigModal(replica.id)">{{replica.config_name}}</a></td>
                     <td><a href="javascript:void(0)" ng-click="openLogModal(replica.id)">View</a></td>
                 </tr>
