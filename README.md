@@ -1,4 +1,5 @@
-![Ignite](https://github.com/datacenter/ignite/blob/master/dist/images/color-logo.png)
+
+----![Ignite](https://github.com/datacenter/ignite/blob/master/dist/images/color-logo.png)
 
 # Description
 
@@ -15,11 +16,11 @@ Ignite provides bootstrapping with the following capabilities:
 # Getting Started
 
 ### Option 1: Download OVA from link below:
-https://cisco.box.com/s/4mdfja1cbev3065vmwst4fvc7nj9vpe2
+https://cisco.box.com/s/f7xdzs6mnltsbdccdr1uamda0txrr5w0
 
 Username/password: ignite/ignite
 
-Follow steps 4-7 below (skip step 6)
+Follow steps below
 
 	a. Deploy OVA
 	b. Login with ignite/ignite
@@ -35,7 +36,6 @@ Follow steps 4-7 below (skip step 6)
 	h. To launch UI use http://<ipaddress>:<port>/ui/index.html
 	i. Use New User registration link in the UI to create a new user credential. Login to the page using this credential.
 
-Setup users as mentioned in step-6 below.
 
 ### Option 2: Create a new Ignite VM/Server with code from git
 
@@ -46,7 +46,7 @@ apt-get install postgresql-9.3 postgresql-common
 
 2.Set up database
 ```
-psql  –U postgres
+psql  â€“U postgres
 create database  DATABASE_NAME;
 \q
 ```
@@ -56,7 +56,7 @@ Edit  following section in ~/ignite/ignite/prod.py
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': ‘DATABASE_NAME’,                  #Name of database created
+        'NAME': â€˜DATABASE_NAMEâ€™,                  #Name of database created
         'USER': 'postgres',                       #Database User
         'PASSWORD': 'PASSWORD',                   #password for Database user
         'HOST': 'localhost',                      # Empty for localhost through domain sockets or           '127.0.0.1' for localhost through TCP.
@@ -86,31 +86,52 @@ to
 python manage.py runserver <ip:port>
 ```
 
-6.Run following command to create user on server
-```
-curl -X POST -i -H "Content-type: application/json" http://<ignite_vm_ip>:<port>/auth/register/  -d '{"username”:”admin”, "password”:”admin”, "email":"username@xyz.com"}'
-```
 
-7.Run UI on web browser
+6.Run UI on web browser
   To launch UI use http://<ipaddress>:<port>/ui/index.html
   Use New User registration link in the UI to create a new user credential. Login to the page using this credential.
 
 ### Installing poap.py in the script server
 ```
-1.Ignite_poap.py – sample poap.py script is available in github
+1.Ignite_poap.py â€“ sample poap.py script is available in github
 
 ```
 2.Modify ignite_poap.py to assign ip address and port number of the ignite server (see the ip address and port number used while executing manage.py run server)
 ```
-	a. Search for “ignite server” in poap.py and change the following values
+	a. Search for â€œignite serverâ€ in poap.py and change the following values
 		#ignite server
 		hostname = "172.31.219.76"
 		port = "8001"
 	b. Save the changes
-	c. Copy and rename the file to “poap.py” in the script server directory /var/lib/tftpboot
+	c. Copy and rename the file to â€œpoap.pyâ€ in the script server directory /var/lib/tftpboot
 ```
 3.Please note, poap.py should be installed in the script server whose address is returned in the DHCP OFFER during the dhcp discover process
-
+### Image Profiles
+Image profiles specify details of the software images available for download to the switch during POAP process.  Following atttributes define an image profile:
+ {
+ 
+    "image_profile_name": "spine_image", 
+    "image": "n9000-dk9.6.1.2.I3.2.bin",
+    "imageserver_ip": "172.31.216.138",
+    "username": "root",
+    "password": "cisco123",
+    "access_protocol": "scp"
+  }
+  
+  image_profile_name - uniquely identifies the profile
+  
+  image - filename where the image is stored
+  
+  imageserver_ip : server where the image is stored
+  
+  username - username to login to the image server
+  
+  password - password to login to the image server
+  
+  access_protocol - ftp/http/scp/tftp protocol used to transfer files from server
+  
+  Image profiles are stored in ignite/fabric/image_profile.py.  The profiles should be modified to match your image needs and environment.  New profiles can be added similar to the pre-defined ones.  spine_image, leaf_image and default_image are example profiles.  An image profile is applied to spine tier or leaf tier of the fabric using "Set Defaults" in "Fabrics" view.  Once applied, this image profile will be sent to the switch during the POAP boot process along with start up config details.  If image profile is not applied, profile named "default_image" is sent to the switch during POAP boot process.
+  
 # License
 
 Copyright 2015 Cisco Systems, Inc.
