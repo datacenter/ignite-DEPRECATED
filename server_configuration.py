@@ -39,3 +39,6 @@ REMOTE_SYSLOG_PATH = '/var/log/remote/ignite/system-'
 # default switch image name
 DEFAULT_SWITCH_IMAGE_NAME = 'n9000-dk9.6.1.2.I3.2.bin'
 
+
+#Enable ANK set it to False if no call to ANK is desired or server is running using Apache2
+ENA_ANK = True

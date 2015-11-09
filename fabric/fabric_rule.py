@@ -14,9 +14,9 @@ from models import Fabric, FabricRuleDB
 from fabric_profile.models import FabricProfile
 from pool.pool import generate_pool_value, generate_vpc_peer_dest
 from pool.models import Pool
-from server_configuration import PROJECT_DIR, REPO, START_ANK
-sys.path.append(START_ANK)
-from autonetkit.start_ank import run_ank
+from server_configuration import PROJECT_DIR, REPO, ENA_ANK
+if ENA_ANK:
+    from autonetkit.start_ank import run_ank
 logger = logging.getLogger(__name__)
 
 BASE_PATH = os.getcwd() + PROJECT_DIR + REPO
@@ -533,9 +533,10 @@ def build_fabric_profiles(fabric_obj):
     logger.debug("Call to ANK")
     for instance_num in range(1, instance + 1):
         fabric_instance = fabric_name + "_" + str(instance_num)
-        try: 
-            run_ank(ank_topo_file, ank_profile_file, fabric_instance, BASE_PATH)
-            logger.debug("Success : call to ANK for %s" %(fabric_instance))
+        try:
+            if ENA_ANK:
+                run_ank(ank_topo_file, ank_profile_file, fabric_instance, BASE_PATH)
+                logger.debug("Success : call to ANK for %s" %(fabric_instance))
         except:
             logger.debug("Failed : call to ANK for %s" %(fabric_instance))
             pass
