@@ -95,10 +95,6 @@ http://<ignite_vm_ip>:<port>/ui/index.html
 Login using credentials: root/root
 
 
-#ANK
-Set PYTHONPATH to ank/autonetkit/
-Example: If location of ank folder is /ignite/ank PYTHONPATH should be set to /ignite/ank/autonetkit 
-
 #Issues
 
 1.Topology can not be modified once the Fabric is instantiated with that topolog
