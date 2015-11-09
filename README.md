@@ -15,7 +15,7 @@ Ignite provides bootstrapping with the following capabilities:
 # Getting Started
 
 ### Option 1: Download OVA from link below:
-https://cisco.box.com/s/4mdfja1cbev3065vmwst4fvc7nj9vpe2
+https://cisco.box.com/s/b0d92hkh1pvpko6rrml3kl2bwqm8mps6
 
 Username/password: ignite/ignite
 
@@ -32,8 +32,6 @@ Follow steps 4-7 below (skip step 6)
 	    vmpassword: password for the server
 	f. Run configure.sh (sh configure.sh)
 	g. Run ignite server (python manage.py runserver ip:port ) where IP is the address provided in ignite_ip and port is value provided in ignite_port.
-	h. To launch UI use http://<ipaddress>:<port>/ui/index.html
-	i. Use New User registration link in the UI to create a new user credential. Login to the page using this credential.
 
 Setup users as mentioned in step-6 below.
 
@@ -92,24 +90,52 @@ curl -X POST -i -H "Content-type: application/json" http://<ignite_vm_ip>:<port>
 ```
 
 7.Run UI on web browser
-  To launch UI use http://<ipaddress>:<port>/ui/index.html
-  Use New User registration link in the UI to create a new user credential. Login to the page using this credential.
+http://<ignite_vm_ip>:<port>/ui/index.html
 
-### Installing poap.py in the script server
-```
-1.Ignite_poap.py – sample poap.py script is available in github
+Login using credentials: root/root
 
-```
-2.Modify ignite_poap.py to assign ip address and port number of the ignite server (see the ip address and port number used while executing manage.py run server)
-```
-	a. Search for “ignite server” in poap.py and change the following values
-		#ignite server
-		hostname = "172.31.219.76"
-		port = "8001"
-	b. Save the changes
-	c. Copy and rename the file to “poap.py” in the script server directory /var/lib/tftpboot
-```
-3.Please note, poap.py should be installed in the script server whose address is returned in the DHCP OFFER during the dhcp discover process
+
+#ANK
+Set PYTHONPATH to ank/autonetkit/
+Example: If location of ank folder is /ignite/ank PYTHONPATH should be set to /ignite/ank/autonetkit 
+
+#Issues
+
+1.Topology can not be modified once the Fabric is instantiated with that topolog
+y.
+
+2.Topology details can not be edited via fabric interface.
+
+3.If topology is cloned, port numbering for any new Leaf/Spine will in correct.
+
+4.In topology default pane, changing the default values will not take effect on
+the topology.
+
+5.In topology, manual editing of port numbers is not validated. This may clash w
+ith port numbers generated automatically when new Leaf/Spine is added. User must
+ take care to avoid duplicates.
+
+6.For Spine Switches, both uplink and downlink ports are assigned from the same
+list (Eth1/1-Eth1/64).
+
+7.Port numbering in topology will work correctly upto 64 Leaf additions. After t
+hat port numbers will be incorrect.
+
+
+#POAP script for ignite server
+
+1.ignite_poap.py is sample POAP script for ignite server
+
+2.Set the following variables(currenty set to a default value) in ignite_poap.py to reflect ignite server ip address and port
+
+	#ignite server
+	hostname                = "172.31.219.76"
+	port              	= "8001"
+
+3.This script file should be placed on the script server TFTP directory by the name poap.py
+
+4.Here script sever referes to the server configured as 'tftp-server-name' in dhcpd.conf on DHCP server. 
+
 
 # License
 

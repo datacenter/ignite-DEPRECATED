@@ -1,5 +1,6 @@
 
 import os
+import sys
 import json
 from const import *
 from switchdb import *
@@ -13,8 +14,9 @@ from models import Fabric, FabricRuleDB
 from fabric_profile.models import FabricProfile
 from pool.pool import generate_pool_value, generate_vpc_peer_dest
 from pool.models import Pool
-from server_configuration import PROJECT_DIR, REPO
-#from autonetkit.start_ank import run_ank
+from server_configuration import PROJECT_DIR, REPO, START_ANK
+sys.path.append(START_ANK)
+from autonetkit.start_ank import run_ank
 logger = logging.getLogger(__name__)
 
 BASE_PATH = os.getcwd() + PROJECT_DIR + REPO
@@ -421,8 +423,8 @@ def generate_config(fabric_obj):
             
             insert_deployed_fabric_stats(match_response, "", file_name, True)
             
-            #file_path = BASE_PATH + file_name 
-            #sanitize_repo(file_path)
+            file_path = BASE_PATH + file_name 
+            sanitize_repo(file_path)
 
     return True
 
@@ -532,7 +534,7 @@ def build_fabric_profiles(fabric_obj):
     for instance_num in range(1, instance + 1):
         fabric_instance = fabric_name + "_" + str(instance_num)
         try: 
-            #run_ank(ank_topo_file, ank_profile_file, fabric_instance, BASE_PATH)
+            run_ank(ank_topo_file, ank_profile_file, fabric_instance, BASE_PATH)
             logger.debug("Success : call to ANK for %s" %(fabric_instance))
         except:
             logger.debug("Failed : call to ANK for %s" %(fabric_instance))

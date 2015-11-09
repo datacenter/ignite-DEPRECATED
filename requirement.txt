@@ -4,5 +4,9 @@ djoser==0.3.0
 psycopg2==2.6
 netaddr==0.7.10
 pytz==2015.4
-pythondateutil==2.4.2
-
+python-dateutil==2.4.2
+django-rest-swagger==0.3.4
+validate
+mako==0.8
+networkx==1.7
+configobj==4.7.1
