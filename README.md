@@ -14,7 +14,7 @@ Ignite provides bootstrapping with the following capabilities:
 
 Ignite is integrated with AutoNetkit.  Autonetkit is a network configuration tool, which automatically generates network configurations from a topology. It extracts the topology information and builds configurations required to enable BGP, OSPF protocols between network elements.  It also has the ability to allocate IP addresses required for such configurations.  It is a highly flexible and configurable tool for building network configurations for mutli-device, multi-vendor networks.
 
-# Acknowledgement to AutoNetkit Contributors
+##### Acknowledgement to AutoNetkit Contributors
 
 The following people have contributed to AutoNetkit:
 
