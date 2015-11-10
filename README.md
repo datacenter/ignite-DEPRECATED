@@ -27,11 +27,7 @@ Thanks also to Hitesh Mali, Ingmar Poese, Michael Rumsewicz, Randy Bush, Niklas 
 # Getting Started
 
 ### Option 1: Download OVA from link below:
-<<<<<<< HEAD
 https://cisco.box.com/s/4bkeauj9fa0zlg910mkx105ms3x4ppin
-=======
-https://cisco.box.com/s/b0d92hkh1pvpko6rrml3kl2bwqm8mps6
->>>>>>> origin/release_1.5
 
 Username/password: ignite/ignite
 
@@ -47,7 +43,6 @@ Follow steps below
 	    vmusername: username for the server
 	    vmpassword: password for the server
 	f. Run configure.sh (sh configure.sh)
-<<<<<<< HEAD
 	g. Edit server_configuration.py and modify the following sections.
     	IP Address of Ignite server and port (same as in step (e))
         IGNITE_IP='127.0.0.1'
@@ -64,9 +59,6 @@ Follow steps below
 	i. Run ignite server (sudo nohup python manage.py runserver <ip>:<port> & ) where IP is the address provided in ignite_ip and port is value provided in ignite_port. Note: To avoide receiving a sudo password prompt while running the server, please run a dummy command for example "sudo ls", before you enter the command to run ignite server.
 	j. To launch UI use http://<ipaddress>:<port>/ui/index.html
 	k. Use New User registration link in the UI to create a new user credential. Login to the page using this credential.
-=======
-	g. Run ignite server (python manage.py runserver ip:port ) where IP is the address provided in ignite_ip and port is value provided in ignite_port.
->>>>>>> origin/release_1.5
 
 
 ### Option 2: Create a new Ignite VM/Server with code from git
@@ -120,7 +112,6 @@ This is required to save logs from switches during POAP.py script execution.
 
 8.Change current directory to the directory where manage,py file is present (sudo cd /home/vmignite/ignite). You may be prompted for a password.
 
-<<<<<<< HEAD
 9.Run ignite server (sudo nohup python manage.py runserver <ip>:<port> & ) where IP is the address provided in ignite_ip and port is value provided in ignite_port.
 
 Note: To avoide receiving a sudo password prompt while running the server, please run a dummy command for example "sudo ls", before you enter the command to run ignite server.
@@ -180,51 +171,6 @@ Image profiles specify details of the software images available for download to 
 5.In topology, manual editing of port numbers is not validated. This may clash w ith port numbers generated automatically when new Leaf/Spine is added. User must take care to avoid duplicates.
 
 6.For Spine Switches, both uplink and downlink ports are assigned from the same list (Eth1/1-Eth1/64).
-=======
-7.Run UI on web browser
-http://<ignite_vm_ip>:<port>/ui/index.html
-
-Login using credentials: root/root
-
-
-#Issues
-
-1.Topology can not be modified once the Fabric is instantiated with that topolog
-y.
-
-2.Topology details can not be edited via fabric interface.
-
-3.If topology is cloned, port numbering for any new Leaf/Spine will in correct.
-
-4.In topology default pane, changing the default values will not take effect on
-the topology.
-
-5.In topology, manual editing of port numbers is not validated. This may clash w
-ith port numbers generated automatically when new Leaf/Spine is added. User must
- take care to avoid duplicates.
-
-6.For Spine Switches, both uplink and downlink ports are assigned from the same
-list (Eth1/1-Eth1/64).
-
-7.Port numbering in topology will work correctly upto 64 Leaf additions. After t
-hat port numbers will be incorrect.
-
-
-#POAP script for ignite server
-
-1.ignite_poap.py is sample POAP script for ignite server
-
-2.Set the following variables(currenty set to a default value) in ignite_poap.py to reflect ignite server ip address and port
-
-	#ignite server
-	hostname                = "172.31.219.76"
-	port              	= "8001"
-
-3.This script file should be placed on the script server TFTP directory by the name poap.py
-
-4.Here script sever referes to the server configured as 'tftp-server-name' in dhcpd.conf on DHCP server. 
-
->>>>>>> origin/release_1.5
 
 7.Port numbering in topology will work correctly upto 64 Leaf additions. After t hat port numbers will be incorrect.  
 # License
