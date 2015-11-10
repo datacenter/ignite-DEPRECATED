@@ -23,7 +23,7 @@ DBPORT=''
 #Example: if manage.py is located inside /var/www/ignite/ignite PROJECT_DIR should be as following
 #PROJECT_DIR = '/ignite/ignite/'
 #Example: if manage.py is located inside /home/linux-user/workspace/ignite/ignite PROJECT_DIR should be as following
-#PROJECT_DIR = '/../../home/linux-user/workspace/ignite/ignite/'
+#PROJECT_DIR = '/../../home/ignite/ignite/'
 
 #If not hosted using Apache2
 PROJECT_DIR = '/'
@@ -38,3 +38,7 @@ REPO = '/repo/'
 REMOTE_SYSLOG_PATH = '/var/log/remote/ignite/system-'
 # default switch image name
 DEFAULT_SWITCH_IMAGE_NAME = 'n9000-dk9.6.1.2.I3.2.bin'
+
+
+#Enable ANK set it to False if no call to ANK is desired or server is running using Apache2
+ENA_ANK = True
