@@ -18,7 +18,8 @@ Ignite is integrated with AutoNetkit.  Autonetkit is a network configuration too
 
 The following people have contributed to AutoNetkit:
 
-##### Simon Knight, Hung Nguyen, Nickolas Falkner, Joel Obstfeld, Olaf Maennel, Iain Phillips, Askar Jaboldinov, Matthew Roughan.
+###### Simon Knight, Hung Nguyen, Nickolas Falkner, Joel Obstfeld, Olaf Maennel, Iain Phillips, Askar Jaboldinov, Matthew Roughan.
+
 
 Thanks also to Hitesh Mali, Ingmar Poese, Michael Rumsewicz, Randy Bush, Niklas Semmler, Stephen Steiner who worked on bugfixes, improvement and suggestions for AutoNetkit.  AutoNetkit project was supported by the Australian Government through an Australian Postgraduate Award, Australian Research Council Discovery Grants DP110103505 and DP0985063, and by the University of Adelaide.  For more details on AutoNetkit please visit http://autonetkit.org/
 
@@ -63,26 +64,28 @@ Follow steps below
 
 ### Option 2: Create a new Ignite VM/Server with code from git
 
-1.Install postgresql
+1.  Install postgresql
 ```
 apt-get install postgresql-9.3 postgresql-common
 ```
 
-2.Set up database
+2.  Set up database
 ```
-psql  â€“U postgres
-create database  DATABASE_NAME;
-\q
+    psql  â€“U postgres
+    create database  ignite_db;
+    \q
 ```
-3.Edit configure.sh to edit parameter values of following parameters
+3.  Edit configure.sh to edit parameter values of following parameters
 
 	   	ignite_ip :  IP address on which to run the server
 	    ignite_port: port on which to run the server
 	    vmusername: username for the server
 	    vmpassword: password for the server
-4.Run configure.sh (sh configure.sh)
+4.  Run configure.sh
 
-5.Edit server_configuration.py and modify the following sections.
+        sh configure.sh
+
+5.  Edit server_configuration.py and modify the following sections.
 
     	IP Address of Ignite server and port (same as in step (e))
         IGNITE_IP='127.0.0.1'
@@ -96,41 +99,184 @@ create database  DATABASE_NAME;
         This name is used only if image_profile.py does not containt a default_image profile.
         DEFAULT_SWITCH_IMAGE_NAME = 'n9000-dk9.6.1.2.I3.2.bin'
 
-6.Create tables in database
+6.  Create tables in database
 ```
-python ~ignite/ignite/manage.py makemigrations
-python ~ignite/ignite/manage.py migrate
+    python ~ignite/ignite/manage.py makemigrations
+    python ~ignite/ignite/manage.py migrate
 ```
 
-7.Following changes may require root permission
+7. Following changes may require root permission
 
-Edit /etc/rsyslog.conf and add the following lines.  
-This is required to save logs from switches during POAP.py script execution. 
+    Edit /etc/rsyslog.conf and add the following lines.  
+    This is required to save logs from switches during POAP.py script execution. 
 
             $template DynaFile,"/var/log/remote/ignite/system-%HOSTNAME%.log"
             *.* -?DynaFile
 
-8.Change current directory to the directory where manage,py file is present (sudo cd /home/vmignite/ignite). You may be prompted for a password.
+8. Change current directory to the directory where manage,py file is present (sudo cd /home/vmignite/ignite). You may be prompted for a password.
 
-9.Run ignite server (sudo nohup python manage.py runserver <ip>:<port> & ) where IP is the address provided in ignite_ip and port is value provided in ignite_port.
+9. Run ignite server
 
-Note: To avoide receiving a sudo password prompt while running the server, please run a dummy command for example "sudo ls", before you enter the command to run ignite server.
+        sudo nohup python manage.py runserver <ip>:<port> 
+        where IP is the address provided in ignite_ip and port is value provided in ignite_port.
 
-10.To launch UI use http://<ipaddress>:<port>/ui/index.html
+        Note: To avoide receiving a sudo password prompt while running the server, please run a dummy command for example "sudo ls", before you enter the command to run ignite server.
 
-11.Use New User registration link in the UI to create a new user credential. Login to the page using this credential.
+10. To launch UI use http://<ipaddress>:<port>/ui/index.html
+
+11. Use New User registration link in the UI to create a new user credential. Login to the page using this credential.
+
+### Option 3: Create a new Ignite VM/Server with code from git and run it as service in Apache
+
+1. Install postgresql
+```
+        apt-get install postgresql-9.3 postgresql-common
+```
+
+2. Set up database (use DATABASE_NAME as given in server_configuration.py DBNAME='ignitedb'
+```
+        psql  â€“U postgres
+        create database  ignitedb;
+        \q
+```
+3. Edit configure.sh to edit parameter values of following parameters
+
+	   	ignite_ip :  IP address on which to run the server
+	    ignite_port: port on which to run the server
+	    vmusername: username for the server
+	    vmpassword: password for the server
+
+4. Edit server_configuration.py and modify the following sections.
+
+    	IP Address of Ignite server and port (same as in step (e))
+        IGNITE_IP='127.0.0.1'
+        IGNITE_PORT='8000'
+      
+        Ignite server access details (same as in step (e))
+        VMUSERNAME='ignite'
+        VMPASSWORD='ignite'
+        
+        default switch image name - software image name sent to the requesting swtich.
+        This name is used only if image_profile.py does not containt a default_image profile.
+        DEFAULT_SWITCH_IMAGE_NAME = 'n9000-dk9.6.1.2.I3.2.bin'
+
+        Edit project directory information for apache.  Project directory is the full path where "wsgi.py" file is located in Ignite application directory, with reference to apache2 directory - /etc/apache2.  For example, if "wsgi.py" is in directory, "/home/vmignite/ignite/ignite/ignite/", project directory should be set as "/../../home/vmignite/ignite/ignite/ignite/"
+        
+        PROJECT_DIR='/../../home/vmignite/ignite/ignite/ignite/'
+        
+        Edit log directory (this directory stores device logs during POAP.py script execution)
+        REMOTE_SYSLOG_PATH = '/var/log/remote/ignite/system-'
+
+5. Run Configure.sh
+
+       sh configure.sh
+    
+6. Create tables in database
+```
+        python ~ignite/ignite/manage.py makemigrations
+        python ~ignite/ignite/manage.py migrate
+```
+
+7. Following changes may require root permission
+
+    Edit /etc/rsyslog.conf and add the following lines.  
+    This is required to save logs from switches during POAP.py script execution. 
+
+            $template DynaFile,"/var/log/remote/ignite/system-%HOSTNAME%.log"
+            *.* -?DynaFile
+
+8. Apache Server setup
+
+    (a) Install apache2, set directory to apache2 and create ignite.conf file
+    
+        sudo su
+        apt-get install apache2 libapache2-mod-wsgi libapache2-mod-python
+        cd /etc/apache2
+        touch sites-available/ignite.conf
+    (b) edit ignite.conf file and enter the following
+    
+        <VirtualHost *:8888> #port on which server will listen
+        <Directory /home/ignite/ignite/ignite > #path to ignite where wsgi.py is located
+             <Files wsgi.py>
+                Require all granted
+            </Files>
+        </Directory>
+        
+        WSGIDaemonProcess ignite #name of the process could be anything
+        #python-path update to point to the location where manage.py is located
+        #for now keep ank path as it is
+        python-path=/home/ignite/ignite:/usr/local/lib/python2.7/dist-packages:/home/ignite/ignite/ank/autonetkit
+
+        WSGIProcessGroup ignite
+        #WSGIScriptAlias update 2nd argument to have full  path of file wsgi.py
+        WSGIScriptAlias / /home/ignite/ignite/ignite/wsgi.py
+
+        WSGIPassAuthorization On
+        #DocumentRoot to point to location of manag.py
+        DocumentRoot /home/ignite/ignite
+
+        ErrorLog ${APACHE_LOG_DIR}/ignite_error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+        </VirtualHost>
+    (c ) Edit /etc/apache2/ports.conf
+    
+        Add the following line to add the ignite server application port number.  Port number here should same as that in step 3 or step 4.
+        
+        Listen 8888
+    (d) Edit /etc/apache2/apache2.conf file to add following lines
+    
+        <Directory /home/ignite/ignite/ignite> #path to manage.py
+        	Options FollowSymLinks
+        	AllowOverride None
+        	Require all granted
+        </Directory>
+
+9. Run ignite server as a service
+
+        cd /etc/apache2/sites-available
+        a2ensite ignite.conf
+        service apache2 restart
+
+
+
+10. To launch UI use http://<ipaddress>:<port>/ui/index.html ipaddress and port corresponds to ignite_ip and ignite_port defined in step 3.
+
+11. Use New User registration link in the UI to create a new user credential. Login to the page using this credential.
+
+12. To stop server
+
+     sudo service apache2 stop
+     
+     Note:  To keep Apache running and just disable ignite server site do following:
+13. To restart server
+
+    sudo service apache2 restart
+    
+14. To disable ignite site without stopping Apache
+
+        cd /etc/apache2/sites-available
+        a2dissite ignite.conf
+        Note: http port used for ignite server will not be released by Apache when site is disabled.
+        If you want to also remove the ignite server http port, edit /etc/apache2/ports.conf to comment out the line "Listen 8888"
+15. To enable, previously disabled ignite site
+
+        cd /etc/apache2/sites-available
+        a2ensite ignite.conf
+ 
+
 
 ### POAP script for ignite server
-1.ignite_poap.py is sample POAP script for ignite server
+1. ignite_poap.py is sample POAP script for ignite server
 
-2.Set the following variables(currenty set to a default value) in ignite_poap.py to reflect ignite server ip address and port
+2. Set the following variables(currenty set to a default value) in ignite_poap.py to reflect ignite server ip address and port
 
     #ignite server
     hostname                = "172.31.219.76"
     port                = "8001"
-3.This script file should be placed on the script server TFTP directory by the name poap.py
+3. This script file should be placed on the script server TFTP directory by the name poap.py
 
-4.Here script sever referes to the server configured as 'tftp-server-name' in dhcpd.conf on DHCP server.
+4. Here script sever referes to the server configured as 'tftp-server-name' in dhcpd.conf on DHCP server.
 
 ### Image Profiles
 Image profiles specify details of the software images available for download to the switch during POAP process.  Following atttributes define an image profile:
@@ -144,17 +290,17 @@ Image profiles specify details of the software images available for download to 
     "access_protocol": "scp"
   }
   
-  image_profile_name - uniquely identifies the profile
+      image_profile_name - uniquely identifies the profile
   
-  image - filename where the image is stored
+      image - filename where the image is stored
   
-  imageserver_ip : server where the image is stored
+      imageserver_ip : server where the image is stored
   
-  username - username to login to the image server
+      username - username to login to the image server
   
-  password - password to login to the image server
+     password - password to login to the image server
   
-  access_protocol - ftp/http/scp/tftp protocol used to transfer files from server
+     access_protocol - ftp/http/scp/tftp protocol used to transfer files from server
   
   Image profiles are stored in ignite/fabric/image_profile.py.  The profiles should be modified to match your image needs and environment.  New profiles can be added similar to the pre-defined ones.  spine_image, leaf_image and default_image are example profiles.  An image profile is applied to spine tier or leaf tier of the fabric using "Set Defaults" in "Fabrics" view.  Once applied, this image profile will be sent to the switch during the POAP boot process along with start up config details.  If image profile is not applied, profile named "default_image" is sent to the switch during POAP boot process.
 
