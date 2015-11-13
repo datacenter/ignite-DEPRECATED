@@ -23,12 +23,12 @@ The following people have contributed to AutoNetkit:
 
 Thanks also to Hitesh Mali, Ingmar Poese, Michael Rumsewicz, Randy Bush, Niklas Semmler, Stephen Steiner who worked on bugfixes, improvement and suggestions for AutoNetkit.  AutoNetkit project was supported by the Australian Government through an Australian Postgraduate Award, Australian Research Council Discovery Grants DP110103505 and DP0985063, and by the University of Adelaide.  For more details on AutoNetkit please visit http://autonetkit.org/
 
-![Ignite Screenshot](https://github.com/datacenter/ignite/blob/master/dist/images/ignite-screenshot.png)
+----![Ignite Screenshot](https://github.com/datacenter/ignite/blob/master/dist/images/ignite-screenshot.png)
 
 # Getting Started
 
 ### Option 1: Download OVA from link below:
-https://cisco.box.com/s/4bkeauj9fa0zlg910mkx105ms3x4ppin
+https://cisco.box.com/s/033ij1hnxteulcjzbaiu0n1c2at8ixjh
 
 Username/password: ignite/ignite
 
@@ -60,27 +60,43 @@ Follow steps below
 	i. Run ignite server (sudo nohup python manage.py runserver <ip>:<port> & ) where IP is the address provided in ignite_ip and port is value provided in ignite_port. Note: To avoide receiving a sudo password prompt while running the server, please run a dummy command for example "sudo ls", before you enter the command to run ignite server.
 	j. To launch UI use http://<ipaddress>:<port>/ui/index.html
 	k. Use New User registration link in the UI to create a new user credential. Login to the page using this credential.
+To run Ignite as an Apache service do the following:
 
+	a. Do all the steps above from (a) - (g)
+    b. Uncomment the following line in /etc/apache2/ports.conf and change 8888 to ignite_port
+        #Listen 8888 -> Listen <ignite_port>
+	c. Enable ignite service
+        cd /etc/apache2/sites-available/
+        sudo a2ensite ignite.conf
+
+	d. In /home/ignite/ignite/server_configuration.py do the following changes:
+        Comment the following line:
+        PROJECT_DIR = / -> #PROJECT_DIR = /
+        Uncomment the following line:
+        #PROJECT_DIR = /../../ignite/ignite -> PROJECT_DIR = /../../ignite/ignite
+	e. Restart Apache server
+       service apache2 restart
 
 ### Option 2: Create a new Ignite VM/Server with code from git
 
 1.  Install postgresql
-```
-apt-get install postgresql-9.3 postgresql-common
-```
+
+		apt-get install postgresql-9.3 postgresql-common
+
 
 2.  Set up database
-```
-    psql  â€“U postgres
-    create database  ignite_db;
-    \q
-```
+
+	    psql  -U postgres
+    	create database  ignite_db;
+    	\q
+
 3.  Edit configure.sh to edit parameter values of following parameters
 
 	   	ignite_ip :  IP address on which to run the server
 	    ignite_port: port on which to run the server
 	    vmusername: username for the server
 	    vmpassword: password for the server
+
 4.  Run configure.sh
 
         sh configure.sh
@@ -100,10 +116,10 @@ apt-get install postgresql-9.3 postgresql-common
         DEFAULT_SWITCH_IMAGE_NAME = 'n9000-dk9.6.1.2.I3.2.bin'
 
 6.  Create tables in database
-```
-    python ~ignite/ignite/manage.py makemigrations
-    python ~ignite/ignite/manage.py migrate
-```
+
+    	python ~ignite/ignite/manage.py makemigrations
+    	python ~ignite/ignite/manage.py migrate
+
 
 7. Following changes may require root permission
 
@@ -122,23 +138,25 @@ apt-get install postgresql-9.3 postgresql-common
 
         Note: To avoide receiving a sudo password prompt while running the server, please run a dummy command for example "sudo ls", before you enter the command to run ignite server.
 
-10. To launch UI use http://<ipaddress>:<port>/ui/index.html
+10. To launch UI use 
+
+		http://<ipaddress>:<port>/ui/index.html
 
 11. Use New User registration link in the UI to create a new user credential. Login to the page using this credential.
 
 ### Option 3: Create a new Ignite VM/Server with code from git and run it as service in Apache
 
 1. Install postgresql
-```
+
         apt-get install postgresql-9.3 postgresql-common
-```
+
 
 2. Set up database (use DATABASE_NAME as given in server_configuration.py DBNAME='ignitedb'
-```
-        psql  â€“U postgres
+
+        psql  -U postgres
         create database  ignitedb;
         \q
-```
+
 3. Edit configure.sh to edit parameter values of following parameters
 
 	   	ignite_ip :  IP address on which to run the server
@@ -172,10 +190,10 @@ apt-get install postgresql-9.3 postgresql-common
        sh configure.sh
     
 6. Create tables in database
-```
+
         python ~ignite/ignite/manage.py makemigrations
         python ~ignite/ignite/manage.py migrate
-```
+
 
 7. Following changes may require root permission
 
@@ -240,7 +258,10 @@ apt-get install postgresql-9.3 postgresql-common
 
 
 
-10. To launch UI use http://<ipaddress>:<port>/ui/index.html ipaddress and port corresponds to ignite_ip and ignite_port defined in step 3.
+10. To launch UI use 
+
+		http://<ipaddress>:<port>/ui/index.html 
+	ipaddress and port corresponds to ignite_ip and ignite_port defined in step 3.
 
 11. Use New User registration link in the UI to create a new user credential. Login to the page using this credential.
 
@@ -249,6 +270,7 @@ apt-get install postgresql-9.3 postgresql-common
      sudo service apache2 stop
      
      Note:  To keep Apache running and just disable ignite server site do following:
+
 13. To restart server
 
     sudo service apache2 restart
@@ -271,32 +293,32 @@ apt-get install postgresql-9.3 postgresql-common
 
 2. Set the following variables(currenty set to a default value) in ignite_poap.py to reflect ignite server ip address and port
 
-    #ignite server
-    hostname                = "172.31.219.76"
-    port                = "8001"
+    	hostname                = "172.31.219.76"
+    	port                	= "8001"
+
 3. This script file should be placed on the script server TFTP directory by the name poap.py
 
 4. Here script sever referes to the server configured as 'tftp-server-name' in dhcpd.conf on DHCP server.
 
 ### Image Profiles
 Image profiles specify details of the software images available for download to the switch during POAP process.  Following atttributes define an image profile:
- {
- 
+
+	 {
     "image_profile_name": "spine_image", 
     "image": "n9000-dk9.6.1.2.I3.2.bin",
     "imageserver_ip": "172.31.216.138",
     "username": "root",
     "password": "cisco123",
     "access_protocol": "scp"
-  }
+	 }
   
-      image_profile_name - uniquely identifies the profile
+     image_profile_name - uniquely identifies the profile
   
-      image - filename where the image is stored
+     image - filename where the image is stored
   
-      imageserver_ip : server where the image is stored
+     imageserver_ip : server where the image is stored
   
-      username - username to login to the image server
+     username - username to login to the image server
   
      password - password to login to the image server
   
