@@ -28,6 +28,9 @@ from fabric.const import INVALID, LOG_SEARCH_COL
 from discoveryrule.models import DiscoveryRule
 from discoveryrule.serializer.DiscoveryRuleSerializer import DiscoveryRuleGetDetailSerializer
 from fabric.image_profile import image_objects
+from server_configuration import PROJECT_DIR, REPO
+
+ASE_PATH = os.getcwd() + PROJECT_DIR + REPO
 
 logger = logging.getLogger(__name__)
 
@@ -702,7 +705,7 @@ class DeployedConfig(APIView):
             logger.error("stats not found with id: " + str(id))
             raise Http404
         
-        config_full_path = os.getcwd()+"/repo/"+obj.configuration_generated
+        config_full_path = BASE_PATH + obj.configuration_generated
 
         try:
             wrapper = FileWrapper(file(config_full_path))

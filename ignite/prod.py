@@ -11,9 +11,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.7/ref/settings/
 """
 
+from server_configuration import PROJECT_DIR, DBNAME, DBUSER, DBPASSWORD, DBHOST, DBPORT
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+
+BASE_DIR = os.getcwd() + PROJECT_DIR
 
 
 # Quick-start development settings - unsuitable for production
@@ -65,7 +68,7 @@ MIDDLEWARE_CLASSES = (
 #XS_SHARING_ALLOWED_HEADERS = ['Content-Type', '*', 'Authorization','X-CSRFToken']
 
 # UI code
-UI_ROOT = os.getcwd()+ '/dist'
+UI_ROOT = BASE_DIR + '/dist'
 UI_URL = 'ui/'
 
 ROOT_URLCONF = 'ignite.urls'
@@ -78,11 +81,11 @@ WSGI_APPLICATION = 'ignite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'ignite_db3',                      # Or path to database file if using sqlite3.
-        'USER': 'postgres',
-        'PASSWORD': '123456',
-        'HOST': 'localhost',                      # Empty for localhost through domain sockets or           '127.0.0.1' for localhost through TCP.
-        'PORT': '',                      # Set to empty string for default.
+        'NAME': DBNAME,                      # Or path to database file if using sqlite3.
+        'USER': DBUSER,
+        'PASSWORD': DBPASSWORD,
+        'HOST': DBHOST,                      # Empty for localhost through domain sockets or           '127.0.0.1' for localhost through TCP.
+        'PORT': DBPORT,                      # Set to empty string for default.
     }
 }
 # Internationalization

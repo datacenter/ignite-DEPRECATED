@@ -10,9 +10,13 @@ from fabric.const import *
 import json
 import re
 from fabric.image_profile import image_objects
+
+from server_configuration import VMUSERNAME, VMPASSWORD, PROJECT_DIR, REPO, DEFAULT_SWITCH_IMAGE_NAME
+REPO_PATH = os.getcwd() + PROJECT_DIR + REPO
  
 import logging
 logger = logging.getLogger(__name__)
+
 
 def swtType(switch, topology, fab_name, replica_num):
     for sw in topology['spine_list']:
@@ -33,9 +37,9 @@ def fillResult(result,file_name,image_name,imageserver_ip,image_username,image_p
     result["image_password"] = image_password
 
     result["config_filename"] = file_name
-    result["config_username"] = "vmignite"
-    result["config_password"] = "cisco123"
-    result["config_file_loc"] = os.getcwd() + "/repo/"
+    result["config_username"] = VMUSERNAME
+    result["config_password"] = VMPASSWORD
+    result["config_file_loc"] = REPO_PATH
     result['protocol'] = access_protocol
     
     logger.debug("Config file = " + file_name)
@@ -100,7 +104,7 @@ def process_ignite(info):
                     logger.error('Failed to read image details')
     # If anything fails, Providing Default(worst case)
     if image_name =='' or imageserver_ip=='' or image_username=='' or image_password=='' or access_protocol=='':
-        image_name = "6.1.2.I3.2"
+        image_name = DEFAULT_SWITCH_IMAGE_NAME
         imageserver_ip = "172.31.216.138"
         image_username = "root"
         image_password = "cisco123"

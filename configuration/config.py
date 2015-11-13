@@ -8,12 +8,12 @@ from datetime import datetime
 from models import Configlet, Configuration
 from pool.pool import generate_pool_value
 from fabric.fabric_rule import generate_instance_value
+from server_configuration import PROJECT_DIR, REPO
 
 import logging
 logger = logging.getLogger(__name__)
 
-BASE_PATH = os.getcwd() + '/repo/'
-
+BASE_PATH = os.getcwd() + PROJECT_DIR + REPO
 
 def build_config(cfg_id, fabric_id, switch_name):
     file_name = switch_name + '.cfg'
