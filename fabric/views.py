@@ -30,7 +30,7 @@ from discoveryrule.serializer.DiscoveryRuleSerializer import DiscoveryRuleGetDet
 from fabric.image_profile import image_objects
 from server_configuration import PROJECT_DIR, REPO
 
-ASE_PATH = os.getcwd() + PROJECT_DIR + REPO
+BASE_PATH = os.getcwd() + PROJECT_DIR + REPO
 
 logger = logging.getLogger(__name__)
 
@@ -676,7 +676,7 @@ class DeployedFabricDetail(APIView):
         
         for stat in resp:
             config = Configuration.objects.get(id = stat['config_id'])
-            stat['config_name'] = config.name
+            stat['config_name'] = 'view'
 
         data = {}
         data['fabric.id'] = fabric_id
