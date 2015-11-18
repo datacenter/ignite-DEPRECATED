@@ -451,6 +451,8 @@ class CiscoCompiler(PlatformCompiler):
 
         nxos_compiler = NxOsCompiler(self.nidb, self.anm)
         for phy_node in g_phy.routers(host=self.host, syntax='nx_os'):
+            if phy_node.devsubtype == "core":
+                continue
             DmNode = self.nidb.node(phy_node)
             DmNode.add_stanza("render")
             DmNode.render.template = os.path.join("templates", "nexus_os.mako")
