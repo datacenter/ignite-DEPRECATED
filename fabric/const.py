@@ -1,3 +1,7 @@
+#Build Target
+TARGET_NXOS = 'nx_os'
+
+
 INVALID = -1
 LOG_SEARCH_COL = 3
 HOST_NAME_REGEX = "(host)([1-9]+[0-9]*)"

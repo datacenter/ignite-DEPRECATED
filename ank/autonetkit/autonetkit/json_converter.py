@@ -25,6 +25,10 @@ import random
 import json
 from pprint import pprint
 import autonetkit.log as log
+import re
+
+VPC_LINK_TYPE = 'VPC-[1-9][0-9]*Link'
+
 
 def parse_options(argument_string=None):
     """Parse user-provided options"""
@@ -122,20 +126,22 @@ class test:
     visualise = True
     webserver = False
     config = 'xyz'
+    syntax = 'ios'
 
-
-def main(topo_file, cfg_file):
+def main(topo_file, cfg_file, syntax):
     import json
 
     dst_folder = None
     try:
         json_data=open(topo_file).read()
+        log.debug("json_converter.py...opened topo_file")
     except:
         log.error("json_converter.py...file open failed for topo_file")
         return dst_folder
 
     try:
         data = json.loads(json_data)
+        log.debug("json_converter.py...Loaded topology json")
     except ValueError, e:
         #Error in JSON format. Check JSON file
         log.error("json_converter.py...Error in JSON format. Loading of topology json failed")
@@ -145,12 +151,13 @@ def main(topo_file, cfg_file):
     ank_data = createAnkJsonData(data)
 
     if ank_data['nodes'] is None:
-        log.error("json_converter.py...No nodes found in topology json.")
+        log.debug("json_converter.py...No nodes found in topology json.")
         return None
 
     try:
     #Add config info onto nodes.
         applyConfig(data, ank_data, cfg_file)
+        log.debug("json_converter.py...applyConfig completed")
     except:
         log.error("json_converter.py...applyConfig failed")
         return dst_folder
@@ -158,6 +165,7 @@ def main(topo_file, cfg_file):
     options = test()
     #options = create_args()
     options.debug = True
+    options.syntax = syntax
     #write ank_data to a file
     #we will write ank data in the same directory where topo_file resides.
     #so first we will extract the directory from that path
@@ -171,12 +179,15 @@ def main(topo_file, cfg_file):
     try:
         with open(options.file, "w+") as fpc:
             fpc.write(json.dumps(ank_data))
+        log.debug("json_converter.py...Created ank input json file.")
     except:
         log.error("json_converter.py...Failed to create ank input json file.")
         return dst_folder
 
     try:
         dst_folder = console_script.main(options)
+        log.debug("json_converter.py...call to ank completed.")
+        log.debug(str(dst_folder))
         return dst_folder
     except:
         log.error("json_converter.py...call to ank failed.")
@@ -346,7 +357,7 @@ def configurePortChannel(data, ank_data):
         if links['link_type'] == "PC-2Link" or links['link_type'] == "VPC-MemberLink":
             port_list_1 = links["port_list_1"]
             port_list_2 = links["port_list_2"]
-            rand_no = random.randint(1,10000)
+            rand_no = random.randint(1, 4090)
             for node in ank_data['nodes']:
                 if node['id'] == links["switch_1"]:
                     _p = {}
@@ -373,10 +384,10 @@ def configureVirtualPortChannel(data, ank_data):
     #iterate through links and fill in port channel info
 
     for links in data["link_list"]:
-        if links['link_type'] == "VPC-2Link":
+        if re.search(VPC_LINK_TYPE, links['link_type']):
             port_list_1 = links["port_list_1"]
             port_list_2 = links["port_list_2"]
-            rand_no = random.randint(1,10000)
+            rand_no = random.randint(1,4090)
             for node in ank_data['nodes']:
                 if node['id'] == links["switch_1"]:
                     _p = {}
@@ -413,7 +424,7 @@ def AddConfigInfo(topo_data, cfg_data):
         vpcids = topo_data['vpcid_block']
         vpc_re = "([0-9]+)(-)([0-9]+)"
         vpc_id_start = (re.search(vpc_re, vpcids)).group(1)
-        vpc_id_end = (re.search(vpc_re, vpcids)).group(3)
+        DmNode.mgmt.ip = mgmt_address_block.next()
         if int(vpc_id_end) < int(vpc_id_start):
             return None
 

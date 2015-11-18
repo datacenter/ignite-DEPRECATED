@@ -418,13 +418,12 @@ def generate_config(fabric_obj):
 
             if(file_name):
                 logger.debug("Generated config for switch %s" %(switch_name))
+                insert_deployed_fabric_stats(match_response, "", file_name, True)
+                file_path = BASE_PATH + file_name 
             else:
                 logger.debug("Failed to generate config for switch %s" %(switch_name))
-            
-            insert_deployed_fabric_stats(match_response, "", file_name, True)
-            
-            file_path = BASE_PATH + file_name 
-            sanitize_repo(file_path)
+                
+            #sanitize_repo(file_path)
 
     return True
 
@@ -535,7 +534,7 @@ def build_fabric_profiles(fabric_obj):
         fabric_instance = fabric_name + "_" + str(instance_num)
         try:
             if ENA_ANK:
-                run_ank(ank_topo_file, ank_profile_file, fabric_instance, BASE_PATH)
+                run_ank(ank_topo_file, ank_profile_file, fabric_instance, BASE_PATH, TARGET_NXOS)
                 logger.debug("Success : call to ANK for %s" %(fabric_instance))
         except:
             logger.debug("Failed : call to ANK for %s" %(fabric_instance))

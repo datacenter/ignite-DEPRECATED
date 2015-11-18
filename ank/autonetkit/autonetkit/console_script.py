@@ -99,7 +99,9 @@ def main(options):
         log.info("Setting output target as Cisco")
         settings['Graphml']['Node Defaults']['platform'] = "cisco"
         settings['Graphml']['Node Defaults']['host'] = "internal"
-        settings['Graphml']['Node Defaults']['syntax'] = "ios"
+        #settings['Graphml']['Node Defaults']['syntax'] = "ios"
+        settings['Graphml']['Node Defaults']['syntax'] = options.syntax
+        settings['JSON']['Node Defaults']['syntax'] = options.syntax
         settings['Compiler']['Cisco']['to memory'] = 1
         settings['General']['deploy'] = 1
         settings['Deploy Hosts']['internal'] = {'cisco':
@@ -152,9 +154,9 @@ def main(options):
     try:
         dst_folder = workflow.manage_network(input_string, timestamp,
                        grid=options.grid, **build_options)
+        log.debug("Generated network configurations: %s" % dst_folder)
     except Exception, err:
-        log.error(
-            "Error generating network configurations: %s" % err)
+        log.error("Error generating network configurations: %s" % err)
         log.debug("Error generating network configurations", exc_info=True)
         if settings['General']['stack_trace']:
             print traceback.print_exc()

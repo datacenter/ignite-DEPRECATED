@@ -99,7 +99,10 @@ def initialise(input_graph):
         anm.set_node_label(".", ['label', 'asn'])
 
     g_in.update(g_in.routers(platform="junosphere"), syntax="junos")
-    g_in.update(g_in.routers(platform="dynagen"), syntax="ios")
+    if autonetkit.config.settings['Graphml']['Node Defaults']['syntax'] == 'ios':
+        g_in.update(g_in.routers(platform="dynagen"), syntax="ios")
+    elif autonetkit.config.settings['Graphml']['Node Defaults']['syntax'] == 'nx_os':
+        g_in.update(g_in.routers(platform="dynagen"), syntax="nx_os")
     g_in.update(g_in.routers(platform="netkit"), syntax="quagga")
     # TODO: is this used?
     g_in.update(g_in.servers(platform="netkit"), syntax="quagga")

@@ -43,6 +43,11 @@ class CiscoCompiler(PlatformCompiler):
         return "Ethernet2/%s" % (x + 1)
 
     @staticmethod
+    def numeric_to_portchannel_interface_label_nxos(x):
+        """Starts at GigabitEthernet0/1 """
+        return "port-channel %s" % x
+
+    @staticmethod
     def numeric_to_interface_label_ios_xr(x):
         return "GigabitEthernet0/0/0/%s" % x
 
@@ -139,6 +144,7 @@ class CiscoCompiler(PlatformCompiler):
 
         if g_phy.data.mgmt_block is not None:
             mgmt_address_block = netaddr.IPNetwork(g_phy.data.mgmt_block).iter_hosts()
+            mgmt_address_mask = (netaddr.IPNetwork(g_phy.data.mgmt_block)).netmask
 
         if g_phy.data.vpcid_block is not None:
             vpc_re = "([0-9]+)(-)([0-9]+)"
@@ -196,6 +202,7 @@ class CiscoCompiler(PlatformCompiler):
             if g_phy.data.mgmt_block is not None:
                 DmNode.add_stanza('mgmt')
                 DmNode.mgmt.ip = mgmt_address_block.next()
+                DmNode.mgmt.mask = mgmt_address_mask
 #           for node_data in phy_node._graph.node:
             for node_id in node_profiles:
                 #if DmNode._graph.node[node_data]['profile'] == node_id['id']:
@@ -381,8 +388,10 @@ class CiscoCompiler(PlatformCompiler):
                 continue
             DmNode = self.nidb.node(phy_node)
             DmNode.add_stanza("render")
+
             DmNode.render.template = os.path.join("templates", "ios.mako")
             to_memory = False
+
             if to_memory:
                 DmNode.render.to_memory = True
             else:
@@ -444,20 +453,33 @@ class CiscoCompiler(PlatformCompiler):
         for phy_node in g_phy.routers(host=self.host, syntax='nx_os'):
             DmNode = self.nidb.node(phy_node)
             DmNode.add_stanza("render")
-            DmNode.render.template = os.path.join("templates", "nx_os.mako")
-            if to_memory:
-                DmNode.render.to_memory = True
-            else:
-                DmNode.render.dst_folder = dst_folder
-                DmNode.render.dst_file = "%s.conf" % naming.network_hostname(
+            DmNode.render.template = os.path.join("templates", "nexus_os.mako")
+            #if to_memory:
+            #    DmNode.render.to_memory = True
+            #else:
+            DmNode.render.dst_folder = dst_folder
+            DmNode.render.dst_file = "%s.conf" % naming.network_hostname(
                     phy_node)
 
             # Assign interfaces
             int_ids = self.interface_ids_nxos()
+            numeric_to_interface_label = self.numeric_to_interface_label_nxos
+            numeric_to_portchannel_interface_label = self.numeric_to_portchannel_interface_label_nxos
             for interface in DmNode.physical_interfaces():
                 if not interface.id:
                     interface.id = self.numeric_to_interface_label_nxos(
                         interface.numeric_id)
+                else:
+                    if interface.id[0] == 'e' or interface.id[0] == 'E':
+                        import re
+                        port_re = "([a-zA-Z]+)([0-9]+/[0-9]+)"
+                        interface.id = "%s %s"%((re.search(port_re,interface.id)).group(1),
+                                                (re.search(port_re,interface.id)).group(2))
+
+            for interface in DmNode.portchannel_interfaces():
+                # TODO: use this code block once for all routers
+                #if not interface.id:
+                interface.id = numeric_to_portchannel_interface_label(interface.numeric_id)
 
             DmNode.supported_features = ConfigStanza(
                 mpls_te=False, mpls_oam=False, vrf=False)

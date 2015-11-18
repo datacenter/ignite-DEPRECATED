@@ -838,7 +838,7 @@ class IosXrCompiler(IosBaseCompiler):
 
 
 class NxOsCompiler(IosBaseCompiler):
-
+    """
     def compile(self, node):
         super(NxOsCompiler, self).compile(node)
         self.mpls_te(node)
@@ -906,6 +906,264 @@ class NxOsCompiler(IosBaseCompiler):
         loopback_zero = node.loopback_zero
         loopback_zero.eigrp = {'use_ipv4': node.ip.use_ipv4,
                                'use_ipv6': node.ip.use_ipv6}
+    """
+
+
+    def compile(self, node):
+        super(NxOsCompiler, self).compile(node)
+
+        self.mpls_te(node)
+        self.mpls_oam(node)
+        self.gre(node)
+        self.l2tp_v3(node)
+
+        phy_node = self.anm['phy'].node(node)
+        if phy_node.device_subtype == 'IOSv':
+
+            # only copy across for certain reference platforms
+
+            node.use_onepk = phy_node.use_onepk
+            node.transport_input_ssh_telnet = True
+            node.no_service_config = True
+            node.ipv4_cef = True
+            node.ipv6_cef = True
+
+        if phy_node.device_subtype == 'CSR1000v':
+
+            # only copy across for certain reference platforms
+
+            node.use_onepk = phy_node.use_onepk
+            node.transport_input_ssh_telnet = True
+            node.include_csr = True
+
+            # Set secret password to "cisco"
+
+            node.enable_secret = \
+                'tnhtc92DXBhelxjYk8LWJrPV36S2i4ntXrpb4RFmfqY'
+            node.exclude_phy_int_auto_speed_duplex = True
+            node.no_service_config = True
+
+    def rip(self, node):
+        super(NxOsCompiler, self).rip(node)
+
+    def ospf(self, node):
+        super(NxOsCompiler, self).ospf(node)
+        loopback_zero = node.loopback_zero
+        ospf_node = self.anm['ospf'].node(node)
+        loopback_zero.ospf = {
+            'cost': 1,
+            'area': ospf_node.area,
+            'process_id': node.ospf.process_id,
+            'use_ipv4': False,
+            'use_ipv6': node.ip.use_ipv6,
+            'multipoint': False,
+        }
+
+        # TODO: add wrapper for this
+    def gre(self, node):
+        node.gre_tunnels = []
+        if not self.anm.has_overlay('gre_tunnel'):
+            return
+
+        g_gre_tunnel = self.anm['gre_tunnel']
+        if node not in g_gre_tunnel:
+            return   # no gre tunnel for node
+
+        gre_node = g_gre_tunnel.node(node)
+        neighbors = gre_node.neighbors()
+        for index, neigh in enumerate(neighbors, start=1):
+            stanza = ConfigStanza(id=index, endpoint=neigh)
+
+            # TODO: try/except here
+            # TODO: Explain logic here
+            src_int = g_gre_tunnel.edge(node, neigh).src_int
+            tunnel_source = node.interface(src_int).id
+            stanza.source = tunnel_source
+            stanza.destination = "0.0.0.0"  # placeholder for user to replace
+
+            if neigh.tunnel_enabled_ipv4:
+                ip_address = neigh.tunnel_ipv4_address
+                cidr = neigh.tunnel_ipv4_cidr
+                stanza.ipv4_address = ip_address
+                stanza.ipv4_subnet = cidr
+                stanza.use_ipv4 = True
+
+            if neigh.tunnel_enabled_ipv6:
+                cidr = neigh.tunnel_ipv6_cidr
+                stanza.ipv4_subnet = cidr
+                stanza.use_ipv6 = True
+
+            node.gre_tunnels.append(stanza)
+
+    def l2tp_v3(self, node):
+        node.l2tp_classes = []
+        node.pseudowire_classes = []
+        if not self.anm.has_overlay('l2tp_v3'):
+            return
+
+        g_l2tp_v3 = self.anm['l2tp_v3']
+        g_phy = self.anm['phy']
+        if node not in g_l2tp_v3:
+            return   # no l2tp_v3 for node
+
+        l2tp_v3_node = g_l2tp_v3.node(node)
+        if l2tp_v3_node.role != "tunnel":
+            return # nothing to configure
+
+        node.l2tp_classes = list(l2tp_v3_node.l2tp_classes)
+        for l2tp_class in l2tp_v3_node.l2tp_classes:
+            node.l2tp_classes
+
+        node.pseudowire_classes = []
+        for pwc in l2tp_v3_node.pseudowire_classes:
+            stanza = ConfigStanza()
+            stanza.name = pwc['name']
+            stanza.encapsulation = pwc['encapsulation']
+            stanza.protocol = pwc['protocol']
+            stanza.l2tp_class_name = pwc['l2tp_class_name']
+            local_interface = pwc['local_interface']
+
+            # Lookup the interface ID allocated for this loopback by compiler
+            local_interface_id = node.interface(local_interface).id
+            stanza.local_interface = local_interface_id
+
+            node.pseudowire_classes.append(stanza)
+
+        for interface in node.physical_interfaces():
+            phy_int = g_phy.interface(interface)
+            if phy_int.xconnect_encapsulation != "l2tpv3":
+                continue # no l2tpv3 encap, no need to do anything
+
+            tunnel_int = l2tp_v3_node.interface(interface)
+            stanza = ConfigStanza()
+            stanza.remote_ip = tunnel_int.xconnect_remote_ip
+            stanza.vc_id = tunnel_int.xconnect_vc_id
+            stanza.encapsulation = "l2tpv3"
+            #TODO: need to be conscious of support for other xconnect types
+            # in templates since pw_class may not apply if not l2tpv3, et
+            stanza.pw_class = tunnel_int.xconnect_pw_class
+
+            interface.xconnect = stanza
+
+    def eigrp(self, node):
+        super(NxOsCompiler, self).eigrp(node)
+        # Numeric process IDs use "old-style" non-ipv6 EIGRP stanzas
+        process_id = node.eigrp.process_id
+        if str(process_id).isdigit():
+            process_id = "as%s" % process_id
+        node.eigrp.process_id = process_id
+
+    def mpls_te(self, node):
+        super(NxOsCompiler, self).mpls_te(node)
+
+        g_mpls_te = self.anm['mpls_te']
+        if node not in g_mpls_te:
+            return   # no mpls te configured
+
+        mpls_te_node = g_mpls_te.node(node)
+
+        for interface in mpls_te_node.physical_interfaces():
+            nidb_interface = self.nidb.interface(interface)
+            if not interface.is_bound:
+                log.debug('Not enable MPLS and RSVP for interface %s on %s '
+                          % (nidb_interface.id, node))
+                continue
+            nidb_interface.te_tunnels = True
+            nidb_interface.rsvp_bandwidth_percent = 100
+
+    def bgp(self, node):
+        super(NxOsCompiler, self).bgp(node)
+
+        node.bgp.use_ipv4 = node.ip.use_ipv4
+        node.bgp.use_ipv6 = node.ip.use_ipv6
+
+        # Seperate by address family
+
+        ipv4_peers = []
+        ipv6_peers = []
+
+        # Note cast to dict - #TODO revisit this requirement
+        # TODO: revisit and tidy up the logic here: split iBGP and eBGP
+        # TODO: sort the peer list by peer IP
+
+        for peer in node.bgp.ibgp_neighbors:
+            peer = ConfigStanza(peer)
+            peer.remote_ip = peer.loopback
+            if peer.use_ipv4:
+                if node.is_ebgp_v4:
+                    peer.next_hop_self = True
+                ipv4_peers.append(peer)
+            if peer.use_ipv6:
+                if node.is_ebgp_v6:
+                    peer.next_hop_self = True
+                ipv6_peers.append(peer)
+
+        for peer in node.bgp.ibgp_rr_parents:
+            peer = ConfigStanza(peer)
+            peer.remote_ip = peer.loopback
+            if peer.use_ipv4:
+                if node.is_ebgp_v4:
+                    peer.next_hop_self = True
+                ipv4_peers.append(peer)
+            if peer.use_ipv6:
+                if node.is_ebgp_v6:
+                    peer.next_hop_self = True
+                ipv6_peers.append(peer)
+
+        for peer in node.bgp.ibgp_rr_clients:
+            peer = ConfigStanza(peer)
+            peer.rr_client = True
+            peer.remote_ip = peer.loopback
+            if peer.use_ipv4:
+                if node.is_ebgp_v4:
+                    peer.next_hop_self = True
+                ipv4_peers.append(peer)
+            if peer.use_ipv6:
+                if node.is_ebgp_v6:
+                    peer.next_hop_self = True
+                ipv6_peers.append(peer)
+
+        for peer in node.bgp.ebgp_neighbors:
+            peer = ConfigStanza(peer)
+            peer.is_ebgp = True
+            peer.remote_ip = peer.dst_int_ip
+            if peer.use_ipv4:
+                peer.next_hop_self = True
+                ipv4_peers.append(peer)
+            if peer.use_ipv6:
+                peer.next_hop_self = True
+                ipv6_peers.append(peer)
+
+        node.bgp.ipv4_peers = ipv4_peers
+        node.bgp.ipv6_peers = ipv6_peers
+
+        vpnv4_neighbors = []
+        if node.bgp.vpnv4:
+            for neigh in node.bgp.ibgp_neighbors:
+                if not neigh.use_ipv4:
+                    continue
+
+                neigh_data = ConfigStanza(neigh)
+                vpnv4_neighbors.append(neigh_data)
+
+            for neigh in node.bgp.ibgp_rr_clients:
+                if not neigh.use_ipv4:
+                    continue
+                neigh_data = ConfigStanza(neigh)
+                neigh_data.rr_client = True
+                vpnv4_neighbors.append(neigh_data)
+
+            for neigh in node.bgp.ibgp_rr_parents:
+                if not neigh.use_ipv4:
+                    continue
+                neigh_data = ConfigStanza(neigh)
+                vpnv4_neighbors.append(neigh_data)
+
+        vpnv4_neighbors = sorted(vpnv4_neighbors, key=lambda x:
+                                 x['loopback'])
+        node.bgp.vpnv4_neighbors = vpnv4_neighbors
+
+
 
 
 class StarOsCompiler(IosBaseCompiler):
