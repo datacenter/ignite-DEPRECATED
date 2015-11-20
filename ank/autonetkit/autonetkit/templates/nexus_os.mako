@@ -1,6 +1,7 @@
-! IOS Config generated on ${date}
+! NEXUS Config generated on ${date}
 ! by ${version_banner}
 !
+
 hostname ${node}
 ##boot-start-marker
 ##boot-end-marker
@@ -31,9 +32,6 @@ mpls traffic-eng tunnels
 %endif
 !
 !
-##service timestamps debug datetime msec
-##service timestamps log datetime msec
-##no service password-encryption
 % if node.no_service_config:
 ##no service config
 %endif
@@ -66,6 +64,12 @@ interface mgmt0
  ip address ${node.mgmt.ip}  ${node.mgmt.mask}
 % endif
 !
+% if node.ospf:
+feature ospf
+% endif
+% if node.bgp:
+feature bgp
+% endif
 ##NTP
 % if node.ntp:
   % if node.ntp.enabled == True:
@@ -173,7 +177,11 @@ interface ${interface.id}
     %else:
   channel-group ${interface.channel_group}
     %endif
+  no shut
   %endif
+  % if  interface.channel_group:
+!
+  %else:
   % if interface.vpc_member_id:
     vpc ${interface.vpc_member_id}
   %endif
@@ -190,15 +198,19 @@ interface ${interface.id}
   vrf forwarding ${interface.vrf}
   %endif
   % if interface.use_ipv4:
+    % if interface.id != 'Loopback0':
+  no switchport
+    % endif
       %if interface.use_dhcp:
   ip address dhcp
       %else:
-  ##ip address ${interface.ipv4_address} ${interface.ipv4_subnet.netmask}
-    %endif
+  ip address ${interface.ipv4_address} ${interface.ipv4_subnet.netmask}
+      %endif
   %else:
   ##no ip address
   %endif
   % if interface.use_ipv6:
+  no switchport
   ipv6 address ${interface.ipv6_address}
   %endif
   % if interface.use_cdp:
@@ -212,16 +224,17 @@ interface ${interface.id}
   % if interface.ospf:
     %if interface.ospf.use_ipv4:
       %if not interface.ospf.multipoint:
-          ###ip ospf network point-to-point
+  ip ospf network point-to-point
       %endif
   ##ip ospf cost ${interface.ospf.cost}
+  ip router ospf ${interface.ospf.process_id} area ${interface.ospf.area}
     %endif
     %if interface.ospf.use_ipv6:
       %if not interface.ospf.multipoint:
-          ###ipv6 ospf network point-to-point
+          ipv6 ospfv3 network point-to-point
       %endif
-  ipv6 ospf cost ${interface.ospf.cost}
-  ipv6 ospf ${interface.ospf.process_id} area ${interface.ospf.area}
+  ##ipv6 router ospfv3 cost ${interface.ospf.cost}
+  ipv6 router ospfv3 ${interface.ospf.process_id} area ${interface.ospf.area}
     %endif
   %endif
   % if interface.isis:
@@ -274,6 +287,7 @@ interface ${interface.id}
   xconnect ${interface.xconnect.remote_ip} ${interface.xconnect.vc_id} encapsulation l2tpv3 pw-class ${interface.xconnect.pw_class}
     %endif
   %endif
+  %endif
 !
 % endfor
 !
@@ -296,6 +310,7 @@ interface Tunnel${tunnel.id}
 % if node.ospf.use_ipv4:
 feature ospf
 router ospf ${node.ospf.process_id}
+router-id ${node.loopback}
   % if node.ospf.custom_config:
   ${node.ospf.custom_config}
   % endif
@@ -307,12 +322,13 @@ router ospf ${node.ospf.process_id}
   network ${node.loopback} 0.0.0.0 area ${node.ospf.loopback_area}
   log-adjacency-changes
   ##passive-interface ${node.ospf.lo_interface}
-  passive-interface default
+  no passive-interface default
 % for ospf_link in node.ospf.ospf_links:
   network ${ospf_link.network.network} ${ospf_link.network.hostmask} area ${ospf_link.area}
 % endfor
 % endif
 % if node.ospf.use_ipv6:
+feature ospfv3
 router ospfv3 ${node.ospf.process_id}
   router-id ${node.loopback}
   !
@@ -384,6 +400,7 @@ router eigrp ${node.eigrp.process_id}
 mpls ldp router-id ${node.mpls.router_id}
 %endif
 !
+!
 ## BGP
 % if node.bgp:
 feature bgp
@@ -393,27 +410,6 @@ router bgp ${node.asn}
   % if node.bgp.custom_config:
   ${node.bgp.custom_config}
   % endif
-% if node.bgp.use_ipv4:
- !
- address-family ipv4 unicast
-% for subnet in node.bgp.ipv4_advertise_subnets:
-  network ${subnet.network} mask ${subnet.netmask}
-% endfor
-%for peer in node.bgp.ipv4_peers:
-  ##neighbor ${peer.remote_ip} activate
-  % if peer.is_ebgp:
-  ##neighbor ${peer.remote_ip} send-community
-  %endif
-  % if peer.next_hop_self:
-  ## iBGP on an eBGP-speaker
-  ##neighbor ${peer.remote_ip} next-hop-self
-  % endif
-  % if peer.rr_client:
-  ##neighbor ${peer.remote_ip} route-reflector-client
-  % endif
-%endfor
- exit
-% endif
 ! ibgp
 ## iBGP Route Reflector Clients
 % for client in node.bgp.ibgp_rr_clients:
@@ -432,8 +428,8 @@ router bgp ${node.asn}
 % endif
   !
   neighbor ${parent.loopback} remote-as ${parent.asn}
-  neighbor ${parent.loopback} description rr parent ${parent.neighbor}
-  neighbor ${parent.loopback} update-source ${node.bgp.lo_interface}
+  #neighbor ${parent.loopback} description rr parent ${parent.neighbor}
+  #neighbor ${parent.loopback} update-source ${node.bgp.lo_interface}
 % endfor
 ## iBGP peers
 % for neigh in node.bgp.ibgp_neighbors:
@@ -482,6 +478,27 @@ router bgp ${node.asn}
 % endfor
 !
 ## ********
+% if node.bgp.use_ipv4:
+ exit
+ address-family ipv4 unicast
+% for subnet in node.bgp.ipv4_advertise_subnets:
+  network ${subnet.network}  mask ${subnet.netmask}
+% endfor
+%for peer in node.bgp.ipv4_peers:
+  ##neighbor ${peer.remote_ip} activate
+  % if peer.is_ebgp:
+  ##neighbor ${peer.remote_ip} send-community
+  %endif
+  % if peer.next_hop_self:
+  ## iBGP on an eBGP-speaker
+  ##neighbor ${peer.remote_ip} next-hop-self
+  % endif
+  % if peer.rr_client:
+  ##neighbor ${peer.remote_ip} route-reflector-client
+  % endif
+%endfor
+ exit
+% endif
 % if node.bgp.use_ipv6:
  !
  address-family ipv6
@@ -489,13 +506,13 @@ router bgp ${node.asn}
   network ${subnet}
 % endfor
 %for peer in node.bgp.ipv6_peers:
-  neighbor ${peer.remote_ip} activate
+  #neighbor ${peer.remote_ip} activate
   % if peer.is_ebgp:
-  neighbor ${peer.remote_ip} send-community
+  #neighbor ${peer.remote_ip} send-community
   %endif
   % if peer.next_hop_self:
   ## iBGP on an eBGP-speaker
-  neighbor ${peer.remote_ip} next-hop-self
+  #neighbor ${peer.remote_ip} next-hop-self
   % endif
 %endfor
  exit
@@ -548,3 +565,4 @@ ipv6 route ${route.prefix} ${route.nexthop}
 !
 ##end
 % endif
+
