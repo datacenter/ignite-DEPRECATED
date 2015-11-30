@@ -21,14 +21,12 @@
                      <tr>
                         <td>Spine</td>
                         <td>
-                              <select ng-disabled="action == 'view'" class="form-control" 
-                                ng-model="submitData.image_details.spine_image_profile"
-                                ng-init="submitData.image_details.spine_image_profile = submitData.image_details.spine_image_profile || '-1'"
+                            <select ng-disabled="action == 'view'"
+                              class="form-control"
+                              ng-model="submitData.image_details.spine_image_profile"
+                              data-ng-options = "v.id as v.image_profile_name for (k, v) in images"
                               >
-                                <option value="-1">None</option>
-                                <option ng-repeat="image in images" 
-                                ng-selected="image.image_profile_name == submitData.image_details.spine_image_profile" 
-                                value="{{image.image_profile_name}}">{{image.image_profile_name}}</option>
+                                <option value="">None</option>
                               </select>
                         </td>
                         <td>
@@ -54,16 +52,16 @@
                           </select>
                         </td>
                         <td>&nbsp;</td>
-                    </tr> 
+                    </tr>
                     <tr>
                         <td>Leaf</td>
                         <td>
-                              <select ng-disabled="action == 'view'" class="form-control" ng-model="submitData.image_details.leaf_image_profile"
-                              ng-init="submitData.image_details.leaf_image_profile = submitData.image_details.leaf_image_profile || '-1'">
-                                <option value="-1">None</option>
-                                <option ng-repeat="image in images" value="{{image.image_profile_name}}"
-                                    ng-selected="image.image_profile_name == submitData.image_details.leaf_image_profile" 
-                                >{{image.image_profile_name}}</option>
+                            <select ng-disabled="action == 'view'"
+                              class="form-control"
+                              ng-model="submitData.image_details.leaf_image_profile"
+                              data-ng-options = "v.id as v.image_profile_name for (k, v) in images"
+                              >
+                                <option value="">None</option>
                               </select>
                         </td>
                         <td>
@@ -124,10 +122,9 @@
 
                               <select ng-disabled="action == 'view'" class="form-control" 
                               ng-model="configDetail.image_profile"
-                              ng-init="configDetail.image_profile = configDetail.image_profile || '-1'"
+                              data-ng-options = "v.id as v.image_profile_name for (k, v) in images"
                               >
-                                <option value="-1">None</option>
-                                <option ng-repeat="image in images" ng-selected="image.image_profile_name == configDetail.image_profile" value="{{image.image_profile_name}}">{{image.image_profile_name}}</option>
+                                <option value="">None</option>
                               </select>
                             </td>
                             <td>

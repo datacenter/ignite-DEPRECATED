@@ -1,0 +1,91 @@
+<div>
+    <div class="modal-header">
+        <h3 class="modal-title pull-left">Images</h3>
+        <p class="pull-right message"><p>
+        <div class="pull-right modal-form-action">
+            <a href="javascript:void(0);" ng-show="action== 'view'" tooltip="Edit" tooltip-placement="bottom">
+                <span class="glyphicon glyphicon-pencil" ng-click="changeAction('edit')" aria-hidden="true"></span>
+            </a>
+            <a href="javascript:void(0);" ng-click="deleteImage()" tooltip="Delete" ng-show="action== 'view'"  tooltip-placement="bottom">
+                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+            </a>
+        </div>
+    </div>
+    <div class="modal-body">
+        <form name="imageForm">
+            <div class="row">
+                <div class="col-xs-4">
+                    <div class="form-group">
+                        <label for="image_profile_name">Profile Name</label>
+                        <input type="text" class="form-control" 
+                        placeholder="Profile Name"
+                        data-ng-required
+                        data-ng-disabled="action == 'view' || action == 'viewothers'"
+                        ng-model="submitData.image_profile_name">
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="form-group">
+                        <label for="group_name">Image</label>
+                        <input type="text" 
+                        class="form-control" 
+                        data-ng-required
+                        placeholder="Image Name"
+                        data-ng-disabled="action == 'view' || action == 'viewothers'"
+                        data-ng-model="submitData.image" />
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="form-group">
+                        <label for="group_name">Server IP</label>
+                        <input type="text" name="imageserver_ip"
+                        class="form-control imageserver_ip" 
+                        placeholder="Server IP"
+                        data-ng-required
+                        data-ng-class="{errorHighlight : imageForm.imageserver_ip.$invalid}"
+                        data-ng-blur="validateIPaddress()"
+                        data-ng-disabled="action == 'view' || action == 'viewothers'"
+                        ng-model="submitData.imageserver_ip" />
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="form-group">
+                        <label for="group_name">Username</label>
+                        <input type="text" 
+                        class="form-control" 
+                        placeholder="Username"
+                        data-ng-required
+                        data-ng-disabled="action == 'view' || action == 'viewothers'"
+                        ng-model="submitData.username" />
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="form-group">
+                        <label for="group_name">Password</label>
+                        <input type="text" 
+                        class="form-control" 
+                        data-ng-required
+                        placeholder="Password"
+                        data-ng-disabled="action == 'view' || action == 'viewothers'"
+                        ng-model="submitData.password" />
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="form-group">
+                        <label for="group_name">Access Protocol</label>
+                        <select class="form-control" data-ng-model="submitData.access_protocol"
+                        data-ng-options="accesProtocol as accesProtocol for accesProtocol in access_protocol_list"
+                        data-ng-required
+                        data-ng-disabled="action == 'view' || action == 'viewothers'">
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-trans btn-default btn-raised" ng-click="cancel()">Cancel</button>
+    <button class="btn btn-raised btn-primary" ng-hide="action == 'view' || action == 'viewothers'" data-ng-disabled="imageForm.$invalid" ng-click="ok()">Save</button>
+</div>
+</div>

@@ -19,7 +19,8 @@
                           <button type="button" class="close dropdown_close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                           <a href="javascript:void(0);">Switches</a>
                         </li>
-                        <li class="not-allowed"><a href="javascript:void(0);">Images</a>
+                        <li ng-class="{ active: $route.current.activetab == 'images'}">
+                            <a href="#/images">Images</a>
                         </li>
                         <li ng-class="{ active: $route.current.activetab == 'configlets'}"><a href="#/configlets">Configlets</a>
                         </li>

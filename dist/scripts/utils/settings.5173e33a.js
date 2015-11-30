@@ -18,7 +18,7 @@
 
             //API URL
             "appAPI": {
-                "baseURL": "http://12.36.118.92:8888",
+                "baseURL": "http://127.0.0.1:8000",
                 "configlets" : {
                   "list" : {
                      // "url" : "http://localhost:9010/data/configlets-list.json",
@@ -254,8 +254,28 @@
                 },
                 "images" : {
                     "list" : {
-                      "url": "/api/fabric/images",
+                      "url": "/api/image_profile/",
                       "method": "GET",
+                      "auth": "true"
+                    },
+                    "add" : {
+                      "url": "/api/image_profile/",
+                      "method": "POST",
+                      "auth": "true"
+                    },
+                    "getById" : {
+                      "url": "/api/image_profile/",
+                      "method": "GET",
+                      "auth": "true"
+                    },
+                    "edit" : {
+                      "url": "/api/image_profile/",
+                      "method": "PUT",
+                      "auth": "true"
+                    },
+                    "delete" : {
+                      "url": "/api/image_profile/",
+                      "method": "DELETE",
                       "auth": "true"
                     }
                 },
@@ -494,6 +514,9 @@
             "defaultData": {
                 "configlets": {
                     "config_type": "template"
+                },
+                "images": {
+                    "access_protocol": "scp"
                 },
                 "pools" : {
                     "type" : "Integer",
