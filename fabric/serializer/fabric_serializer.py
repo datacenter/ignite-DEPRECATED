@@ -53,7 +53,7 @@ class SystemIdSerializer(serializers.Serializer):
     
 class ImageDetailSerializer(serializers.Serializer):
     name = serializers.CharField()
-    image_profile = serializers.CharField()
+    image_profile = serializers.IntegerField()
 
 class ConfigurationDictSerializer(serializers.Serializer):
     leaf_config_id = serializers.IntegerField()
@@ -61,8 +61,8 @@ class ConfigurationDictSerializer(serializers.Serializer):
     switch_config_id = ConfigurationSerializer(many=True)
 
 class ImageDetailDictSerializer(serializers.Serializer):
-    leaf_image_profile = serializers.CharField()
-    spine_image_profile = serializers.CharField()
+    leaf_image_profile = serializers.IntegerField()
+    spine_image_profile = serializers.IntegerField()
     switch_image_profile = ImageDetailSerializer(many=True)
 
 class ProfilesDictSerializer(serializers.Serializer):

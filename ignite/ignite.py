@@ -4,12 +4,13 @@ from fabric.const import INVALID
 from fabric.fabric_rule import match_fabric_rules 
 from pool.pool import generate_pool_value
 import os
+from image_profile.models import ImageProfile
+from image_profile.ImageProfileSerializer import ImageProfileGetSerializer
 from fabric.models import DeployedFabricStats, FabricRuleDB, Fabric, Topology
 from configuration.models import Configuration
 from fabric.const import *
 import json
 import re
-from fabric.image_profile import image_objects
 from server_configuration import VMUSERNAME, VMPASSWORD, PROJECT_DIR, REPO, DEFAULT_SWITCH_IMAGE_NAME
 import datetime
 from django.utils import timezone
@@ -30,22 +31,31 @@ def swtType(switch, topology, fab_name, replica_num):
             return LEAF_IMAGE_PROFILE
     return INVALID
 
-def fillResult(result,file_name,image_name,imageserver_ip,image_username,image_password,access_protocol):
+def fillResult(result,file_name,image_data):
     result["status"] = True
-    result["imagename"] = image_name
-    result["imageserver"] = imageserver_ip
-    result["image_username"] = image_username
-    result["image_password"] = image_password
+    result["imagename"] = image_data['image']
+    result["imageserver"] = image_data['imageserver_ip']
+    result["image_username"] = image_data['username']
+    result["image_password"] = image_data['password']
+    result['protocol'] = image_data['access_protocol']
 
     result["config_filename"] = file_name
     result["config_username"] = VMUSERNAME
     result["config_password"] = VMPASSWORD
     result["config_file_loc"] = REPO_PATH
-    result['protocol'] = access_protocol
     
     logger.debug("Config file = " + file_name)
     logger.debug("POAP End")
     return result
+
+def fill_image(image='', imageserver_ip='', username='',password='',access_protocol=''):
+    image_data = {}
+    image_data['image'] = image
+    image_data['imageserver_ip'] = imageserver_ip
+    image_data['username'] = username
+    image_data['password'] = password
+    image_data['access_protocol'] = access_protocol
+    return image_data
 
 def process_ignite(info):
 
@@ -70,27 +80,18 @@ def process_ignite(info):
         result["err_msg"] = "Error in Config ID = " + str(match_response["CFG_ID"])
         return result
     
-    #file_path = REPO_PATH + file_name 
-    #sanitize_repo(file_path)
+    file_path = REPO_PATH + file_name 
+    sanitize_repo(file_path)
     
     status = insert_deployed_fabric_stats(match_response, info["system_id"], file_name)
     if not status:
 		result["err_msg"] = 'Failed to update stats'
 		return result
     
-    image_name = ''
-    imageserver_ip = ''
-    image_username = ''
-    image_password = ''
-    access_protocol = ''
-    # Getting default values from json
-    for img in image_objects:
-        if img['image_profile_name'] == 'default_image':
-            image_name = img['image']
-            imageserver_ip = img['imageserver_ip']
-            image_username = img['username']
-            image_password = img['password']
-            access_protocol = img['access_protocol']
+    
+#     image_data = fill_image()
+    image_data = fill_image(image=DEFAULT_SWITCH_IMAGE_NAME, imageserver_ip="172.31.216.138", username="root",password="cisco123",access_protocol="scp")
+    
     # For Valid Fabric
     try:
         if match_response["FABRIC_ID"] != INVALID:
@@ -98,40 +99,39 @@ def process_ignite(info):
             img_detail = json.loads(fabric_obj.image_details)
             if bool(img_detail):
                 switch = match_response["SWITCH_ID"]
-                image = INVALID
+                
+                image_id = INVALID
                 for sw_level in img_detail[IMAGE_KEY]:
-                    if sw_level[SWITCH_NAME] == switch:
-                        image = sw_level['image_profile']
-                if image == INVALID:
-                    type = ''
+                    var = fabric_obj.name+"_"+str(match_response["REPLICA_NUM"])+"_"+sw_level[SWITCH_NAME]
+                    if var == switch:
+                        image_id = sw_level['image_profile']
+                if image_id == INVALID:
+                    type_name = ''
                     topo_id = fabric_obj.topology.id
                     topology_obj = Topology.objects.get(id=topo_id)
                     topology = json.loads(topology_obj.topology_json)
-                    type = swtType(switch,topology, fabric_obj.name, match_response["REPLICA_NUM"])
-                    if type != INVALID:
-                        image = img_detail[type]
+                    type_name = swtType(switch,topology, fabric_obj.name, match_response["REPLICA_NUM"])
+                    if type_name != INVALID:
+                        image_id = img_detail[type_name]
                 try:
-                    for detail in image_objects:
-                        if detail['image_profile_name'] == image:
-                            image_name = detail['image']
-                            imageserver_ip = detail['imageserver_ip']
-                            image_username = detail['username']
-                            image_password = detail['password']
-                            access_protocol = detail['access_protocol']
+                    image_object = ImageProfile.objects.get(pk=image_id)
+                    serializer = ImageProfileGetSerializer(image_object)
+                    image_details = serializer.data
+                    del image_details['image_profile_name']
+                    del image_details['id']
+                    image_data = fill_image(**image_details)
                 except:
                     logger.error('Failed to read image details')
     except:
         logger.error('Failed to read image details')
     # If anything fails, Providing Default(worst case)
-    if image_name =='' or imageserver_ip=='' or image_username=='' or image_password=='' or access_protocol=='':
-        image_name = DEFAULT_SWITCH_IMAGE_NAME
-        imageserver_ip = "172.31.216.138"
-        image_username = "root"
-        image_password = "cisco123"
-        access_protocol = "scp"
+#     if image_name =='' or imageserver_ip=='' or image_username=='' or image_password=='' or access_protocol=='':
+#         image_data = fill_image(image=DEFAULT_SWITCH_IMAGE_NAME, imageserver_ip="172.31.216.138", username="root",password="cisco123",access_protocol="scp")
 
-    result = fillResult(result,file_name,image_name,imageserver_ip,image_username,image_password,access_protocol)
+    result = fillResult(result,file_name,image_data)
     #clear_repo(result["config_file_loc"])
+    #sanitize_repo(repo_path) 
+     
     return result
 
 def match_info(result,info):

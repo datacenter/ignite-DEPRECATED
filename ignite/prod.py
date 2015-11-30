@@ -42,13 +42,14 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework.authtoken',
-    #'rest_framework_swagger',
+    'rest_framework_swagger',
     'rest_framework',
     'djoser',
     #User apps
     'configuration',
     'discoveryrule',
     'fabric_profile',
+    'image_profile',
     'fabric',
     'pool',
 )
