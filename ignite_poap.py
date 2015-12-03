@@ -32,11 +32,10 @@ import urllib
 # in your automation environment
 
 # system and kickstart images, configuration: location on server (src) and target (dst)
-n9k_image_version       = "6.1.2.I3.2"
 image_dir_src           = "/var/lib/tftpboot/"
 ftp_image_dir_src_root  = image_dir_src
 tftp_image_dir_src_root = image_dir_src
-n9k_system_image_src    = "n9000-dk9.%s.bin" % n9k_image_version
+n9k_system_image_src    = "n9000-dk9.6.1.2.I3.2.bin" 
 config_file_src         = "/var/lib/tftpboot/Leaf3.cfg" 
 image_dir_dst           = "bootflash:poap"
 system_image_dst        = n9k_system_image_src
@@ -520,7 +519,7 @@ def get_system_image ():
         # get file's md5 from server (if any) and verify it, failure is fatal (exit)
         check_md5sum(system_image_src, system_image_dst_tmp, "system_image")
 	#run_cli("delete bottflash:poap")
-        run_cli("move %s %s" % (system_image_dst_tmp, image_dir_dst))
+        run_cli("move %s %s" % (system_image_dst_tmp, system_image_dst))
 
 def wait_box_online ():
     while 1:
@@ -543,11 +542,7 @@ def install_it ():
     try: shutil.rmtree("%s.new" % image_dir_dst_u)
     except: pass
     try:
-        if  image_change:
-            run_cli("config terminal ; boot nxos %s/%s" % (image_dir_dst, new_image_name))
-        else:
-            run_cli("config terminal ; boot nxos %s/%s" % (image_dir_dst, n9k_system_image_src))
-   
+        run_cli("config terminal ; boot nxos %s/" % (system_image_dst))
         run_cli("copy running-config startup-config")
         run_cli('copy %s scheduled-config' % config_file_dst)
     except:
