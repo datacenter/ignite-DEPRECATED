@@ -28,7 +28,7 @@ Thanks also to Hitesh Mali, Ingmar Poese, Michael Rumsewicz, Randy Bush, Niklas 
 # Getting Started
 
 ### Option 1: Download OVA from link below:
-https://cisco.box.com/s/033ij1hnxteulcjzbaiu0n1c2at8ixjh
+https://cisco.box.com/s/o9bizce362th3ec7at97474webl3q1x1
 
 Username/password: ignite/ignite
 
