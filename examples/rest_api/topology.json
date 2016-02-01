@@ -1,0 +1,20 @@
+{
+    "name": "Topo1",
+    "model_name": "Leaf-Spine",
+    "defaults": {
+        "switches": [
+            { "tier": "Core", "model": 6, "image_profile": 1 },
+            { "tier": "Spine", "model": 6, "image_profile": 1 },
+            { "tier": "Leaf", "model": 5, "image_profile": 2 },
+            { "tier": "Border", "model": 5, "image_profile": 2 }
+        ],
+        "links": [
+            {
+                "src_tier": "Spine",
+                "dst_tier": "Leaf",
+                "link_type": "Port-Channel",
+                "num_links": 2
+            }
+        ]
+    }
+}

@@ -1,2 +1,0 @@
-vpc domain $$VPC_DOMAIN_ID$$
-peer-keepalive destination $$VPC_PEER_DST$$ source $$VPC_PEER_SRC$$ vrf management

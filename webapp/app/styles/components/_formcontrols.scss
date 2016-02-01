@@ -1,0 +1,213 @@
+.search-cont .form-control {
+    background-color: transparent;
+    border-top: 0;
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 6px 10px;
+    &:focus {
+        outline: 0;
+        box-shadow: none;
+    }
+}
+
+.fileUpload {
+    position: relative;
+    input[type=file] {
+        opacity: 0;
+        position: absolute;
+        top: 0;
+    }
+    button {
+        position: absolute;
+        /*top: 0;
+        right: 0;*/
+
+        top: 5px;
+        right: 5px;
+    }
+}
+label {
+    display: inline-block;
+    max-width: 100%;
+    margin-bottom: 5px;
+    font-weight: 700;
+}
+.fixedwidth_input {
+    width: 70px !important;
+}
+.form_inline_style.form-inline {
+    label {
+        display: block;
+    }
+    .radio{
+      margin-right: 10px;
+    }
+}
+/**Checkbox**/
+
+.chkbx {
+    display: inline-block;
+}
+.chk {
+    display: inline;
+    height: 20px;
+    margin: 0 10px 0 0;
+    width: 20px;
+    position: relative;
+    &:before {
+        content: '';
+        display: block;
+        width: 20px;
+        height: 20px;
+        position: absolute;
+    }
+    &:checked:before {
+        content: "\e013";
+        font-family: 'Glyphicons Halflings';
+        color: #000;
+        font-size: 14px;
+        text-align: center;
+        border-color: #777;
+    }
+}
+.chk.chk-trans {
+    width: 14px;
+    height: 14px;
+    &:before {
+        width: 14px;
+        height: 14px;
+    }
+    &:checked:before {
+        font-size: 10px;
+    }
+}
+/**./Checkbox**/
+/**Buttons**/
+/**Black Btn**/
+
+.btn {
+    &:focus {
+        outline: 0;
+    }
+}
+.login_btn {
+    width: $fullwidth_height;
+    &:hover, &:focus, &:active {
+        outline: 0 !important;
+    }
+}
+.btn-lg {
+    border-radius: 3px;
+}
+/**./Black Btn**/
+
+.btn.btn-raised {
+    padding: 3px 10px;
+    border-radius: 2px;
+    font-size: 12px;
+}
+.btn.btn-raised.btn-xs {
+    padding: 1px 5px;
+}
+.btn-trans {
+    border: 0;
+    box-shadow: none !important;
+}
+/**./Buttons**/
+/**Search Textbox**/
+
+.search-cont {
+    position: relative;
+    width: 15em;
+    display: inline-block;
+    .glyphicon-search {
+        position: absolute;
+        right: 5px;
+        top: 10px;
+        cursor: pointer;
+    }
+}
+.search-cont input[type="search"] {
+    padding-right: 25px;
+}
+/**./Search Textbox**/
+/**Customized Select Box**/
+/* The CSS */
+/* Targetting Webkit browsers only. FF will show the dropdown arrow with so much padding. */
+
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+    .select-label select {
+        padding-right: 18px
+    }
+}
+.select-label {
+    position:relative;
+    select {
+        width: 100% !important;
+        padding: 3px;
+        margin: 0;
+     /*   -webkit-border-radius:0px;
+        -moz-border-radius:0px;
+        border-radius:0px;
+        -webkit-box-shadow: 0 3px 0 #ccc, 0 -1px #fff inset;
+        -moz-box-shadow: 0 3px 0 #ccc, 0 -1px #fff inset;
+        box-shadow: 0 3px 0 #ccc, 0 -1px #fff inset;*/
+        background: #fff;
+        color: #888;
+        border: none;
+	border-bottom:1px solid #ccc;
+        outline: none;
+        display: inline-block;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        cursor: pointer;
+        font-weight: normal;
+    }
+    label {
+        width: 100%;
+        position:relative &:before {
+            content: '';
+            right: 6px;
+            top: 0px;
+            width: 20px;
+            height: 20px;
+            background: #f8f8f8;
+            position: absolute;
+            pointer-events: none;
+            display: block;
+        }
+        &:after {
+            content: '<>';
+            font: 11px "Consolas", monospace;
+            color: #aaa;
+            -webkit-transform: rotate(90deg);
+            -moz-transform: rotate(90deg);
+            -ms-transform: rotate(90deg);
+            transform: rotate(90deg);
+            right: 8px;
+            top: 11px;
+            padding: 0 0 2px;
+            border-bottom: 1px solid #ddd;
+            position: absolute;
+            pointer-events: none;
+        }
+    }
+}
+/**./Customized Select Box**/
+
+@media(max-width:$media-large) {
+    .form_inline_style {
+        .form-group {
+            margin-bottom: 15px;
+            .form-control {
+                width: 100%;
+            }
+            .fixedwidth_input {
+                width: 100%!important;
+            }
+        }
+    }
+}

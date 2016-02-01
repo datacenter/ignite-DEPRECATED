@@ -1,0 +1,171 @@
+<div>
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" ng-click="cancel()" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <h3 class="modal-title pull-left">Set Configurations</h3>
+    </div>
+    <div class="modal-body">
+        
+
+        <div class="table-responsive">
+            <h5 class="">TIER DEFAULTS</h5>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Tier</th>
+                        <th>Image Profile</th>
+                        <th>Configuration</th>
+                        <th>Fabric Profile</th>
+                        <th>&nbsp;</th>
+                    </tr>
+                </thead>
+                <tbody>
+                     <tr>
+                        <td>Spine</td>
+                        <td>
+                            <select ng-disabled="action == 'view'"
+                              class="form-control"
+                              ng-model="submitData.image_details.spine_image_profile"
+                              data-ng-options = "v.id as v.image_name for (k, v) in images"
+                              >
+                                <option value="">None</option>
+                              </select>
+                        </td>
+                        <td>
+                          <select class="form-control" ng-disabled="action == 'view'" 
+                          ng-model="submitData.config_json.spine_config_id"
+                          ng-init="submitData.config_json.spine_config_id = submitData.config_json.spine_config_id || '-1'">
+                                <option value="-1" ng-selected="submitData.config_json.spine_config_id == '-1'">None</option>
+                                <option ng-repeat="configuration in configurations" 
+                                ng-selected="configuration.id == submitData.config_json.spine_config_id" 
+                                value="{{configuration.id}}">
+                                    {{configuration.name}}
+                                </option>
+                          </select>
+                        </td>
+                        <td>
+                          <select class="form-control" ng-disabled="action == 'view'" ng-model="submitData.profiles.spine_profile_id"
+                            ng-init="submitData.profiles.spine_profile_id = submitData.profiles.spine_profile_id || '-1'"
+                          >
+                              <option value="-1"  ng-selected="submitData.profiles.spine_profile_id == '-1'">None</option>
+                              <option ng-repeat="fabricProfile in fabricProfiles" 
+                              ng-selected="fabricProfile.id == submitData.profiles.spine_profile_id" 
+                              value="{{fabricProfile.id}}">{{fabricProfile.name}}</option>
+                          </select>
+                        </td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>Leaf</td>
+                        <td>
+                            <select ng-disabled="action == 'view'"
+                              class="form-control"
+                              ng-model="submitData.image_details.leaf_image_profile"
+                              data-ng-options = "v.id as v.image_name for (k, v) in images"
+                              >
+                                <option value="">None</option>
+                              </select>
+                        </td>
+                        <td>
+                            
+                          <select class="form-control" ng-disabled="action == 'view'"  ng-model="submitData.config_json.leaf_config_id"
+                            ng-init="submitData.config_json.leaf_config_id = submitData.config_json.leaf_config_id || '-1'"
+                          >
+                                <option value="-1" ng-selected="submitData.config_json.leaf_config_id == '-1'" >None</option>
+                                <option ng-repeat="configuration in configurations" 
+                                ng-selected="configuration.id == submitData.config_json.leaf_config_id" 
+                                value="{{configuration.id}}">
+                                    {{configuration.name}}
+                                </option>
+                          </select>
+                        </td>
+                        <td>
+                          <select class="form-control" ng-disabled="action == 'view'" ng-model="submitData.profiles.leaf_profile_id"
+                          ng-init="submitData.profiles.leaf_profile_id = submitData.profiles.leaf_profile_id || '-1'"
+                          >
+                              <option value="-1" ng-selected="submitData.profiles.leaf_profile_id == '-1'">None</option>
+                              <option ng-repeat="fabricProfile in fabricProfiles" 
+                              ng-selected="fabricProfile.id == submitData.profiles.leaf_profile_id" 
+                              value="{{fabricProfile.id}}">{{fabricProfile.name}}</option>
+                          </select>
+                        </td>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+                
+                <h5 class="mt_10">
+                    <a href="javascript:void(0)" ng-click="toggleSwitch()">
+                    <i class="glyphicon glyphicon-triangle-right" ng-show="switchDetails == false"></i>
+                    <i class="glyphicon glyphicon-triangle-bottom" ng-show="switchDetails == true"></i>
+                    Switch Details</a>
+                </h5>                   
+                
+                <div ng-show="switchDetails == true">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Switch</th>
+                                <th>Image Profile</th>
+                                <th>Configuration</th>
+                                <th>Fabric Profile</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                        <tr ng-repeat="configDetail in tempConfigurations track by $index">
+                            <td>
+                              <select ng-disabled="action == 'view'" class="form-control" ng-model="configDetail.switch_name">
+                                <option value="">Select</option>
+                                <option ng-repeat="switch in switchList" ng-selected="switch == configDetail.switch_name" value="{{switch}}">{{switch}}</option>
+                              </select>  
+                            </td>
+                            <td>
+
+                              <select ng-disabled="action == 'view'" class="form-control" 
+                              ng-model="configDetail.image_profile"
+                              data-ng-options = "v.id as v.image_name for (k, v) in images"
+                              >
+                                <option value="">None</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="form-control" ng-disabled="action == 'view'" ng-model="configDetail.configuration_id"
+                              ng-init="configDetail.configuration_id = configDetail.configuration_id || '-1'"
+                              >
+                                <option value="-1">None</option>
+                                <option ng-repeat="configuration in configurations" ng-selected="configuration.id == configDetail.configuration_id" value="{{configuration.id}}">{{configuration.name}}</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="form-control" ng-disabled="action == 'view'" ng-model="configDetail.profile_id"
+                              ng-init="configDetail.profile_id = configDetail.profile_id || '-1'">
+                                <option value="-1">None</option>
+                                <option ng-repeat="fabricProfile in fabricProfiles" ng-selected="fabricProfile.id == configDetail.profile_id" value="{{fabricProfile.id}}">{{fabricProfile.name}}</option>
+                              </select>
+                            </td>
+                            <td>
+                                <ul class="list-inline">
+                                    <li ng-hide="action == 'view'">
+                                        <a href="javascript:void(0);" ng-click="deleteConfig($index)" tooltip="Delete" tooltip-placement="bottom" tabindex="0" class=""><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>
+                                    </li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="mt_10" ng-hide="action == 'view'">
+                <a href="javascript:void(0);" ng-click="addAnother()"  tooltip-placement="bottom" tabindex="0" class=""><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> Add Switch</a>
+            </div>
+            </div>
+            
+        </div>
+
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-trans btn-default btn-raised" ng-click="cancel()">Cancel</button>
+    <button class="btn btn-trans btn-raised btn-primary" ng-disabled="action == 'view'"  ng-click="ok()">Apply</button>
+</div>
+</div>

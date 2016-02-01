@@ -1,0 +1,11 @@
+
+    "priority":"100",
+    "name": "Rule_Serial",
+    "config_id":"1",
+    "match":"serial_num",
+    "subrules":[
+    "SAL1910ATZ9",
+    "SAL1910ATA9",
+    "SAL1910ATT9"
+    ]   
+}

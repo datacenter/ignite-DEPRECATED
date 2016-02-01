@@ -1,0 +1,3 @@
+# ignore everything except tar packages
+!*.tar
+!.gitignore

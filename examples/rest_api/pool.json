@@ -1,0 +1,15 @@
+{
+    "name": "VNID",
+    "type": "Integer",
+    "scope": "Global",
+    "start": "100",
+    "end": "200"
+}
+
+{
+    "name": "Mgmt",
+    "type": "IPv4",
+    "scope": "Global",
+    "start": "10.0.0.1/24",
+    "end": "10.0.0.32/24"
+}

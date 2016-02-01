@@ -1,0 +1,84 @@
+.table-responsive {
+    clear: both;
+    margin-bottom: 20px;
+    overflow: inherit;
+    table {
+        margin-bottom: 0;
+        th {
+            input[type=checkbox] {
+                margin-top: 2px;
+                vertical-align: middle;
+            }
+        }
+        input[type=checkbox] {
+            margin-top: 2px;
+        }
+    }
+}
+.table-header-cont {
+    margin-bottom: 3.5em;
+}
+ul.table-actions {
+    display: inline-block;
+    li {
+        a {
+            padding: 11px 0px 0px 0px;
+            display: inline-block;
+            .glyphicon {
+                margin-right: 5px;
+            }
+        }
+    }
+}
+.parameter_list {
+    li {
+        padding: 4px 0;
+    }
+}
+.table_action_icons {
+    visibility: hidden;
+    line-height: 22px;
+}
+tr {
+    &:focus {
+        outline: 0;
+    }
+    &:hover .table_action_icons {
+        visibility: visible;
+    }
+}
+.pagination-nav {
+    margin-bottom: 20px;
+    .pagination_info {
+        display: block;
+        float: left;
+        margin-top: 7px;
+    }
+    nav {
+        float: left;
+    }
+    .pagination {
+        margin: 0 0 0 20px;
+    }
+}
+.para_val {
+    font-weight:400;
+}
+.table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th { padding:5px 10px }
+.row_head{
+    margin-top: 10px;
+  margin-bottom: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+/**Media Screen**/
+
+@media(max-width:$media-medium) {
+    .table-responsive {
+        border: 0;
+        overflow: auto;
+    }
+    .table_action_icons {
+        width: 160px;
+    }
+}

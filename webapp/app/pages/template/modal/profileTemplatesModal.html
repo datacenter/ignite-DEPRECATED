@@ -1,0 +1,90 @@
+<div>
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" ng-click="cancel()" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <h3 class="modal-title pull-left">Feature</h3>
+        <div class="pull-right modal-form-action">
+            <a href="javascript:void(0);" ng-show="action== 'view'" tooltip="Edit" tooltip-placement="bottom">
+                <span class="glyphicon glyphicon-pencil" ng-click="changeAction('edit')" aria-hidden="true"></span>
+            </a>
+            <a href="javascript:void(0);" ng-click="deleteProfileTemplate()" tooltip="Delete" ng-show="action== 'view' || action == 'edit'"  tooltip-placement="bottom">
+                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+            </a>
+        </div>
+    </div>
+    <div class="modal-body">
+        <form>
+            <div class="row">
+                <div class="col-xs-6">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" class="form-control" 
+                        placeholder="Name" 
+                        ng-disabled="action == 'view' || action == 'edit' || action == 'viewothers'"
+                        ng-model="submitData.name"
+                        >
+                    </div>
+                </div>
+                <div class="col-xs-6">
+                    <div class="form-group">
+                        <label for="group_name">Group Name</label>
+                        <input type="text" 
+                        class="form-control" 
+                        placeholder="Group Name"
+                        ng-disabled="action == 'view' || action == 'edit' || action == 'viewothers'" 
+                        ng-model="submitData.group" />
+                    </div>
+                </div>
+               
+                <div class="col-xs-12" ng-hide="action == 'view' || action == 'viewothers'">
+                    <div class="form-group">
+                        <label for="group_name">Import From</label>
+                        <div class="fileUpload">
+                        	<input type="text"  
+                            readonly
+                            class="form-control" 
+                            placeholder="Import File"
+                            value="{{uploadFile.name}}"
+                            ><button class="btn btn-raised btn-default">Browse</button>
+
+    					    <input type="file"  
+                            file-model="uploadFile" 
+                            ng-disabled="action == 'view'" 
+                            on-read-file="readFile($fileContent)"
+                            class="form-control" 
+                            >
+    					</div>
+                    </div>
+                </div>
+                
+                <div class="col-xs-12">
+                    <div class="form-group">
+                        <label>Code</label>
+                        <pre ng-if="action=='add' || action=='edit'">{{content}}</pre> 
+                        <label ng-if="action == 'edit'">Existing Code</label>
+                        <div class="fileContent" ng-if="action != 'add'">
+                            <pre ng-repeat="fileContent in submitData.file track by $index">{{fileContent}}<br ng-if="fileContent.trim()==''"/></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xs-12" ng-show="action != 'add'">
+                    <div class="form-group">
+                        <label for="group_name">Parameters</label>
+                        <div class="fileContent">
+                            <ul> 
+                                <li ng-repeat="params in submitData.parameters">{{params}}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-trans btn-default btn-raised" ng-click="cancel()">Cancel</button>
+    <button class="btn btn-raised btn-primary" ng-hide="action == 'view' || action == 'viewothers'" ng-click="ok()">Save</button>
+</div>
+</div>

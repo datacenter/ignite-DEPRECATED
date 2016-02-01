@@ -1,60 +1,61 @@
 from django.db import models
-# Create your models here.
+
+from bootstrap.models import SwitchBootDetail
+from config.models import Profile as ConfigProfile
+from discovery.models import DiscoveryRule
+from feature.models import Profile as FeatureProfile
+from image.models import ImageProfile
+from switch.models import SwitchModel
+from workflow.models import Workflow
+
 
 class Topology(models.Model):
 
-    name = models.CharField(max_length=100, unique=True)
-    topology_json = models.TextField()
-    config_json = models.TextField()
-    defaults = models.TextField()
-    used = models.IntegerField(default=0)
-    user_id = models.IntegerField(default=0)
-    status = models.BooleanField(default=True)
-    created_date = models.DateTimeField(auto_now_add=True)
-    updated_date = models.DateTimeField(auto_now=True)
-    submit = models.CharField(max_length=10, default="false")
-
-class Fabric(models.Model):
-
-    name = models.CharField(max_length=100, unique=True)
-    config_json = models.TextField()
-    system_id = models.TextField()
-    locked = models.BooleanField(default=True)
-    validate = models.BooleanField(default=True)
-    instance = models.IntegerField(default = 1)
-    topology = models.ForeignKey('Topology')
-    booted = models.IntegerField(default=0)
-    user_id = models.IntegerField(default=0)
-    status = models.BooleanField(default=True)
-    created_date = models.DateTimeField(auto_now_add=True)
-    updated_date = models.DateTimeField(auto_now=True)
-    submit = models.CharField(max_length=10, default="false")
-    image_details = models.TextField()
-#    profiles = models.TextField()
-
-class FabricRuleDB(models.Model):
-
-    local_node = models.CharField(max_length=100)
-    remote_node = models.CharField(max_length=100)
-    remote_port = models.CharField(max_length=100)
-    local_port = models.CharField(max_length=100)
-    fabric =  models.ForeignKey('Fabric')
-    action = models.IntegerField(default=-1)
-    status = models.BooleanField(default=True)
-    replica_num = models.IntegerField(default=0)
+    name = models.TextField(unique=True)
+    model_name = models.TextField()
+    is_fabric = models.BooleanField(default=True)
+    submit = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    updated_by = models.TextField(default="")
 
 
-class DeployedFabricStats(models.Model):
-    
-    fabric_id = models.IntegerField(default= -1)
-    replica_num = models.IntegerField(default = -1)
-    switch_name = models.CharField(max_length=100)
-    config_id = models.IntegerField(default=-1)
-    booted = models.BooleanField(default=False)
-    boot_time = models.DateTimeField(auto_now=True)
-    config_name = models.CharField(max_length=100)
-    discoveryrule_id = models.IntegerField(default=-1)
-    system_id = models.CharField(max_length=100)
-    match_type = models.CharField(max_length=100)
-    configuration_generated = models.CharField(max_length=100)
-    logs = models.CharField(max_length=100, default = 'logs')
+class Fabric(Topology):
+
+    site = models.TextField(default="default")
+
+
+class Switch(models.Model):
+
+    topology = models.ForeignKey(Topology, null=True, default=None,
+                                 on_delete=models.CASCADE)
+    dummy = models.BooleanField(default=False)
+    name = models.TextField()
+    tier = models.TextField()
+    serial_num = models.TextField(default="")
+    model = models.ForeignKey(SwitchModel, null=True, default=None,
+                              on_delete=models.PROTECT)
+    image_profile = models.ForeignKey(ImageProfile, null=True, default=None,
+                                      on_delete=models.PROTECT)
+    config_profile = models.ForeignKey(ConfigProfile, null=True, default=None,
+                                       on_delete=models.PROTECT)
+    feature_profile = models.ForeignKey(FeatureProfile, null=True, default=None,
+                                        on_delete=models.PROTECT)
+    workflow = models.ForeignKey(Workflow, null=True, default=None,
+                                 on_delete=models.PROTECT)
+    boot_detail = models.ForeignKey(SwitchBootDetail, null=True, default=None,
+                                    on_delete=models.PROTECT)
+
+
+class Link(models.Model):
+
+    topology = models.ForeignKey(Topology, on_delete=models.CASCADE)
+    dummy = models.BooleanField(default=False)
+    src_switch = models.ForeignKey(Switch, on_delete=models.CASCADE, null=True,
+                                   default=None, related_name="link_src")
+    dst_switch = models.ForeignKey(Switch, on_delete=models.CASCADE, null=True,
+                                   default=None, related_name="link_dst")
+    link_type = models.TextField()
+    num_links = models.IntegerField()
+    src_ports = models.TextField(default="")
+    dst_ports = models.TextField(default="")

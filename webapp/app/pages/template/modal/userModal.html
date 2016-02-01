@@ -1,0 +1,114 @@
+<div id="switchModal">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" ng-click="cancel()" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <h3 class="modal-title pull-left">User</h3>
+        <!-- <p class="pull-right errorHighlight" data-ng-show="fieldErr">
+            All fields are mandatory
+        <p> -->
+        <div class="pull-right modal-form-action">
+            <a href="javascript:void(0);" ng-show="action == 'view' && mode != 'view'" tooltip="Edit" tooltip-placement="bottom">
+                <span class="glyphicon glyphicon-pencil" ng-click="changeAction('edit')" aria-hidden="true"></span>
+            </a>
+            <a href="javascript:void(0);" ng-click="deleteSetup()" tooltip="Delete" ng-show="action == 'view' && mode != 'view'"  tooltip-placement="bottom">
+                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+            </a>
+        </div>
+    </div>
+    <div class="modal-body">
+        <form name="userForm">
+            <div class="row">
+                <div>
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <label for="uname">Username</label>
+                            <input type="text" class="form-control" 
+                            placeholder="User Name"
+                            required name="uname"
+                            data-ng-disabled="action == 'view'"
+                            ng-model="submitData.username">
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <label for="email">Email ID</label>
+                            <input type="text" class="form-control" 
+                            placeholder="Email ID" data-ng-change="validateEmailPattern()"
+                            required name="email"
+                            data-ng-disabled="action == 'view'"
+                            ng-model="submitData.email">
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <label for="pwd">Password</label>
+                            <input type="password" class="form-control" 
+                            placeholder="Password" name="pwd"
+                            data-ng-change="verifyPwd()"
+                            required
+                            data-ng-disabled="action == 'view'"
+                            ng-model="submitData.password">
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <label for="verify-pwd">Verify Password</label>
+                            <input type="password" class="form-control" 
+                            placeholder="Verify Password" name="vpwd"
+                            data-ng-change="verifyPwd()"
+                            required
+                            data-ng-disabled="action == 'view'"
+                            ng-model="submitData.vpwd">
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <!-- <div class="col-xs-12"> -->
+                                <label for="role">Role</label>
+                            <!-- </div> -->
+                           <!--  <select class="form-control"
+                             data-ng-model="submitData.role"
+                             data-ng-options="v.value as v.label for (k,v) in appSettings.fieldValues.users.roles" required
+                             data-ng-disabled="action == 'view'">
+                             <option value="">--Select--</option>
+                            </select> -->
+                            <label class="text-capitalize checklist" style="font-weight: initial">
+                                Superuser
+                                <input type="checkbox" class="ml_10"
+                                name="superuser"
+                                data-ng-disabled="action == 'view'"
+                                data-ng-model="submitData.is_superuser">
+                            </label>
+                        </div>
+                    </div>
+                    <!-- <div class="col-xs-6">
+                        <div class="form-group">
+                            <div class="col-xs-12">
+                                <label for="tiers"></label>
+                            </div>
+                            <label class="text-capitalize checklist" style="font-weight: initial">
+                                Superuser
+                                <input type="checkbox" class="ml_10"
+                                name="superuser"
+                                data-ng-disabled="action == 'view'"
+                                required
+                                data-ng-model="submitData.is_superuser">
+                            </label>
+                        </div>
+                    </div> -->
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-trans btn-default btn-raised" ng-click="cancel()">Cancel</button>
+    <button class="btn btn-raised btn-primary"
+        ng-hide="action == 'view'" data-ng-disabled="userForm.$invalid"
+        ng-click="ok()">
+        Save
+    </button>
+</div>
+</div>
+

@@ -1,0 +1,163 @@
+<div>
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" ng-click="cancel()" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <h3 class="modal-title pull-left">Default Settings</h3>
+        <div class="pull-right modal-form-action">
+            <a href="javascript:void(0);" ng-show="action== 'editDefault' && !defaultEdit" tooltip="Edit" tooltip-placement="bottom">
+                <span class="glyphicon glyphicon-pencil" ng-click="changeAction('edit')" aria-hidden="true"></span>
+            </a>
+        </div>
+    </div>
+    <div class="modal-body">
+        <form name="creatTopoForm">
+            <div class="row" data-ng-if="!(source == 'topology' || source == 'fabric')">
+                <div class="col-xs-8">
+                    <div class="form-group">
+                        <label for="name" class="col-xs-2" style="float:none">Name</label>
+                        <input type="text" class="form-control" style="display: inline; width: inherit"
+                        name="name"
+                        placeholder="Name"
+                        required autofocus
+                        data-ng-class="{errorHighlight : creatTopoForm.name.$invalid}"
+                        ng-model="submitData.name">
+                    </div>
+                </div>
+            </div>
+            <h4>Switches</h4>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th class="col-xs-4">Tier</th>
+                        <th class="col-xs-4">Model</th>
+                        <th class="col-xs-4">Image Profile</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr data-ng-repeat="switch in submitData.defaults.switches">
+                        <td>
+                            <input type="text" name="tier"
+                            class="form-control" 
+                            placeholder="Tier"
+                            readonly
+                            ng-model="switch.tier_display" />
+                        </td>
+                        <td data-ng-if="switch.tier=='Core'">
+                            <select class="form-control"
+                             data-ng-model="switch.model" required
+                             data-ng-disabled="!defaultEdit"
+                             data-ng-options="v.id as v.name for (k,v) in selectList.Core">
+                             <option value=''>--Select--</option>
+                            </select>
+                        </td>
+                        <td data-ng-if="switch.tier=='Spine'">
+                            <select class="form-control" required
+                             data-ng-model="switch.model"
+                             data-ng-disabled="!defaultEdit"
+                             data-ng-options="v.id as v.name for (k,v) in selectList.Spine">
+                             <option value=''>--Select--</option>
+                            </select>
+                        </td>
+                        <td data-ng-if="switch.tier=='Leaf'">
+                            <select class="form-control" required
+                             data-ng-model="switch.model"
+                             data-ng-disabled="!defaultEdit"
+                             data-ng-options="v.id as v.name for (k,v) in selectList.Leaf">
+                             <option value=''>--Select--</option>
+                            </select>
+                        </td>
+                        <td data-ng-if="switch.tier=='Border'">
+                            <select class="form-control"
+                             data-ng-model="switch.model" required
+                             data-ng-disabled="!defaultEdit"
+                             data-ng-options="v.id as v.name for (k,v) in selectList.Border">
+                             <option value=''>--Select--</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control"
+                             data-ng-model="switch.image_profile" required
+                             data-ng-disabled="!defaultEdit"
+                             data-ng-options="v.id as v.profile_name for (k,v) in selectList.imglist">
+                             <option value=''>--Select--</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr data-ng-if="!show.Core && defaultEdit">
+                        <td>
+                            <a href="javascript:void(0);" data-ng-click="addTier('Core')">
+                                <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+                                Add Core Router Default
+                            </a>
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr data-ng-if="!show.Border && defaultEdit">
+                        <td>
+                            <a href="javascript:void(0);" data-ng-click="addTier('Border')">
+                                <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+                                Add Border Router Default
+                            </a>
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+            <h4>Links</h4>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th class="col-xs-3">From</th>
+                        <th class="col-xs-3">To</th>
+                        <th class="col-xs-3">Link Type</th>
+                        <th class="col-xs-3">Number of Links</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr data-ng-repeat="link in submitData.defaults.links">
+                        <td>
+                            <input type="text" name="src_tier"
+                            class="form-control" 
+                            placeholder="Source Tier"
+                            readonly
+                            ng-model="link.src_tier" />
+                        </td>
+                        <td>
+                            <input type="text" name="dst_tier"
+                            class="form-control" 
+                            placeholder="Destination Tier"
+                            readonly
+                            ng-model="link.dst_tier" />
+                        </td>
+                        <td>
+                            <select class="form-control"
+                             data-ng-model="link.link_type"
+                             data-ng-disabled="!defaultEdit"
+                             data-ng-options="v.id as v.name for (k,v) in selectList.linkTypes | filter_link:[link.src_tier,link.dst_tier]">
+                            </select>
+                        </td>
+                        <td>
+                            <input type="number" class="form-control" 
+                            placeholder="Number of Links"
+                            required name="num_links"
+                            max="8" min="1"
+                            data-ng-class="{errorHighlight : creatTopoForm.num_links.$invalid}"
+                             data-ng-disabled="!defaultEdit"
+                            ng-model="link.num_links">
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<div class="modal-footer">
+    <div class="small pull-left profile-note" data-ng-if="source=='topology'"><b>Note:</b> Changes will be applied to all the switches & links in the topology. </div>
+    <div class="small pull-left profile-note" data-ng-if="source=='fabric'"><b>Note:</b> Changes will be applied only to the newly added switches & links. </div>
+    <button class="btn btn-trans btn-default btn-raised" ng-click="cancel()">Cancel</button>
+    <button class="btn btn-raised btn-primary" ng-hide="!defaultEdit" data-ng-disabled="creatTopoForm.$invalid" ng-click="ok()">Save</button>
+</div>
+</div>

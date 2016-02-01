@@ -1,0 +1,91 @@
+from django.db import Error
+from django.http import JsonResponse
+from rest_framework import status
+
+from administration.models import AAAServer
+from bootstrap.models import SwitchBootDetail
+from config.models import Profile as ConfigProfile
+from discovery.models import DiscoveryRule
+from fabric.models import Link, Switch, Topology
+from feature.models import Profile as FeatureProfile
+from image.models import ImageProfile
+from pool.models import Pool
+from switch.models import LineCard, SwitchModel
+from utils.exception import IgniteException, TokenException
+from workflow.models import Workflow, Task
+
+import logging
+logger = logging.getLogger(__name__)
+
+
+# error messages
+ERR_MSG = "error_message"
+
+
+class ExceptionMiddleware(object):
+
+    def process_exception(self, request, exception):
+        msg = ""
+        code = status.HTTP_500_INTERNAL_SERVER_ERROR
+
+        # database exceptions
+        if isinstance(exception, Error):
+            msg = exception.message
+            code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        # model exceptions
+        elif isinstance(exception, AAAServer.DoesNotExist):
+            msg = "AAAServer does not exist"
+            code = status.HTTP_404_NOT_FOUND
+        elif isinstance(exception, ConfigProfile.DoesNotExist):
+            msg = "Config Profile does not exist"
+            code = status.HTTP_404_NOT_FOUND
+        elif isinstance(exception, DiscoveryRule.DoesNotExist):
+            msg = "Discovery Rule does not exist"
+            code = status.HTTP_404_NOT_FOUND
+        elif isinstance(exception, FeatureProfile.DoesNotExist):
+            msg = "Feature Profile does not exist"
+            code = status.HTTP_404_NOT_FOUND
+        elif isinstance(exception, ImageProfile.DoesNotExist):
+            msg = "Image Profile does not exist"
+            code = status.HTTP_404_NOT_FOUND
+        elif isinstance(exception, LineCard.DoesNotExist):
+            msg = "Line Card does not exist"
+            code = status.HTTP_404_NOT_FOUND
+        elif isinstance(exception, Link.DoesNotExist):
+            msg = "Link does not exist"
+            code = status.HTTP_404_NOT_FOUND
+        elif isinstance(exception, Pool.DoesNotExist):
+            msg = "Pool does not exist"
+            code = status.HTTP_404_NOT_FOUND
+        elif isinstance(exception, Switch.DoesNotExist):
+            msg = "Switch does not exist"
+            code = status.HTTP_404_NOT_FOUND
+        elif isinstance(exception, SwitchBootDetail.DoesNotExist):
+            msg = "Switch Boot Detail does not exist"
+            code = status.HTTP_404_NOT_FOUND
+        elif isinstance(exception, SwitchModel.DoesNotExist):
+            msg = "Switch Model does not exist"
+            code = status.HTTP_404_NOT_FOUND
+        elif isinstance(exception, Task.DoesNotExist):
+            msg = "Task does not exist"
+            code = status.HTTP_404_NOT_FOUND
+        elif isinstance(exception, Topology.DoesNotExist):
+            msg = "Topology does not exist"
+            code = status.HTTP_404_NOT_FOUND
+        elif isinstance(exception, Workflow.DoesNotExist):
+            msg = "Workflow does not exist"
+            code = status.HTTP_404_NOT_FOUND
+        # ignite exceptions
+        elif isinstance(exception, IgniteException):
+            msg = exception.message
+            code = status.HTTP_400_BAD_REQUEST
+        # Token exception
+        elif isinstance(exception, TokenException):
+            msg = exception.message
+            code = status.HTTP_401_UNAUTHORIZED
+
+        if msg:
+            logger.debug(msg)
+            return JsonResponse({ERR_MSG: msg}, status=code)
+
+        return None

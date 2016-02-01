@@ -1,0 +1,53 @@
+<div>
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" ng-click="cancel()" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <h3 class="modal-title pull-left">Switch Identity</h3>
+    </div>
+    <div class="modal-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th width="2%">#</th>
+                        <th width="30%">Switch Name</th>
+                        <th>Serial ID</th>
+                        <th>&nbsp;</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="serialID in serialIDs track by $index">
+                        <td>{{$index + 1}}</td>
+                        <td>
+                            <select class="form-control" ng-disabled="action == 'view'" ng-model="serialID.name">
+                                <option value="">Select</option>
+                                <option ng-repeat="sn in switchNames | orderBy" ng-selected="serialID.name == sn" value="{{sn}}">{{sn}}</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" ng-disabled="action == 'view'"  ng-model="serialID.system_id"/>
+                        </td>
+                        <th>
+                            <ul class="list-inline">
+                                <li ng-hide="action == 'view'">
+                                    <a href="javascript:void(0);" ng-click="deleteSerialID($index)" tooltip="Delete" tooltip-placement="bottom" tabindex="0" class=""><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>
+                                </li>
+                            </ul>
+                        </th>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div ng-show="serialIDs.length == 0"  class="alert alert-info"> No records found </div>
+            <div class="mt_10" ng-hide="action == 'view'">
+                <a href="javascript:void(0);" ng-click="addAnotherSwitchID()"  tooltip-placement="bottom" tabindex="0" class=""><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> Add another</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-trans btn-default btn-raised" ng-click="cancel();">Cancel</button>
+    <button class="btn btn-trans btn-raised btn-primary" ng-click="ok();" ng-disabled="action == 'view'">Apply</button>
+</div>
+</div>

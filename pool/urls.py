@@ -1,12 +1,10 @@
-__author__  = "arunrajms"
+from django.conf.urls import patterns, url
 
-from django.conf.urls import patterns, include, url
-from django.contrib import admin
-from django.views.decorators.csrf import csrf_exempt
-from views import PoolList
-from views import PoolDetailList
+from views import *
 
 urlpatterns = patterns('',
-    url(r'^$',PoolList.as_view(),name='Full_Pools'),
-    url(r'^(?P<id>\w+)/$',PoolDetailList.as_view(),name='Full_Pools'),
+    url(r'^/pool/(?P<id>[1-9][0-9]?)$',
+        PoolDetailView.as_view()),
+    url(r'^/pool$',
+        PoolListView.as_view()),
 )

@@ -1,0 +1,44 @@
+[
+    {
+        "model": "workflow.task",
+        "pk": 100,
+        "fields": {
+             "name": "bootstrap_config",
+             "function": "get_config",
+             "desc": "Bootstrap get config task",
+             "created": "2016-01-11 09:29:51.405893+00:00",
+             "updated": "2016-01-11 09:29:51.405893+00:00"
+         }
+    },
+    {
+        "model": "workflow.task",
+        "pk": 200,
+        "fields": {
+             "name": "bootstrap_image",
+             "function": "get_image",
+             "desc": "Bootstrap get image task",
+             "created": "2016-01-11 09:29:51.405893+00:00",
+             "updated": "2016-01-11 09:29:51.405893+00:00"
+         }
+    },
+    {
+        "model": "workflow.workflow",
+        "pk": 100,
+        "fields": {
+             "name": "bootstrap_workflow",
+             "task_list": [
+                              {
+                                  "task_id": 100,
+                                  "parameters":{}
+                              }
+                              {
+                                  "task_id": 200,
+                                  "parameters":{}
+                              }
+              ]
+             "created": "2016-01-11 09:29:51.405893+00:00",
+             "updated": "2016-01-11 09:29:51.405893+00:00"
+         }
+    }
+
+]

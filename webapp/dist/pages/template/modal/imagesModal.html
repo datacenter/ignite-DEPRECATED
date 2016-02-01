@@ -1,0 +1,121 @@
+<div>
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" ng-click="cancel()" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <h3 class="modal-title pull-left">Image</h3>
+        <p class="pull-right message"><p>
+        <div class="pull-right modal-form-action">
+            <a href="javascript:void(0);" ng-show="action== 'view'" tooltip="Edit" tooltip-placement="bottom">
+                <span class="glyphicon glyphicon-pencil" ng-click="changeAction('edit')" aria-hidden="true"></span>
+            </a>
+            <a href="javascript:void(0);" ng-click="deleteImage()" tooltip="Delete" ng-show="action== 'view'"  tooltip-placement="bottom">
+                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+            </a>
+        </div>
+    </div>
+    <div class="modal-body">
+        <form name="imageForm">
+            <div class="row">
+                <div class="col-xs-4">
+                    <div class="form-group">
+                        <label for="image_profile_name">Profile Name</label>
+                        <input type="text" class="form-control" 
+                        placeholder="Profile Name"
+                        data-ng-required
+                        data-ng-disabled="action == 'view'"
+                        ng-model="submitData.profile_name">
+                    </div>
+                </div>
+                <div class="row"></div>
+                <div class="col-xs-4">
+                    <div class="form-group">
+                        <label for="group_name">Path/Image</label>
+                        <input type="text" 
+                        class="form-control" 
+                        placeholder="System Image"
+                        data-ng-disabled="action == 'view'"
+                        data-ng-model="submitData.system_image" />
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="form-group">
+                        <label for="group_name">EPLD image</label>
+                        <input type="text" 
+                        class="form-control"
+                        placeholder="EPLD image"
+                        data-ng-disabled="action == 'view'"
+                        data-ng-model="submitData.epld_image" />
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="form-group">
+                        <label for="group_name">Kickstart image</label>
+                        <input type="text" 
+                        class="form-control"
+                        placeholder="Kickstart Image"
+                        data-ng-disabled="action == 'view'"
+                        data-ng-model="submitData.kickstart_image" />
+                    </div>
+                </div>
+                <div class="row_head">
+                    <div class="row">
+                        <div class="col-xs-4">
+                            <label for="startRange" class="grid_label sub-heading">Location</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="form-group">
+                        <label for="group_name">Server IP</label>
+                        <input type="text" name="imageserver_ip"
+                        class="form-control imageserver_ip" 
+                        placeholder="Server IP"
+                        data-ng-required
+                        data-ng-class="{errorHighlight : imageForm.imageserver_ip.$invalid}"
+                        data-ng-blur="validateIPaddress()"
+                        data-ng-disabled="action == 'view'"
+                        ng-model="submitData.image_server_ip" />
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="form-group">
+                        <label for="group_name">Username</label>
+                        <input type="text" 
+                        class="form-control" 
+                        placeholder="Username"
+                        data-ng-required
+                        data-ng-disabled="action == 'view'"
+                        ng-model="submitData.image_server_username" />
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="form-group">
+                        <label for="group_name">Password</label>
+                        <input type="text" 
+                        class="form-control" 
+                        data-ng-required
+                        placeholder="Password"
+                        data-ng-disabled="action == 'view'"
+                        ng-model="submitData.image_server_password" />
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="form-group">
+                        <label for="group_name">Transfer Protocol</label>
+                        <select class="form-control" data-ng-model="submitData.access_protocol"
+                        data-ng-options="accesProtocol as accesProtocol for accesProtocol in access_protocol_list"
+                        data-ng-required
+                        data-ng-disabled="action == 'view'">
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-trans btn-default btn-raised" ng-click="cancel()">Cancel</button>
+    <button class="btn btn-raised btn-primary" ng-hide="action == 'view' || action == 'viewothers'" data-ng-disabled="imageForm.$invalid" ng-click="ok()">Save</button>
+</div>
+</div>

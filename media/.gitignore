@@ -1,0 +1,8 @@
+# ignore everything except files/directories listed below
+*
+!configlets
+!features
+!packages
+!repo
+!scripts
+!.gitignore

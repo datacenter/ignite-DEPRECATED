@@ -1,0 +1,50 @@
+<div id="main" class="content container">
+    <div class="table-header-cont">
+        <div class="pull-left">
+            <h5 class="page-header pull-left">Deployed Fabrics ({{tableParams.total()}})</h5>
+        </div>
+        <div class="pull-right">
+            <div class="search-cont">
+                <input type="search" class="form-control" title="Search" ng-model="searchKeyword" data-toggle="tooltip" placeholder="Search">
+                <i class="glyphicon glyphicon-search"></i>
+            </div>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover" ng-table="tableParams">
+            <thead>
+                <tr>
+                    <th width="2%" class="hide">
+                        <input type="checkbox" class="form-control chk chk-trans">
+                    </th>
+                    <th width="2%">#</th>
+                    <th class="sortable" 
+                    ng-class="{
+                        'sort-asc': tableParams.isSortBy('name', 'asc'),
+                        'sort-desc': tableParams.isSortBy('name', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'name' : tableParams.isSortBy('name', 'asc') ? 'desc' : 'asc'})"
+                    >
+                    Name</th>
+                    <th>Replicas</th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-class="{active: classVal}" ng-repeat="fabrics in $data | filter : search">
+                    <td class="hide">
+                        <input type="checkbox" class="form-control chk chk-trans" ng-click="getChecked()" ng-checked="checkbox1">
+                    </td>
+
+                    <td>{{appServices.generateSeq(tableParams.page(), tableParams.count(), $index)}}</td>
+                    <td>{{fabrics.fabric_name}}</td>
+                    <td>
+                        <span ng-repeat="replica in fabrics.total_replicas">
+                            <a href="#/deployedFabrics/{{fabrics.fabric_id}}/{{replica}}">{{replica}}</a><span ng-show = "$index < fabrics.total_replicas.length - 1">, </span>
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

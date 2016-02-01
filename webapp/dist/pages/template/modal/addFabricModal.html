@@ -1,0 +1,94 @@
+<div>
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" ng-click="cancel()" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <h3 class="modal-title pull-left">Profile Settings</h3>
+        <div class="pull-right modal-form-action">
+            <a href="javascript:void(0);" ng-show="action == 'editConfig' && !configEdit" tooltip="Edit" tooltip-placement="bottom">
+                <span class="glyphicon glyphicon-pencil" ng-click="changeAction('edit')" aria-hidden="true"></span>
+            </a>
+        </div>
+    </div>
+    <div class="modal-body">
+        <form name="addFabricForm">
+            <div class="row" data-ng-if="source != 'fabric'">
+                <div class="col-xs-6">
+                    <div class="form-group">
+                        <label for="name" class="col-xs-2" style="float:none">Name</label>
+                        <input type="text" class="form-control" style="display: inline; width: inherit"
+                            name="name"
+                            placeholder="Name"
+                            required autofocus
+                            data-ng-class="{errorHighlight : addFabricForm.name.$invalid}"
+                            ng-model="submitData.name">
+                    </div>
+                </div>
+                <div class="col-xs-6">
+                    <div class="form-group">
+                        <label for="topology" class="col-xs-2" style="float:none;width: 23%;">Topology</label>
+                        <select class="form-control" name="topology" style="display: inline; width: 50%;"
+                            required data-ng-class="{errorHighlight : addFabricForm.topology.$invalid}"
+                            data-ng-model="submitData.topology"
+                            data-ng-options="v.id as v.name for (k,v) in selectList.topology_list">
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <h4>Switches</h4>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th class="col-xs-3">Tier</th>
+                        <th class="col-xs-3">Config Profile</th>
+                        <th class="col-xs-3">Feature Profile</th>
+                        <th class="col-xs-3">Workflow</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr data-ng-repeat="switch in submitData.switches"
+                        data-ng-if="!(switch.tier == 'Core' || switch.tier == 'Border')">
+                        <td>
+                            <input type="text" name="tier"
+                            class="form-control" 
+                            placeholder="Tier"
+                            readonly
+                            ng-model="switch.tier" />
+                        </td>
+                        <td>
+                            <select class="form-control" name="config_profile{{$index}}"
+                             data-ng-model="switch.config_profile"
+                             data-ng-disabled="!configEdit"
+                             data-ng-change="checkTierValidity({{$index}})"
+                             data-ng-class="{errorHighlight : addFabricForm.config_profile{{$index}}.$invalid}"
+                             data-ng-options="v.id as v.name for (k,v) in selectList.config_list">
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control" name="feature_profile{{$index}}"
+                             data-ng-model="switch.feature_profile"
+                             data-ng-disabled="!configEdit"
+                             data-ng-change="checkTierValidity({{$index}})"
+                             data-ng-class="{errorHighlight : addFabricForm.feature_profile{{$index}}.$invalid}"
+                             data-ng-options="v.id as v.name for (k,v) in selectList.fabricProfile_list">
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control"
+                             data-ng-model="switch.workflow"
+                             data-ng-disabled="!configEdit"
+                             data-ng-options="v.id as v.name for (k,v) in selectList.workflow_list">
+                            </select>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<div class="modal-footer">
+    <div class="small pull-left profile-note"><b>Note:</b> For a Tier both Config Profile and Feature Profile cannot be --None--</div>
+    <button class="btn btn-trans btn-default btn-raised" ng-click="cancel()">Cancel</button>
+    <button class="btn btn-raised btn-primary" ng-hide="!configEdit" data-ng-disabled="addFabricForm.$invalid" ng-click="ok()">Save</button>
+</div>
+</div>

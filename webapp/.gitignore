@@ -1,0 +1,6 @@
+# ignore bower components & node modules
+!dist/bower_components
+bower_components
+node_modules
+.sass-cache
+.tmp

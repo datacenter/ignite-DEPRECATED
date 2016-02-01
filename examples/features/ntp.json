@@ -1,0 +1,7 @@
+
+"ntp" :
+{
+	"enabled" : $$NTP_ENABLED$$,
+	"server_ip" : "$$NTP_SERVER_IP$$"
+}
+

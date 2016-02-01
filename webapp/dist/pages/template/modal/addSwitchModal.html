@@ -1,0 +1,268 @@
+<div id="switchModal">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" ng-click="cancel()" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <h3 class="modal-title pull-left">Switch</h3>
+        <!-- <p class="pull-right errorHighlight" data-ng-show="fieldErr">
+            All fields are mandatory
+        <p> -->
+        <div class="pull-right modal-form-action">
+            <a href="javascript:void(0);" ng-show="action== 'view'" tooltip="Edit" tooltip-placement="bottom">
+                <span class="glyphicon glyphicon-pencil" ng-click="changeAction('edit')" aria-hidden="true"></span>
+            </a>
+            <a href="javascript:void(0);" ng-click="deleteSwitch()" tooltip="Delete" ng-show="action== 'view'"  tooltip-placement="bottom">
+                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+            </a>
+        </div>
+    </div>
+    <div class="modal-body">
+        <form name="switchForm">
+            <div classs="row">
+                <div class="col-xs-4">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" class="form-control"
+                        name="name"
+                        placeholder="Name"
+                        required
+                        data-ng-class="{errorHighlight : switchForm.name.$invalid}"
+                        data-ng-change="checkModelName()"
+                        data-ng-disabled="action == 'view'"
+                        ng-model="submitData.name">
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="form-group">
+                        <label for="base_model">Base Model</label>
+                        <input type="text" class="form-control" 
+                        placeholder="Base Model" name="base_model"
+                        required
+                        data-ng-class="{errorHighlight : switchForm.base_model.$invalid}"
+                        data-ng-disabled="action == 'view'"
+                        ng-model="submitData.base_model">
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="form-group">
+                        <div class="col-xs-12">
+                            <label for="tiers">Tier Roles</label>
+                        </div>
+                        <label data-ng-repeat="tier in domainValues.tier_list"
+                          class="text-capitalize checklist" style="font-weight: initial">
+                            <input type="checkbox"
+                            name="tiers_{{$index}}"
+                            data-ng-disabled="action == 'view'"
+                            required
+                            checklist-model="submitData.switch_data.tiers"
+                            checklist-value="tier">{{tier}}
+                        </label>
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="form-group form-inline form_inline_style">
+                        <label for="switch_type" class="">Type</label>
+                        <div class="radio mt_12">
+                            <label class="pt-13">
+                                <input type="radio" name="switch_type" value="Fixed"
+                                data-ng-change="checkType('fixed')"
+                                ng-disabled="action == 'view'"
+                                ng-model="submitData.switch_type">
+                                Fixed Switch
+                            </label>
+                        </div>
+                        <div class="radio mt_12">
+                            <label class="pt-13">
+                                <input type="radio" name="switch_type" value="Chassis"
+                                ng-disabled="action == 'view'"
+                                data-ng-change="checkType('chassis')"
+                                ng-model="submitData.switch_type">
+                                Chassis
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <!-- <div class="col-xs-4">
+                    <div class="form-group">
+                        <label for="base_model">Base Model</label>
+                        <input type="text" class="form-control" 
+                        placeholder="Base Model" name="base_model"
+                        required
+                        data-ng-class="{errorHighlight : switchForm.base_model.$invalid}"
+                        data-ng-disabled="action == 'view'"
+                        ng-model="submitData.base_model">
+                    </div>
+                </div> -->
+                <!-- <div class="col-xs-4"></div>
+                <div class="col-xs-4"></div> -->
+            </div>
+            <!-- <div class="row"></div>
+            <div class="row">
+                <div class="col-xs-4">
+                    <div class="form-group">
+                        <label for="base_model">Base Model</label>
+                        <input type="text" class="form-control"
+                        name="base_model"
+                        placeholder="Base Model"
+                        required
+                        data-ng-class="{errorHighlight : switchForm.base_model.$invalid}"
+                        data-ng-disabled="action == 'view'"
+                        ng-model="submitData.base_model">
+                    </div>
+                </div>
+            </div> -->
+            <div class="row"></div>
+            <div class="row switchModule" data-ng-if="submitData.switch_type === 'Fixed'">
+                <div class="portGroup"
+                 data-ng-repeat="portGrp in submitData.switch_data.port_groups">
+                    <div class="col-xs-4">
+                        <div class="form-group">
+                            <label for="num_ports">Number of Ports</label>
+                            <input type="number" class="form-control" 
+                            placeholder="Number of Ports" name="num_ports{{$index}}"
+                            required min="1"
+                            data-ng-class="{errorHighlight : switchForm.num_ports{{$index}}.$invalid}"
+                            data-ng-disabled="action == 'view'"
+                            ng-model="portGrp.num_ports">
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        <div class="form-group">
+                            <label for="port_speed">Port Speed</label>
+                            <select class="form-control" data-ng-model="portGrp.speed"
+                                data-ng-options="portSpeed as portSpeed for portSpeed in domainValues.port_speed_list"
+                                data-ng-required
+                                data-ng-disabled="action == 'view'">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        <div class="form-group">
+                            <label for="transceiver">Transceiver</label>
+                            <select class="form-control" data-ng-model="portGrp.transceiver"
+                                data-ng-options="transceiver as transceiver for transceiver in domainValues.transceiver_list"
+                                data-ng-required
+                                data-ng-disabled="action == 'view'">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-xs-8">
+                        <div class="col-xs-12">
+                            <div class="form-group form-inline form_inline_style">
+                                <label for="role" class="">Port Roles</label>
+                                <div class="radio mt_12"
+                                 data-ng-repeat="port_role in domainValues.port_role_list">
+                                    <label class="text-capitalize">
+                                        <input type="radio" name="port_roles_{{$parent.$index}}"
+                                         value="{{port_role}}"
+                                         required
+                                         ng-disabled="action == 'view'"
+                                         ng-model="portGrp.role">
+                                        {{port_role}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        <a href="javascript:void(0);"
+                        ng-hide="submitData.switch_data.port_groups.length == 1 || action == 'view'"
+                        ng-click="delPortGrp($index)"
+                        class="bottom-align">
+                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                            <span class="hidden-xs"></span>
+                        </a>
+                    </div>
+                    <div class="row"></div>
+                    <a href="javascript:void(0);"
+                        ng-hide="$index < submitData.switch_data.port_groups.length - 1 || action == 'view'"
+                        ng-click="addPortGrp()"
+                        class="pull-right mt_10">
+                        <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+                        <span class="hidden-xs">Add Port-Group</span>
+                    </a>
+                </div>
+                <div class="row"></div>
+                <div class="col-xs-4" data-ng-if="submitData.switch_data.module_id !== 0">
+                    <div class="form-group">
+                        <label for="module_id">Optional Module</label>
+                        <select class="form-control"
+                         data-ng-model="submitData.switch_data.module_id"
+                         data-ng-disabled="action == 'view'"
+                         data-ng-options="v.id as v.name for (k,v) in module_list">
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row switchModule" data-ng-if="submitData.switch_type === 'Chassis'">
+                <div class="col-xs-4">
+                    <div class="form-group">
+                        <label for="num_slots">Number of Slots</label>
+                        <input type="number" class="form-control" 
+                        placeholder="Number of Slots" name="num_slots"
+                        data-ng-required
+                        data-ng-class="{errorHighlight : switchForm.num_slots.$invalid}"
+                        data-ng-change="checkSlotLen()"
+                        data-ng-disabled="action == 'view'"
+                        ng-model="submitData.switch_data.num_slots">
+                    </div>
+                </div>
+                <div class="row"></div>
+                <div data-ng-repeat="slot in submitData.switch_data.slots">
+                    <div class="col-xs-4">
+                        <div class="form-group">
+                            <label for="slot_num">Slot No.</label>
+                            <input type="number" class="form-control" 
+                            name="slot_num_{{$index}}"
+                            data-ng-class="{errorHighlight : switchForm.slot_num_{{$index}}.$invalid}"
+                            placeholder="Slot Number"
+                            data-ng-required
+                            data-ng-change="checkSlotNum($index)"
+                            data-ng-disabled="action == 'view'"
+                            ng-model="slot.slot_num">
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        <div class="form-group">
+                            <label for="lc_id">Line Card</label>
+                            <select class="form-control"
+                             data-ng-model="slot.lc_id"
+                                data-ng-required
+                                data-ng-disabled="action == 'view'"
+                                data-ng-options="v.id as v.name for (k,v) in lc_list">
+                                <option>--Select--<option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        <a href="javascript:void(0);"
+                        ng-hide="submitData.switch_data.slots.length == 1 || action == 'view'"
+                        ng-click="delLC($index)"
+                        class="bottom-align">
+                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                            <span class="hidden-xs"></span>
+                        </a>
+                        <a href="javascript:void(0);"
+                            ng-hide="(($index < submitData.switch_data.slots.length - 1) || !(submitData.switch_data.num_slots > submitData.switch_data.slots.length)) || action == 'view'"
+                            ng-click="addLC()"
+                            class="bottom-align" style="right : 100px">
+                            <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+                            <span class="hidden-xs">Add Slot</span>
+                        </a>
+                    </div>
+                    <div class="row"></div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-trans btn-default btn-raised" ng-click="cancel()">Cancel</button>
+    <button class="btn btn-raised btn-primary"
+        ng-hide="action == 'view'"
+        data-ng-disabled="switchForm.$invalid"
+        ng-click="ok()">
+        Save
+    </button>
+</div>
+</div>

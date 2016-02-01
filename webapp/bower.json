@@ -1,0 +1,36 @@
+{
+  "name": "cisco-poapserver",
+  "version": "0.0.1",
+  "dependencies": {
+    "angular": "1.4.4",
+    "json3": "^3.3.0",
+    "es5-shim": "^4.0.0",
+    "angular-animate": "^1.3.0",
+    "angular-aria": "^1.3.0",
+    "angular-cookies": "^1.3.0",
+    "angular-messages": "^1.3.0",
+    "angular-resource": "^1.3.0",
+    "angular-route": "^1.3.0",
+    "angular-sanitize": "^1.3.0",
+    "angular-touch": "^1.3.0",
+    "angular-storage": "~0.5.0",
+    "angular-jwt": "~0.0.8",
+    "angular-loading-bar": "~0.6.0",
+    "angular-chart.js": "~0.3.14",
+    "a0-angular-storage": "~0.0.9",
+    "angular-gettext": "~2.0.5",
+    "ng-table": "~0.4.3",
+    "angular-bootstrap": "~0.13.0",
+    "bootstrap-sass-official": "~3.3.4",
+    "angular-bootstrap-select": "0.0.5",
+    "angular-svg-round-progressbar": "0.2.7",
+    "angular-file-model": "~0.3.0",
+    "angular-filereader": "~1.0.4",
+    "ngtoast": "~1.5.5"
+  },
+  "devDependencies": {
+    "angular-mocks": "~1.3.0",
+    "angular-scenario": "~1.3.0"
+  },
+  "appPath": "app"
+}

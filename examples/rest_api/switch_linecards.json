@@ -1,0 +1,255 @@
+{
+    "name": "Cisco Nexus M6PQ",
+    "lc_type": "Module",
+    "lc_data": {
+        "port_groups": [
+            {
+                "num_ports": 6,
+                "speed": "40G",
+                "transceiver": "QSFP+",
+                "role": "Uplink"
+            }
+        ]
+    }
+}
+
+{
+    "name": "Cisco Nexus M8PQ",
+    "lc_type": "Module",
+    "lc_data": {
+        "port_groups": [
+            {
+                "num_ports": 8,
+                "speed": "40G",
+                "transceiver": "QSFP+",
+                "role": "Uplink"
+            }
+        ]
+    }
+}
+
+{
+    "name": "Cisco Nexus M12PQ",
+    "lc_type": "Module",
+    "lc_data": {
+        "port_groups": [
+            {
+                "num_ports": 12,
+                "speed": "40G",
+                "transceiver": "QSFP+",
+                "role": "Uplink"
+            }
+        ]
+    }
+}
+
+{
+    "name": "Cisco Nexus N9K-M2PC-CFP2",
+    "lc_type": "Module",
+    "lc_data": {
+        "port_groups": [
+            {
+                "num_ports": 2,
+                "speed": "100G",
+                "transceiver": "CFP2",
+                "role": "Uplink"
+            }
+        ]
+    }
+}
+
+{
+    "name": "Cisco Nexus N9K-M4PC-CFP2",
+    "lc_type": "Module",
+    "lc_data": {
+        "port_groups": [
+            {
+                "num_ports": 4,
+                "speed": "100G",
+                "transceiver": "CFP2",
+                "role": "Uplink"
+            }
+        ]
+    }
+}
+
+{
+    "name": "Cisco Nexus N9K-X9536PQ",
+    "lc_type": "Linecard",
+    "lc_data": {
+        "port_groups": [
+            {
+                "num_ports": 32,
+                "speed": "40G",
+                "transceiver": "QSFP+",
+                "role": "Both"
+            }
+        ]
+    }
+}
+
+{
+    "name": "Cisco Nexus N9K-X9636PQ",
+    "lc_type": "Linecard",
+    "lc_data": {
+        "port_groups": [
+            {
+                "num_ports": 36,
+                "speed": "40G",
+                "transceiver": "QSFP+",
+                "role": "Both"
+            }
+        ]
+    }
+}
+
+{
+    "name": "Cisco Nexus N9K-X9432PQ",
+    "lc_type": "Linecard",
+    "lc_data": {
+        "port_groups": [
+            {
+                "num_ports": 32,
+                "speed": "40G",
+                "transceiver": "QSFP+",
+                "role": "Both"
+            }
+        ]
+    }
+}
+
+{
+    "name": "Cisco Nexus N9K-X9564PX",
+    "lc_type": "Linecard",
+    "lc_data": {
+        "port_groups": [
+            {
+                "num_ports": 48,
+                "speed": "1/10G",
+                "transceiver": "SFP+",
+                "role": "Downlink"
+            },
+			{
+                "num_ports": 4,
+                "speed": "40G",
+                "transceiver": "QSFP+",
+                "role": "Uplink"
+            }
+        ]
+    }
+}
+
+{
+    "name": "Cisco Nexus N9K-X9564TX",
+    "lc_type": "Linecard",
+    "lc_data": {
+        "port_groups": [
+            {
+                "num_ports": 48,
+                "speed": "1/10G",
+                "transceiver": "GBASE-T",
+                "role": "Downlink"
+            },
+			{
+                "num_ports": 4,
+                "speed": "40G",
+                "transceiver": "QSFP+",
+                "role": "Uplink"
+            }
+        ]
+    }
+}
+
+{
+    "name": "Cisco Nexus N9K-X9464PX",
+    "lc_type": "Linecard",
+    "lc_data": {
+        "port_groups": [
+            {
+                "num_ports": 48,
+                "speed": "1/10G",
+                "transceiver": "SFP+",
+                "role": "Downlink"
+            },
+			{
+                "num_ports": 4,
+                "speed": "40G",
+                "transceiver": "QSFP+",
+                "role": "Uplink"
+            }
+        ]
+    }
+}
+
+{
+    "name": "Cisco Nexus N9K-X9464PX-48",
+    "lc_type": "Linecard",
+    "lc_data": {
+        "port_groups": [
+            {
+                "num_ports": 48,
+                "speed": "1/10G",
+                "transceiver": "SFP+",
+                "role": "Downlink"
+            },
+			{
+                "num_ports": 4,
+                "speed": "40G",
+                "transceiver": "QSFP+",
+                "role": "Uplink"
+            }
+        ]
+    }
+}
+
+{
+    "name": "Cisco Nexus N9K-X9464TX",
+    "lc_type": "Linecard",
+    "lc_data": {
+        "port_groups": [
+            {
+                "num_ports": 48,
+                "speed": "1/10G",
+                "transceiver": "GBASE-T",
+                "role": "Downlink"
+            },
+			{
+                "num_ports": 4,
+                "speed": "40G",
+                "transceiver": "QSFP+",
+                "role": "Uplink"
+            }
+        ]
+    }
+}
+
+{
+    "name": "Cisco Nexus N9K-X9432C-S",
+    "lc_type": "Linecard",
+    "lc_data": {
+        "port_groups": [
+            {
+                "num_ports": 32,
+                "speed": "100G",
+                "transceiver": "QSFP28",
+                "role": "Both"
+            }
+        ]
+    }
+}
+
+{
+    "name": "Cisco Nexus N9K-X9408PC-CFP2",
+    "lc_type": "Linecard",
+    "lc_data": {
+        "port_groups": [
+            {
+                "num_ports": 8,
+                "speed": "100G",
+                "transceiver": "CFP2",
+                "role": "Both"
+            }
+        ]
+    }
+}
+

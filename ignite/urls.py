@@ -1,26 +1,34 @@
-__author__  = "Rohit N Dubey"
-
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 
-from views import Ignite
-
-from . import prod
+from . import settings
 
 urlpatterns = patterns('',
+    # Examples:
+    # url(r'^$', 'ignite.views.home', name='home'),
+    # url(r'^blog/', include('blog.urls')),
 
-    url(r'^ui/(?P<path>.*)$', 'django.views.static.serve', { 'document_root': prod.UI_ROOT, }),
-
-    url(r'^api/pool/', include('pool.urls')),
-    url(r'^api/discoveryrule/', include('discoveryrule.urls')),
-    url(r'^api/configuration/', include('configuration.urls')),
-  #  url(r'^api/usermanagement/', include('usermanagement.urls')),
-    url(r'^api/fabric/', include('fabric.urls')),
-    url(r'^api/resource/', include('resource.urls')),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^auth/', include('djoser.urls')),
-    url(r'^api/ignite', Ignite.as_view(), name='home'),
-    url(r'^api/fabric_profile/', include('fabric_profile.urls')),
 
-    #url(r'^docs/', include('rest_framework_swagger.urls')),
+    # Auth URL
+    url(r'^auth/', include('djoser.urls')),
+
+    # Swagger URL
+    url(r'^docs/', include('rest_framework_swagger.urls')),
+
+    # UI URL
+    url(r'^ui/(?P<path>.*)$', 'django.views.static.serve',
+        { 'document_root': settings.UI_ROOT, }),
+
+    # Ignite URLs
+    url(r'^api/admin', include('administration.urls')),
+    url(r'^api/bootstrap', include('bootstrap.urls')),
+    url(r'^api/config', include('config.urls')),
+    url(r'^api/discovery', include('discovery.urls')),
+    url(r'^api/fabric', include('fabric.urls')),
+    url(r'^api/feature', include('feature.urls')),
+    url(r'^api/image', include('image.urls')),
+    url(r'^api/pool', include('pool.urls')),
+    url(r'^api/switch', include('switch.urls')),
+    url(r'^api/workflow', include('workflow.urls')),
 )

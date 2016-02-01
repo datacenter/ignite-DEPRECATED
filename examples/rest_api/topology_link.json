@@ -1,0 +1,6 @@
+{
+    "src_switch": 51,
+    "dst_switch": 41,
+    "link_type": "Physical",
+    "num_ports": 1
+}

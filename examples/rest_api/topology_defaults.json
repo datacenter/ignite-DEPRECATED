@@ -1,0 +1,16 @@
+{
+    "switches": [
+        { "tier": "Core", "model": 7, "image_profile": 2 },
+        { "tier": "Spine", "model": 7, "image_profile": 2 },
+        { "tier": "Leaf", "model": 9, "image_profile": 1 },
+        { "tier": "Border", "model": 9, "image_profile": 1 }
+    ],
+    "links": [
+        {
+            "src_tier": "Spine",
+            "dst_tier": "Leaf",
+            "link_type": "VPC-Peer",
+            "num_ports": 1
+        }
+    ]
+}

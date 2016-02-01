@@ -1,0 +1,11 @@
+
+"vxlan" :
+{
+	"vxlan_vni_configured" :[
+        	{
+                   "tenant_id": "$$TENANT_ID$$",
+                   "vni":["$$VNIS_CONFIGURED$$"]
+            }
+	]
+}
+

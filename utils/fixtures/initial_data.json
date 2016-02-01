@@ -1,0 +1,20 @@
+[
+   {
+       "model" : "auth.user",
+       "pk" : 1,
+       "fields" : {
+           "password" : "pbkdf2_sha256$12000$mlWHovTjm7HW$oWb+oW9CHBaZELD0ieeIkaBI0p/65+mALwUxwfO2Y3Y=",
+           "last_login" : "2016-01-01 00:00:00.799121+05:30",
+           "is_superuser" :true,
+           "username" : "admin",
+           "first_name" : "admin",
+           "last_name" : "admin",
+           "email" : "admin@cisco.com",
+           "is_staff" : false,
+           "is_active" : true,
+           "date_joined" : "2016-01-01 00:00:00.799121+05:30"
+        }
+   }
+]
+         
+       

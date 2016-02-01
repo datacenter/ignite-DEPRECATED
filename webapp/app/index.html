@@ -1,0 +1,136 @@
+<!doctype html>
+<html class="no-js">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width">
+  <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+  <!-- build:css(.) styles/vendor.css -->
+  <!--BOOTSTRAP CSS-->
+  <!-- bower:css -->
+  <link rel="stylesheet" href="bower_components/angular-loading-bar/build/loading-bar.css" />
+  <link rel="stylesheet" href="bower_components/angular-chart.js/dist/angular-chart.css" />
+  <link rel="stylesheet" href="bower_components/ng-table/dist/ng-table.min.css" />
+  <link rel="stylesheet" href="bower_components/bootstrap-select/bootstrap-select.css" />
+  <link rel="stylesheet" href="bower_components/ngtoast/dist/ngToast.css" />
+  <!-- endbower -->
+  <!-- endbuild -->
+  <!-- build:css(.tmp) styles/main.css -->
+  <link rel="stylesheet" href="styles/plugincss/odometer-theme-car.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/custom.css">
+  <link rel="stylesheet" href="styles/plugincss/topology.custom.css">
+  <!-- endbuild -->
+
+  <!-- Css for Topology -->
+
+</head>
+
+<body ng-app="PoapServer" class="{{bodyClass}}" ng-controller="MainCtrl">
+  <toast></toast>
+  <ng-include src="'pages/common/views/svgimages.html'"></ng-include>
+  <!--[if lt IE 7]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+  <!-- Add your site or application content here -->
+  <div class="layout-content" style="margin:auto;">
+    <div class="doc-content">
+      <ng-include ng-if="!isLogin" src="'pages/common/views/header.html'" scope="" onload=""></ng-include>
+      <!--div ng-if="!isLogin && appServices.errors.length>0" class="alert alert-danger hide" ng-class="{'show': appServices.errors.length>0}" ng-repeat="error in appServices.errors" role="alert">
+        {{error.msg}}
+        <a href="javascript:void(0)" ng-click="deleteError($index)" class="glyphicon glyphicon-trash pull-right"></a>
+      </div-->
+      <div ng-view=""></div>
+      <ng-include ng-if="!isLogin" src="'pages/common/views/footer.html'" scope="" onload=""></ng-include>
+     
+    </div>
+  </div>
+  <!-- build:js(.) scripts/oldieshim.js -->
+  <!--[if lt IE 9]>
+    <script src="bower_components/es5-shim/es5-shim.js"></script>
+    <script src="bower_components/json3/lib/json3.js"></script>
+    <![endif]-->
+  <!-- endbuild -->
+  <!-- build:js(.) scripts/vendor.js -->
+  <!-- bower:js -->
+  <script src="bower_components/jquery/dist/jquery.js"></script>
+  <script src="bower_components/angular/angular.js"></script>
+  <script src="bower_components/angular-animate/angular-animate.js"></script>
+  <script src="bower_components/angular-aria/angular-aria.js"></script>
+  <script src="bower_components/angular-cookies/angular-cookies.js"></script>
+  <script src="bower_components/angular-messages/angular-messages.js"></script>
+  <script src="bower_components/angular-resource/angular-resource.js"></script>
+  <script src="bower_components/angular-route/angular-route.js"></script>
+  <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+  <script src="bower_components/angular-touch/angular-touch.js"></script>
+  <script src="bower_components/angular-storage/dist/angular-storage.js"></script>
+  <script src="bower_components/angular-jwt/dist/angular-jwt.js"></script>
+  <script src="bower_components/angular-loading-bar/build/loading-bar.js"></script>
+  <script src="bower_components/Chart.js/Chart.js"></script>
+  <script src="bower_components/angular-chart.js/dist/angular-chart.js"></script>
+  <script src="bower_components/a0-angular-storage/dist/angular-storage.js"></script>
+  <script src="bower_components/angular-gettext/dist/angular-gettext.js"></script>
+  <script src="bower_components/ng-table/dist/ng-table.min.js"></script>
+  <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+  <script src="bower_components/bootstrap-sass-official/assets/javascripts/bootstrap.js"></script>
+  <script src="bower_components/bootstrap-select/bootstrap-select.js"></script>
+  <script src="bower_components/angular-bootstrap-select/build/angular-bootstrap-select.js"></script>
+  <script src="bower_components/angular-svg-round-progressbar/build/roundProgress.min.js"></script>
+  <script src="bower_components/angular-file-model/angular-file-model.js"></script>
+  <script src="bower_components/angular-filereader/angular-filereader.min.js"></script>
+  <script src="bower_components/ngtoast/dist/ngToast.js"></script>
+  <!-- endbower -->
+  <!-- endbuild -->
+
+  <!-- build:js({.tmp,app}) scripts/scripts.js -->
+  <script src="scripts/app.js"></script>
+  <script src="scripts/utils/services.js"></script>
+  <script src="scripts/controllers/main-ctrl.js"></script>
+  <script src="scripts/controllers/header-ctrl.js"></script>
+  <script src="scripts/controllers/login-ctrl.js"></script>
+  <script src="scripts/controllers/registration-ctrl.js"></script>
+  <script src="scripts/controllers/pool-ctrl.js"></script>
+  <script src="scripts/controllers/configuration-crtl.js"></script>
+  <script src="scripts/controllers/construct-ctrl.js"></script>
+  <script src="scripts/controllers/configlets-ctrl.js"></script>
+  <script src="scripts/controllers/images-ctrl.js"></script>
+  <script src="scripts/controllers/switches-ctrl.js"></script>
+  <script src="scripts/controllers/linecards-ctrl.js"></script>
+  <script src="scripts/controllers/topology-ctrl.js"></script>
+  <script src="scripts/controllers/addTopology-ctrl.js"></script>
+  <script src="scripts/controllers/discoveryRule-ctrl.js"></script>
+  <script src="scripts/controllers/fabricInstance-ctrl.js"></script>
+  <script src="scripts/controllers/addFabric-ctrl.js"></script>
+  <script src="scripts/controllers/deployedFabric-ctrl.js"></script>
+  <script src="scripts/controllers/deployedSwitches-ctrl.js"></script>
+  <script src="scripts/controllers/profileTemplates-ctrl.js"></script>
+  <script src="scripts/controllers/fabricProfile-ctrl.js"></script>
+  <script src="scripts/controllers/fabricProfileAddEdit-ctrl.js"></script>
+  <script src="scripts/controllers/errorModal-ctrl.js"></script>
+  <script src="scripts/directives/directives.js"></script>
+  <script src="scripts/filters/filters.js"></script>
+  <script src="scripts/controllers/task-ctrl.js"></script>
+  <script src="scripts/controllers/workflow-ctrl.js"></script>
+  <script src="scripts/controllers/addWorkflow-ctrl.js"></script>
+  <script src="scripts/controllers/aaa-ctrl.js"></script>
+  <script src="scripts/controllers/users-ctrl.js"></script>
+  <script src="scripts/controllers/backup-ctrl.js"></script>
+  <script src="scripts/controllers/groups-ctrl.js"></script>
+  <!-- <script src="scripts/controllers/rma-ctrl.js"></script> -->
+  <!-- endbuild -->
+
+  <!-- settings should be outside the minimize process -->
+  <script src="scripts/pluginjs/snap.svg-min.js"></script>
+  <script src="scripts/pluginjs/snap.svg-connectors.js"></script>
+  <script src="scripts/pluginjs/svg-pan-zoom.min.js"></script>
+  <script src="scripts/utils/topology-generator.js"></script>
+  <script src="scripts/utils/settings.js"></script>
+  <script src="scripts/modules/topology_viewer.js"></script>
+
+
+
+</body>
+
+</html>

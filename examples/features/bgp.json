@@ -1,0 +1,7 @@
+
+"bgp":
+	{
+	   "asn":"$$ASN_NUMBER$$",
+           "route_reflector":$$ROUTE_REFLECTOR_ENABLED$$
+	}
+

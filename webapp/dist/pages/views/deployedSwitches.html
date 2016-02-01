@@ -1,0 +1,109 @@
+<div id="main" class="content container">
+    <div class="table-header-cont">
+        <div class="pull-left">
+            <h5 class="page-header">Deployed Switches ({{tableParams.total()}})</h5>
+        </div>
+        <div class="pull-right">
+            <div class="search-cont">
+                <input type="search" class="form-control" title="Search" ng-model="search" data-toggle="tooltip" placeholder="Search">
+                <i class="glyphicon glyphicon-search"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+         <table class="table table-hover" ng-table="tableParams">
+            <thead>
+                <tr>
+                    <th width="2%">#</th>
+                    <th class="sortable" 
+                    ng-class="{
+                        'sort-asc': tableParams.isSortBy('name', 'asc'),
+                        'sort-desc': tableParams.isSortBy('name', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'name' : tableParams.isSortBy('name', 'asc') ? 'desc' : 'asc'})"
+                    >
+                    Name</th>
+                    <th class="sortable" 
+                    ng-class="{
+                        'sort-asc': tableParams.isSortBy('topology.name', 'asc'),
+                        'sort-desc': tableParams.isSortBy('topology.name', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'topology.name' : tableParams.isSortBy('topology.name', 'asc') ? 'desc' : 'asc'})"
+                    >
+                    Fabric Name</th>
+
+                    <th class="sortable" 
+                    ng-class="{
+                        'sort-asc': tableParams.isSortBy('boot_detail.serial_number', 'asc'),
+                        'sort-desc': tableParams.isSortBy('boot_detail.serial_number', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'boot_detail.serial_number' : tableParams.isSortBy('boot_detail.serial_number', 'asc') ? 'desc' : 'asc'})"
+                    >
+                    Serial Number</th>
+                    <th class="sortable"
+                    ng-class="{
+                        'sort-asc': tableParams.isSortBy('boot_detail.boot_status', 'asc'),
+                        'sort-desc': tableParams.isSortBy('boot_detail.boot_status', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'boot_detail.boot_status' : tableParams.isSortBy('boot_detail.boot_status', 'asc') ? 'desc' : 'asc'})"
+                    >Boot Status</th>
+                    <th class="sortable" 
+                    ng-class="{
+                        'sort-asc': tableParams.isSortBy('boot_detail.boot_time', 'asc'),
+                        'sort-desc': tableParams.isSortBy('boot_detail.boot_time', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'boot_detail.boot_time' : tableParams.isSortBy('boot_detail.boot_time', 'asc') ? 'desc' : 'asc'})"
+                    >
+                    Boot Time</th>
+
+                     <th class="sortable" 
+                    ng-class="{
+                        'sort-asc': tableParams.isSortBy('boot_detail.match_type', 'asc'),
+                        'sort-desc': tableParams.isSortBy('boot_detail.match_type', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'boot_detail.match_type' : tableParams.isSortBy('boot_detail.match_type', 'asc') ? 'desc' : 'asc'})"
+                    >
+                    Match Type</th>
+
+                    <th class="sortable" 
+                    ng-class="{
+                        'sort-asc': tableParams.isSortBy('boot_detail.discovery_rule_name', 'asc'),
+                        'sort-desc': tableParams.isSortBy('boot_detail.discovery_rule_name', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'boot_detail.discovery_rule_name' : tableParams.isSortBy('boot_detail.discovery_rule_name', 'asc') ? 'desc' : 'asc'})"
+                    >
+                    Discovery Rule</th>
+
+                    <th>Config</th>
+                    <th>Logs</th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-class="{active: classVal}" ng-repeat="switch in $data | filter : search">
+                    <td>{{appServices.generateSeq(tableParams.page(), tableParams.count(), $index)}}</td>
+                    <td>{{switch.name}}</td>
+                    <td>{{switch.topology.name}}</td>
+                    <td>{{switch.boot_detail.serial_number}}</td>
+                    <td>{{switch.boot_detail.boot_status}}</td>
+                    <td>{{switch.boot_detail.boot_time | date : appSettings.dateFormat}}</td>
+                    <td>{{switch.boot_detail.match_type}}</td>
+                    <td>
+                            <a href="javascript:void(0)"
+                                ng-click="openRuleModal(switch.boot_detail.discovery_rule)"
+                                ng-if="switch.boot_detail.discovery_rule_name != '--'">
+                                {{switch.boot_detail.discovery_rule_name}}
+                            </a>
+                            <span ng-if="switch.boot_detail.discovery_rule_name == '--'"> -- </span>
+
+                    </td>
+                    <td><a href="javascript:void(0)" ng-click="openConfigModal(switch.id)">View</a></td>
+                    <td><a href="javascript:void(0)" ng-click="openLogModal(switch.id)">View</a></td>
+                </tr>
+            </tbody>
+        </table>
+        
+    </div>
+</div>
+

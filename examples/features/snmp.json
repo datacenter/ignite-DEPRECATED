@@ -1,0 +1,48 @@
+
+"snmp":{
+  "enabled": $$SNMP_ENABLED$$,
+  "features":[
+	{
+	  "id":"bgp",
+	  "enabled": $$SNMP_BGP_ENABLED$$
+	},
+	{
+	  "id":"bridge",
+	  "enabled": $$SNMP_BRIDGE_ENABLED$$
+	},
+	{
+	  "id":"aaa",
+	  "enabled": $$SNMP_AAA_ENABLED$$
+	},
+	{
+	  "id":"callhome",
+	  "enabled": $$SNMP_CALLHOME_ENABLED$$
+	},
+	{
+	  "id":"snmp",
+	  "enabled": $$SNMP_SNMP_ENABLED$$
+	}
+  ],
+  "servers":[
+	{  "ip": "$$SNMP_SERVER_IP_1$$",
+	"udp_port": "$$SNMP_UDP_PORT$$",
+	"version": "$$SNMP_VERSION$$",
+	"community":"community"
+	},
+	{  "ip": "$$SNMP_SERVER_IP_2$$",
+	"udp_port": "$$SNMP_UDP_PORT$$",
+	"version": "$$SNMP_VERSION$$",
+	"community":"community"
+	}
+  ],
+  "users":[
+ 	  {
+		"user":"admin",
+		"auth":"sha",
+		"pwd":"cisco123",
+		"priv_passphrase":"abcdefgh",
+		"engineID":""
+	  }
+  ]
+}
+

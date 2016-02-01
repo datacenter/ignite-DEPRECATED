@@ -1,141 +1,252 @@
-__author__  = "arunrajms"
+from django.db.models import F
+from netaddr import IPAddress, IPNetwork
 
-from django.shortcuts import render
-from rest_framework.views import APIView
-from django.views.generic.base import View
-from rest_framework.response import Response
-from rest_framework import status
-import json
-import re
+from constants import *
+from fabric.models import Fabric, Switch
+from models import Pool, PoolEntry
+from utils.exception import IgniteException
+
 import logging
-
-from models import Pool
-from models import PoolDetail
-from models import PoolFabricDetail
-
-
-from usermanagement.utils import RequestValidator
-from django.http import JsonResponse
-from django.http import HttpResponse, Http404
-from django.views.decorators.csrf import csrf_exempt
-from pprint import *
-
 logger = logging.getLogger(__name__)
 
-def generate_pool_value(pool_id,fabric_id,switch_name,ifvpc=0):
 
-    logger.debug("Generating Pool with Pool ID: "+str(pool_id)+" Fabric ID: "+str(fabric_id)+" Switch Name: "+str(switch_name))
-    pools = Pool.objects.filter(id=pool_id)
-    pool = pools.first()
-    
-    if(pool.scope =='global'):
-        logger.debug("Got global pool")
-        
-        pooldetails = PoolDetail.objects.filter(index=pool_id,assigned=str(switch_name))
-        
-        if (pooldetails.__len__() == 0 ):
-            if(pool.available==0):
-                logger.error("Pool is FULL!!!")
-                return None
-            
-            pooldetails = PoolDetail.objects.filter(index=pool_id,assigned='')
-            pooldetail = pooldetails.first()
-            pooldetail.assigned = str(switch_name)
-            pooldetail.save()
-            pool.used = pool.used + 1
-            pool.available = pool.available-1
-            pool.save()
-        else:
-            logger.debug("Switch name already exists in pool")
-            pooldetail = pooldetails.first()
-            if ifvpc == 0:
-                pooldetail.save()
-            
-        return pooldetail.value
-        
-    elif(pool.scope == 'fabric'):
-        
-        logger.debug("Got fabric pool")
-        pooldetails = PoolDetail.objects.filter(index=pool_id)
-        poolfabdetails = PoolFabricDetail.objects.filter(pool_id=pool_id,assigned=str(switch_name),fab_id=fabric_id)
-        pool_values = []
-        pool_used_values = []
-        if pooldetails.__len__() - poolfabdetails.__len__() == 0:
-            logger.error("Exhausted pools")
-            return None
-            
-        for pool_det_obj in pooldetails:
-            pool_values.append(pool_det_obj.value)
-            
-        if poolfabdetails.__len__() == 0 :
-            #pool.used = pool.used + 1
-            pool_value = pool_values[0]
-        else:
-            for pool_fab_det_obj in poolfabdetails:
-                pool_used_values.append(pool_fab_det_obj.value)
-                
-            pool_un_used_values = list(set(pool_values)-set(pool_used_values))
-            pool_un_used_values.sort()
-            pool_value = pool_un_used_values[0]
-        
-        pool_fab_det_obj = PoolFabricDetail()
-        pool_fab_det_obj.pool_id = pool
-        pool_fab_det_obj.value = str(pool_value)
-        pool_fab_det_obj.fab_id = fabric_id
-        pool_fab_det_obj.assigned = str(switch_name)
-        pool_fab_det_obj.save()
-        return pool_value
-        
-        
-        
+def get_all_pools():
+    pools = Pool.objects.all()
+    pool_list = list()
+    for pool in pools:
+        pool.used = len(PoolEntry.objects.filter(pool_id=pool.id).
+                        exclude(switch=None))
+        pool.available = len(PoolEntry.objects.filter(pool_id=pool.id).
+                             filter(switch=None))
+        pool_list.append(pool)
 
-def generate_vpc_peer_dest(fabric_id, switch_name,peer_switch_name):
-    logger.debug("Generating VPC peer dest with switch name: "+str(switch_name)+" Peer Switch Name: "+str(peer_switch_name))
-    
-    pooldetails = PoolDetail.objects.filter(assigned=str(switch_name))
-    
-    for pool_det_obj in pooldetails:
-        pool_id = pool_det_obj.index.id
-        #print pool_id
-        pools = Pool.objects.filter(type='MgmtIP',id=pool_id)
-        if pools.__len__ != 0 :
-            break
-    
-    return generate_pool_value(pool_id, fabric_id, peer_switch_name,1)
-        
-def delete_pool_value(pool_id,fabric_id,switch_name=100):
-
-    logger.debug("Deleting PoolDetail with Pool ID: "+str(pool_id)+" Fabric ID: "+str(fabric_id)+" Switch ID: "+str(switch_name))
-    pools = Pool.objects.filter(id=pool_id)
-    pool = pools.first()
-    #print pool.id
-    
-    if(pool.scope =='global'):
-        logger.debug("Got global pool to delete")
-        if(pool.available==0):
-            return None
-        
-        pooldetails = PoolDetail.objects.filter(index=pool_id,assigned=str(switch_name))
-        pooldetail = pooldetails.first()
-        pooldetail.assigned = str(switch_name)
-        pooldetail.save()
-        pool.used = pool.used + 1
-        pool.available = pool.available-1
-        pool.save()
-        return pooldetail.value
-        #pooldetails.save()
-        #print pooldetails.values()
+    return pool_list
 
 
-def delete_switchid_pool(switch_name):
-    logger.debug("Deleting PoolDetail for Switch ID: "+str(switch_name))
-    pools = Pool.objects.filter(scope="global")
-    
-    for pool_obj in pools:    
-        pooldetails = PoolDetail.objects.filter(index=pool_obj.id,assigned=str(switch_name))
-        for single_obj in pooldetails.iterator():
-            single_obj.assigned=''
-            single_obj.save()
-            pool_obj.used = pool_obj.used - 1
-            pool_obj.available = pool_obj.available + 1
-            pool_obj.save()
+def add_pool(data, user):
+    _validate_pool(data[BLOCKS], data[TYPE])
+
+    # create new pool
+    pool = Pool()
+    pool.name = data[NAME]
+    pool.type = data[TYPE]
+    pool.scope = data[SCOPE]
+    pool.blocks = data[BLOCKS]
+    pool.updated_by = user
+    pool.save()
+
+    if pool.scope == FABRIC:
+        return pool
+
+    # if scope is global create pool entries
+    if pool.type == INTEGER:
+        _create_integer_pool(pool, pool.blocks)
+    elif pool.type == IPV4:
+        _create_ipv4_pool(pool, pool.blocks)
+    elif pool.type == IPV6:
+        _create_ipv6_pool(pool, pool.blocks)
+
+    return pool
+
+
+def update_pool(data, id, user):
+    pool = get_pool(id)
+    blocks = pool.blocks + data
+    _validate_pool(blocks, pool.type)
+    pool.blocks = blocks
+    pool.save()
+
+    if pool.scope == FABRIC:
+      # here, get unique list of fabric id's to extend pool entry with new blocks
+        fabric_list = PoolEntry.objects.filter(pool_id=pool.id).exclude(fabric=None).values_list('fabric', flat=True).distinct()
+        for fabric_id in fabric_list:
+            fabric = Fabric.objects.get(pk=fabric_id)
+            if pool.type == INTEGER:
+                _create_integer_pool(pool, data, fabric)
+            elif pool.type == IPV4:
+                _create_ipv4_pool(pool, data, fabric)
+            elif pool.type == IPV6:
+                _create_ipv6_pool(pool, data, fabric)
+        return pool
+
+    if pool.type == INTEGER:
+        _create_integer_pool(pool, data)
+    elif pool.type == IPV4:
+        _create_ipv4_pool(pool, data)
+    elif pool.type == IPV6:
+        _create_ipv6_pool(pool, data)
+
+    return pool
+
+
+def _validate_pool(blocks, data_type):
+    num_blocks = len(blocks)
+
+    for index in range(0, num_blocks):
+        block = blocks[index]
+
+        if data_type == INTEGER:
+            start = int(block[START])
+            end = int(block[END])
+
+            if end < start:
+                raise IgniteException(ERR_INV_POOL_RANGE)
+
+            for inner_index in range(index + 1, num_blocks):
+                curr_start = int(blocks[inner_index][START])
+                curr_end = int(blocks[inner_index][END])
+
+                if (start <= curr_start <= end or
+                    start <= curr_end <= end or
+                    curr_start <= start <= curr_end or
+                    curr_start <= end <= curr_end):
+                    raise IgniteException(ERR_POOL_RANGE_OVERLAP)
+
+        elif data_type == IPV4 or data_type == IPV6:
+            start = IPNetwork(block[START])
+            end = IPNetwork(block[END])
+
+            if start.prefixlen != end.prefixlen:
+                raise IgniteException(ERR_MISMATCH_PREFIX_LEN)
+
+            if index == 0:
+                prefix = start.prefixlen
+            else:
+                if prefix != start.prefixlen:
+                    raise IgniteException(ERR_MISMATCH_PREFIX_LEN_BLOCKS)
+
+            if end.ip < start.ip:
+                raise IgniteException(ERR_INV_POOL_RANGE)
+
+            for inner_index in range(index + 1, num_blocks):
+                curr_start = IPNetwork(blocks[inner_index][START])
+                curr_end = IPNetwork(blocks[inner_index][END])
+
+                if (start <= curr_start <= end or
+                    start <= curr_end <= end or
+                    curr_start <= start <= curr_end or
+                    curr_start <= end <= curr_end):
+                    raise IgniteException(ERR_POOL_RANGE_OVERLAP)
+
+
+def _create_integer_pool(pool, blocks, fabric=None):
+    for block in blocks:
+        start = int(block[START])
+        end = int(block[END])
+
+        for value in range(start, end + 1):
+            entry = PoolEntry()
+            entry.pool = pool
+            entry.fabric = fabric
+            entry.value = str(value)
+            entry.save()
+
+
+def _create_ipv4_pool(pool, blocks, fabric=None):
+
+    for block in blocks:
+        start = IPNetwork(block[START])
+        end = IPNetwork(block[END])
+
+        for ip in range(start.ip, end.ip + 1):
+            entry = PoolEntry()
+            entry.pool = pool
+            entry.fabric = fabric
+            entry.value = str(IPAddress(ip)) + "/" + str(start.prefixlen)
+            entry.save()
+
+
+def _create_ipv6_pool(pool, blocks, fabric=None):
+
+    for block in blocks:
+        start = IPNetwork(block[START])
+        end = IPNetwork(block[END])
+
+        for ip in range(start.ip, end.ip + 1):
+            entry = PoolEntry()
+            entry.pool = pool
+            entry.fabric = fabric
+            entry.value = str(IPAddress(ip)) + "/" + str(start.prefixlen)
+            entry.save()
+
+
+def get_pool(id):
+    pool = Pool.objects.get(pk=id)
+
+    if pool.scope == GLOBAL:
+        pool.entries = (PoolEntry.objects.filter(pool_id=pool.id).
+                        exclude(switch=None))
+
+        entry_list = list()
+
+        for entry in pool.entries:
+            entry.assigned = entry.switch.name
+            entry_list.append(entry)
+
+        pool.entries = entry_list
+
+    return pool
+
+
+def delete_pool(id):
+    pool = Pool.objects.get(pk=id)
+
+    if pool.ref_count:
+        raise IgniteException(ERR_POOL_IN_USE)
+
+    pool.delete()
+
+
+def update_pool_ref_count(id, value):
+    Pool.objects.filter(pk=id).update(ref_count=F('ref_count')+value)
+
+
+def allocate_pool_entry(pool_id, switch_id, switch):
+    logger.debug("pool id = %s, switch id = %s",
+                 pool_id, switch_id)
+
+    if not switch:
+        switch = Switch.objects.get(pk=switch_id)
+
+    pool = Pool.objects.get(pk=pool_id)
+
+    if pool.scope == GLOBAL:
+        fabric = None
+    else:
+        if not switch.topology:
+            raise IgniteException(ERR_NON_FABRIC_POOL)
+
+        fabric = Fabric.objects.get(pk=switch.topology.id)
+        # check if fabric specific entries have been created
+        entry = PoolEntry.objects.filter(pool=pool, fabric=fabric)
+
+        if not entry:
+            # create fabric specific entries
+            if pool.type == INTEGER:
+                _create_integer_pool(pool, pool.blocks, fabric)
+            elif pool.type == IPV4:
+                _create_ipv4_pool(pool, pool.blocks, fabric)
+            elif pool.type == IPV6:
+                _create_ipv6_pool(pool, pool.blocks, fabric)
+
+    # check if pool entry has already been allocated to this switch
+    try:
+        entry = PoolEntry.objects.get(pool=pool, fabric=fabric,
+                                      switch=switch)
+        logger.debug("value = %s", entry.value)
+        return entry.value
+    except PoolEntry.DoesNotExist:
+        pass
+
+    # find new entry to allocate
+    entries = PoolEntry.objects.filter(pool=pool, fabric=fabric, switch=None)
+
+    if not entries:
+        raise IgniteException(ERR_POOL_FULL)
+
+    # save assigned switch in pool entry
+    entry = entries.first()
+    entry.switch = switch
+    entry.save()
+    logger.debug("value = %s", entry.value)
+    return entry.value

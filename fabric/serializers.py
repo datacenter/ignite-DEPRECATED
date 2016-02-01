@@ -1,0 +1,219 @@
+from rest_framework import serializers
+
+from constants import LINK_TYPES, MATCH_TYPES, TIER_NAMES
+from models import Topology
+
+
+NUM_LINKS_MIN = 1
+NUM_LINKS_MAX = 4
+COUNT_MIN = 0
+COUNT_MAX = 16
+
+
+class NameSerializer(serializers.Serializer):
+
+    name = serializers.CharField()
+
+
+class TopologyBriefSerializer(serializers.Serializer):
+
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField()
+    model_name = serializers.CharField()
+    submit = serializers.BooleanField()
+    updated = serializers.DateTimeField()
+    updated_by = serializers.CharField()
+
+
+class DefaultLinkSerializer(serializers.Serializer):
+
+    src_tier = serializers.ChoiceField(TIER_NAMES)
+    dst_tier = serializers.ChoiceField(TIER_NAMES)
+    link_type = serializers.ChoiceField(LINK_TYPES)
+    num_links = serializers.IntegerField(min_value=NUM_LINKS_MIN,
+                                         max_value=NUM_LINKS_MAX)
+
+
+class TopologyPostDefaultsSerializer(serializers.Serializer):
+
+    class TopologyPostDefaultSwitchSerializer(serializers.Serializer):
+
+        tier = serializers.ChoiceField(TIER_NAMES)
+        model = serializers.IntegerField()
+        image_profile = serializers.IntegerField()
+
+    switches = TopologyPostDefaultSwitchSerializer(many=True)
+    links = DefaultLinkSerializer(many=True)
+
+
+class TopologyPostSerializer(serializers.Serializer):
+
+    name = serializers.CharField()
+    model_name = serializers.CharField()
+    defaults = TopologyPostDefaultsSerializer()
+
+
+class TopologyDefaultsSerializer(serializers.Serializer):
+
+    class TopologyDefaultSwitchSerializer(serializers.Serializer):
+
+        tier = serializers.ChoiceField(TIER_NAMES)
+        model = serializers.PrimaryKeyRelatedField(read_only=True)
+        image_profile = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    switches = TopologyDefaultSwitchSerializer(many=True)
+    links = DefaultLinkSerializer(many=True)
+
+
+class LinkSerializer(serializers.Serializer):
+
+    id = serializers.IntegerField(read_only=True)
+    src_switch = serializers.PrimaryKeyRelatedField(read_only=True)
+    dst_switch = serializers.PrimaryKeyRelatedField(read_only=True)
+    link_type = serializers.ChoiceField(LINK_TYPES)
+    num_links = serializers.IntegerField(min_value=NUM_LINKS_MIN,
+                                         max_value=NUM_LINKS_MAX)
+    src_ports = serializers.CharField()
+    dst_ports = serializers.CharField()
+
+
+class TopologySerializer(serializers.Serializer):
+
+    class TopologySwitchSerializer(serializers.Serializer):
+
+        id = serializers.IntegerField(read_only=True)
+        name = serializers.CharField()
+        tier = serializers.ChoiceField(TIER_NAMES)
+        model = serializers.PrimaryKeyRelatedField(read_only=True)
+        image_profile = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField()
+    model_name = serializers.CharField()
+    submit = serializers.BooleanField()
+    defaults = TopologyDefaultsSerializer()
+    switches = TopologySwitchSerializer(many=True)
+    links = LinkSerializer(many=True)
+
+
+class SwitchPostSerializer(serializers.Serializer):
+
+    class TierCountSerializer(serializers.Serializer):
+
+        tier = serializers.ChoiceField(TIER_NAMES)
+        count = serializers.IntegerField(min_value=COUNT_MIN,
+                                         max_value=COUNT_MAX)
+
+    switches = TierCountSerializer(many=True)
+
+
+class TopologySwitchPutSerializer(serializers.Serializer):
+
+    model = serializers.IntegerField()
+    image_profile = serializers.IntegerField(allow_null=True)
+
+
+class LinkPostSerializer(serializers.Serializer):
+
+    src_switch = serializers.IntegerField()
+    dst_switch = serializers.IntegerField()
+    link_type = serializers.ChoiceField(LINK_TYPES)
+    num_links = serializers.IntegerField(min_value=NUM_LINKS_MIN,
+                                         max_value=NUM_LINKS_MAX)
+
+
+class LinkPutSerializer(serializers.Serializer):
+
+    link_type = serializers.ChoiceField(LINK_TYPES)
+    num_links = serializers.IntegerField(min_value=NUM_LINKS_MIN,
+                                         max_value=NUM_LINKS_MAX)
+    src_ports = serializers.CharField()
+    dst_ports = serializers.CharField()
+
+
+class FabricBriefSerializer(serializers.Serializer):
+
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField()
+    model_name = serializers.CharField()
+    submit = serializers.BooleanField()
+    updated = serializers.DateTimeField()
+    updated_by = serializers.CharField()
+    site = serializers.CharField()
+
+
+class FabricProfilesSerializer(serializers.Serializer):
+
+    tier = serializers.ChoiceField(TIER_NAMES)
+    config_profile = serializers.IntegerField(allow_null=True)
+    feature_profile = serializers.IntegerField(allow_null=True)
+    workflow = serializers.IntegerField(allow_null=True)
+
+
+class FabricPostSerializer(serializers.Serializer):
+
+    name = serializers.CharField()
+    topology = serializers.IntegerField()
+    switches = FabricProfilesSerializer(many=True)
+
+
+class FabricDefaultsSerializer(serializers.Serializer):
+
+    class FabricDefaultSwitchSerializer(serializers.Serializer):
+
+        tier = serializers.ChoiceField(TIER_NAMES)
+        model = serializers.PrimaryKeyRelatedField(read_only=True)
+        image_profile = serializers.PrimaryKeyRelatedField(read_only=True)
+        config_profile = serializers.PrimaryKeyRelatedField(read_only=True)
+        feature_profile = serializers.PrimaryKeyRelatedField(read_only=True)
+        workflow = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    switches = FabricDefaultSwitchSerializer(many=True)
+    links = DefaultLinkSerializer(many=True)
+
+
+class FabricSerializer(serializers.Serializer):
+
+    class FabricSwitchSerializer(serializers.Serializer):
+
+        class SwitchBootDetailSerializer(serializers.Serializer):
+
+            boot_status = serializers.CharField()
+            match_type = serializers.ChoiceField(MATCH_TYPES)
+            boot_time = serializers.DateTimeField()
+
+        id = serializers.IntegerField(read_only=True)
+        name = serializers.CharField()
+        tier = serializers.ChoiceField(TIER_NAMES)
+        serial_num = serializers.CharField()
+        model = serializers.PrimaryKeyRelatedField(read_only=True)
+        image_profile = serializers.PrimaryKeyRelatedField(read_only=True)
+        config_profile = serializers.PrimaryKeyRelatedField(read_only=True)
+        feature_profile = serializers.PrimaryKeyRelatedField(read_only=True)
+        workflow = serializers.PrimaryKeyRelatedField(read_only=True)
+        boot_detail = SwitchBootDetailSerializer()
+
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField()
+    model_name = serializers.CharField()
+    submit = serializers.BooleanField()
+    site = serializers.CharField()
+    defaults = FabricDefaultsSerializer()
+    switches = FabricSwitchSerializer(many=True)
+    links = LinkSerializer(many=True)
+
+
+class FabricSwitchPutSerializer(serializers.Serializer):
+
+    name = serializers.CharField()
+    serial_num = serializers.CharField(allow_blank=True)
+    model = serializers.IntegerField()
+    image_profile = serializers.IntegerField(allow_null=True)
+    config_profile = serializers.IntegerField(allow_null=True)
+    feature_profile = serializers.IntegerField(allow_null=True)
+    workflow = serializers.IntegerField(allow_null=True)
+
+
+class FabricProfilesPutSerializer(serializers.Serializer):
+
+    profiles = FabricProfilesSerializer(many=True)

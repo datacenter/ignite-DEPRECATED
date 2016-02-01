@@ -1,0 +1,188 @@
+<div id="switchModal">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" ng-click="cancel()" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <h3 class="modal-title pull-left">Task</h3>
+        <!-- <p class="pull-right errorHighlight" data-ng-show="fieldErr">
+            All fields are mandatory
+        <p> -->
+        <div class="pull-right modal-form-action">
+            <a href="javascript:void(0);" ng-show="action == 'view' && mode != 'view'" tooltip="Edit" tooltip-placement="bottom">
+                <span class="glyphicon glyphicon-pencil" ng-click="changeAction('edit')" aria-hidden="true"></span>
+            </a>
+            <a href="javascript:void(0);" ng-click="deleteTask()" tooltip="Delete" ng-show="action == 'view' && mode != 'view'"  tooltip-placement="bottom">
+                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+            </a>
+        </div>
+    </div>
+    <div class="modal-body">
+        <form name="taskForm">
+            <div class="row">
+                <div data-ng-if="submitData.page == 'workflow'">
+                    <div class="col-xs-4">
+                        <div class="form-group">
+                            <label for="name">Select a Task</label>
+                            <select class="form-control"
+                             data-ng-model="submitData.task_selected"
+                             data-ng-disabled="action != 'add'"
+                             data-ng-change="getTaskDetails()"
+                             data-ng-options="v.id as v.name for (k,v) in task_list">
+                             <option value="">--Select--</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" data-ng-if="submitData.page == 'workflow'"></div>
+                <div data-ng-if="submitData.page == 'task' || (submitData.page == 'workflow' && submitData.task_selected != '')">
+                    <div class="col-xs-4" data-ng-if="submitData.page == 'task'">
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" class="form-control" 
+                            placeholder="Name"
+                            data-ng-required
+                            data-ng-disabled="action == 'view'"
+                            ng-model="submitData.task.name">
+                        </div>
+                    </div>
+                    <div class="col-xs-4" data-ng-if="submitData.page == 'task'">
+                        <div class="form-group">
+                            <label for="desc">Description</label>
+                            <input type="text" class="form-control" 
+                            placeholder="Task Description"
+                            data-ng-required
+                            data-ng-disabled="action == 'view'"
+                            ng-model="submitData.task.desc">
+                        </div>
+                    </div>
+                    <div class="col-xs-4" data-ng-if="submitData.page == 'task'">
+                        <div class="form-group">
+                            <label for="handler">Handler</label>
+                            <input type="text" class="form-control" 
+                            placeholder="Handler"
+                            data-ng-required
+                            data-ng-disabled="action == 'view'"
+                            ng-model="submitData.task.handler">
+                        </div>
+                    </div>
+                    <div class="col-xs-4" data-ng-if="submitData.page == 'task'">
+                        <div class="form-group">
+                            <label for="function_name">Function Name</label>
+                            <input type="text" class="form-control" 
+                            placeholder="Function Name"
+                            data-ng-required
+                            data-ng-disabled="action == 'view'"
+                            ng-model="submitData.task.function">
+                        </div>
+                    </div>
+                    <div class="row"></div>
+                    <div class="row_head" data-ng-if="submitData.page == 'task'">
+                    <div class="row">
+                        <div class="col-xs-4">
+                            <label for="startRange" class="grid_label sub-heading">Location</label>
+                        </div>
+                    </div>
+                    </div>
+                    <div class="col-xs-4" data-ng-if="submitData.page == 'task'">
+                        <div class="form-group">
+                            <label for="hostname">Host Name</label>
+                            <input type="text" class="form-control" 
+                            placeholder="Host Name"
+                            data-ng-required
+                            data-ng-disabled="action == 'view'"
+                            ng-model="submitData.task.location_server_ip">
+                        </div>
+                    </div>
+                    <div class="col-xs-4" data-ng-if="submitData.page == 'task'">
+                        <div class="form-group">
+                            <label for="method">Method</label>
+                            <select class="form-control"
+                             data-ng-model="submitData.task.location_access_protocol"
+                             data-ng-disabled="action == 'view'"
+                             required
+                             data-ng-options="method as method for method in methodList">
+                             <option value="">--Select--</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-xs-4" data-ng-if="submitData.page == 'task'">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" class="form-control" 
+                            placeholder="Username"
+                            data-ng-required
+                            data-ng-disabled="action == 'view'"
+                            ng-model="submitData.task.location_server_user">
+                        </div>
+                    </div>
+                    <div class="col-xs-4" data-ng-if="submitData.page == 'task'">
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="text" class="form-control" 
+                            placeholder="Password"
+                            data-ng-required
+                            data-ng-disabled="action == 'view'"
+                            ng-model="submitData.task.location_server_password">
+                        </div>
+                    </div>
+                    <div class="row" data-ng-if="submitData.page == 'task'"></div>
+                    <div class="row_head">
+                    <div class="row">
+                        <div class="col-xs-4">
+                            <label for="startRange" class="grid_label sub-heading">Parameters</label>
+                        </div>
+                    </div>
+                    </div>
+                    <div data-ng-repeat="(key,value) in submitData.task.parameters">
+                        <div class="col-xs-4">
+                            <div class="form-group">
+                                <input type="text" class="form-control" 
+                                placeholder="Parameter"
+                                data-ng-required
+                                data-ng-disabled="action == 'view' || submitData.page == 'workflow'"
+                                data-ng-blur="editParam(key)"
+                                ng-model="key">
+                            </div>
+                        </div>
+                        <div class="col-xs-4" data-ng-if="submitData.page == 'workflow'">
+                            <div class="form-group">
+                                <input type="text" class="form-control" 
+                                placeholder="Value"
+                                data-ng-required
+                                data-ng-change="editParamVal(key,value)"
+                                data-ng-disabled="action == 'view'"
+                                ng-model="value">
+                            </div>
+                        </div>
+                        <div class="col-xs-3">
+                            <a href="javascript:void(0);"
+                            ng-hide="paramSize == 1 || action == 'view' || submitData.page == 'workflow'"
+                            ng-click="removeParam(key)">
+                                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                                <span class="hidden-xs"></span>
+                            </a>
+                            <a href="javascript:void(0);" class="pull-right"
+                                ng-hide="($index != 0) || action == 'view' || submitData.page == 'workflow'"
+                                ng-click="addParam()" style="right : 100px">
+                                <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+                                <span class="hidden-xs">Add Param</span> 
+                            </a>
+                        </div>
+                        <div class="row"></div>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-trans btn-default btn-raised" ng-click="cancel()">Cancel</button>
+    <button class="btn btn-raised btn-primary"
+        ng-hide="action == 'view'"
+        ng-click="ok()">
+        Save
+    </button>
+</div>
+</div>
+

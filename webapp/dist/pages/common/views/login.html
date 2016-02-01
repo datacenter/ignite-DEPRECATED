@@ -1,0 +1,45 @@
+<div>
+    <div class="login">
+        <div class="container">
+            <div class="signin-card">
+                <div class="signin-header text-center">
+                        <img class="img-responsive" src="images/color-logo.png" alt="Logo">
+                </div>
+                <div class="signin-body">
+                    <form class="signin-form material" ng-submit="login();">
+                        <h3>Login</h3>
+                        <div class="form-group">
+                            <input type="text" class="form-control" ng-model="submit.username" placeholder="Username" name="Username"/>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" class="form-control" ng-model="submit.password" placeholder="Password" name="Password"/>
+                        </div>
+                        <div class="form-group">
+							<label class="chkbx"><input type="checkbox" class="form-control chk"><span class="card-txt ">Remember Password</span></label>
+						</div>
+                        <div class="error"><span class="errortxt hide"></span>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-login login_btn btn-lg">SIGN IN</button>
+                        </div>
+                        <div class="card-txt forgot_pass">
+                        <a  href="javascript:void(0);">Forgot password?</a> 
+
+                        <span class="pull-right">
+                            New User?
+                            <a href="#/register">Register here</a>
+                        </span>
+                        </div> 
+                        
+                    </form>
+                </div>
+                <div class="card-footer">
+                    <div class="copyright text-center">
+                        <span>All contents are Copyright &copy; 1992-2015 Cisco and/or its affiliates. All rights reserved.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

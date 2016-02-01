@@ -1,0 +1,15 @@
+[
+    {
+        "model": "image.imageprofile",
+        "pk": 1,
+        "fields": {
+             "profile_name": "Profile1",
+             "system_image": "n9000-dk9.6.1.2.I3.2.bin",
+             "image_server_ip": "127.0.0.1",
+             "image_server_username": "admin",
+             "image_server_password": "admin",
+             "access_protocol": "ftp",
+             "updated_by" : "admin"
+         }
+    }
+]

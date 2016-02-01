@@ -1,0 +1,46 @@
+from rest_framework import serializers
+
+from fabric.constants import MATCH_TYPES
+
+
+class IgniteRequestPostSerializer(serializers.Serializer):
+
+    class NeighborSerializer(serializers.Serializer):
+
+        remote_node = serializers.CharField(allow_blank=True, required=False)
+        remote_port = serializers.CharField(allow_blank=True, required=False)
+        local_port = serializers.CharField(allow_blank=True, required=False)
+
+    serial_num = serializers.CharField()
+    neighbor_list = NeighborSerializer(many=True)
+
+
+class BootstrapSwitchSerializer(serializers.Serializer):
+
+    class TopologySerializer(serializers.Serializer):
+
+        name = serializers.CharField()
+
+    class SwitchBootDetailSerializer(serializers.Serializer):
+
+        class DiscoveryRuleSerializer(serializers.Serializer):
+
+            name = serializers.CharField()
+
+        serial_number = serializers.CharField()
+        boot_status = serializers.CharField()
+        boot_time = serializers.DateTimeField()
+        match_type = serializers.ChoiceField(MATCH_TYPES)
+        discovery_rule = serializers.IntegerField()
+
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    serial_num = serializers.CharField()
+    topology = TopologySerializer()
+    boot_detail = SwitchBootDetailSerializer()
+
+
+class SwitchBootStatusPostSerializer(serializers.Serializer):
+
+    serial_num = serializers.CharField()
+    status = serializers.BooleanField()

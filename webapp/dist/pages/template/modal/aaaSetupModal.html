@@ -1,0 +1,79 @@
+<div id="switchModal">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" ng-click="cancel()" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <h3 class="modal-title pull-left">AAA Set Up</h3>
+        <!-- <p class="pull-right errorHighlight" data-ng-show="fieldErr">
+            All fields are mandatory
+        <p> -->
+        <div class="pull-right modal-form-action">
+            <a href="javascript:void(0);" ng-show="action == 'view' && mode != 'view'" tooltip="Edit" tooltip-placement="bottom">
+                <span class="glyphicon glyphicon-pencil" ng-click="changeAction('edit')" aria-hidden="true"></span>
+            </a>
+            <a href="javascript:void(0);" ng-click="deleteSetup()" tooltip="Delete" ng-show="action == 'view' && mode != 'view'"  tooltip-placement="bottom">
+                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+            </a>
+        </div>
+    </div>
+    <div class="modal-body">
+        <form name="setupForm">
+            <div class="row">
+                <div>
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <label for="server_address">Server Address</label>
+                            <input type="text" class="form-control" 
+                            placeholder="Server Address"
+                            required name="server_address"
+                            data-ng-blur="validateIPaddress()"
+                            data-ng-disabled="action == 'view'"
+                            ng-model="submitData.server_ip">
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <label for="port">Port</label>
+                            <input type="number" class="form-control" 
+                            placeholder="Port"
+                            required maxlength="4" minlength="4"
+                            data-ng-disabled="action == 'view'"
+                            ng-model="submitData.port">
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <label for="secret">Secret</label>
+                            <input type="text" class="form-control" 
+                            placeholder="Secret"
+                            required
+                            data-ng-disabled="action == 'view'"
+                            ng-model="submitData.secret">
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <label for="protocol">Protocol</label>
+                            <select class="form-control"
+                             data-ng-model="submitData.protocol"
+                             data-ng-options="v.value as v.label for (k,v) in appSettings.fieldValues.aaa.protocols" required
+                             data-ng-disabled="action == 'view'">
+                             <option value="">--Select--</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-trans btn-default btn-raised" ng-click="cancel()">Cancel</button>
+    <button class="btn btn-raised btn-primary"
+        ng-hide="action == 'view'" data-ng-disabled="setupForm.$invalid"
+        ng-click="ok()">
+        Save
+    </button>
+</div>
+</div>
+

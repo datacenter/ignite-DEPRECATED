@@ -1,0 +1,11 @@
+{
+    "switches": [
+        { "tier": "Core", "count": 1 },
+        { "tier": "Spine", "count": 2 },
+        { "tier": "Leaf", "count": 2 }
+    ]
+}
+
+{
+    "image_profile": 2
+}

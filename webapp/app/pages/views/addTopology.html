@@ -1,0 +1,493 @@
+<div class="topologyBlock">
+    <section>
+        <div class="container">
+            <div class="row tool-bar">
+                <div class="col-sm-5" >
+                    <h4 class="col-sm-3" data-ng-if="source == 'topology'">Topology</h4>
+                    <h4 class="col-sm-3" data-ng-if="source == 'fabric'">Fabric</h4>
+                    <!-- <span class="alert alert-danger hide" ng-if="topology.name==''">Please enter a topology name</span> -->
+                    <input type="text" class="form-control" style="display: inline; width: inherit"
+                        name="name" data-ng-disabled="!nameEdit"
+                        placeholder="Name"
+                        ng-model="topologyData.name">
+                    <a href="javascript:void(0);" tooltip="Edit" tooltip-placement="bottom"
+                        data-ng-if="!nameEdit">
+                        <span class="glyphicon glyphicon-pencil" ng-click="editName()" aria-hidden="true">
+                        </span>
+                    </a>
+                    
+                    <button class="topo-btn btn-xs" style="" data-ng-if="nameEdit" data-ng-click="saveName()">
+                        Save
+                    </button>
+                    <a href="javascript:void(0);" tooltip="Edit" tooltip-placement="bottom"
+                        data-ng-if="nameEdit" style="font-size: 12px" data-ng-click="cancelNameEdit()">
+                        / Cancel
+                    </a>
+                </div>
+                 <div class="col-sm-4 toolbox">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-default"
+                            ng-click="addSwitch();" data-toggle="tooltip" title="Add Switch"><i class="glyphicon glyphicon-plus"></i> Add Switch
+                            <span class="hide">
+                                (<span ng-bind="coreLeft"></span>)
+                            </span>
+                        </button>
+                        <div class="btn-group">
+                          <button type="button" class="btn btn-sm btn-default dropdown-toggle"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="glyphicon glyphicon-plus"></i> Link <span class="caret"></span>
+                          </button>
+                          <ul class="dropdown-menu">
+                            <li><a href="javascript:void(0)" ng-click="addLinkModal('core2spine');">Core <span class="glyphicon glyphicon-resize-horizontal"></span> Spine</a></li>
+                            <li><a href="javascript:void(0)" ng-click="addLinkModal('spine2leaf');">Spine <span class="glyphicon glyphicon-resize-horizontal"></span> Leaf</a></li>
+                            <li><a href="javascript:void(0)" ng-click="addLinkModal('leaf2border');">Leaf <span class="glyphicon glyphicon-resize-horizontal"></span> Border</a></li>
+                            <li><a href="javascript:void(0)" ng-click="addLinkModal('leaf2leaf');">Leaf <span class="glyphicon glyphicon-resize-horizontal"></span> Leaf</a></li>
+                          </ul>
+                        </div>
+
+                        <!-- Link button -->
+                    </div>
+                    <button class="btn btn-sm btn-default"
+                        ng-hide="source == 'topology'"
+                        ng-click="buildConfig()">Build Config
+                    </button>
+                    <button class="btn btn-sm btn-default" ng-click="clearTopology()"
+                        data-ng-if="!(topology.submit || source == 'fabric')">Clear
+                    </button>
+                    <button class="btn btn-sm btn-default" ng-if="!topology.submit"
+                        ng-click="submitWork()">
+                        <span class="glyphicon glyphicon-ok success-color"></span> Submit
+                    </button>
+                    <span ng-if="topology.submit" class="success-color" style="padding-left: 25px;">
+                        <i class="glyphicon glyphicon-ok"></i> Submitted
+                    </span>
+                </div>
+                <div class="col-sm-3 text-right">
+                    <span>
+                        <a href="javascript:void(0);" data-ng-if="source == 'fabric'" data-ng-click="showConfig()">View Profiles</a>
+                    </span>
+                    <span>
+                        <a href="javascript:void(0);" data-ng-click="showDefaults()">View Defaults</a>
+                    </span>
+                    <span>
+                        <button type="button" class="btn btn-sm btn-default" ng-click="goBackToList()">
+                            <span class="glyphicon glyphicon-chevron-left"></span>Back to List</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 svgbox" id="svgBox">
+            <div class="row">
+                <div class="col-sm-12 row" id="topology_container">
+                    <!-- <div class="text-center">
+                        <div class="col-sm-5"></div>
+                        <div class="col-sm-0.5">
+                            <label for="coreCount" style="float: left; color: black; font-weight: lighter">Core : </label>
+                            <div id="odometer" class="odometer" style="background-image: -webkit-linear-gradient(top, #eee0d3 0%, #eee0d3 40%, #bbaa9a 60%, #eee0d3 80%, #eee0d3 100%);">
+                                {{switchDetails.count.Core}}
+                            </div>
+                        </div>
+                        <div class="col-sm-0.5">
+                            <label for="spineCount" style="float: left; color: black; font-weight: lighter">Spine : </label>
+                            <div id="odometer" class="odometer" style="background-image: -webkit-linear-gradient(top, #eee0d3 0%, #eee0d3 40%, #bbaa9a 60%, #eee0d3 80%, #eee0d3 100%);">
+                                {{switchDetails.count.Spine}}
+                            </div>
+                        </div>
+                        <div class="col-sm-0.5">
+                            <label for="leafCount" style="float: left; color: black; font-weight: lighter">Leaf : </label>
+                            <div id="odometer" class="odometer" style="background-image: -webkit-linear-gradient(top, #eee0d3 0%, #eee0d3 40%, #bbaa9a 60%, #eee0d3 80%, #eee0d3 100%);">
+                                {{switchDetails.count.Leaf}}
+                            </div>
+                        </div>
+                        <div class="col-sm-0.5">
+                            <label for="borderCount" style="float: left; color: black; font-weight: lighter">Border : </label>
+                            <div id="odometer" class="odometer" style="background-image: -webkit-linear-gradient(top, #eee0d3 0%, #eee0d3 40%, #bbaa9a 60%, #eee0d3 80%, #eee0d3 100%);">
+                                {{switchDetails.count.Border}}
+                            </div>
+                        </div>
+                    </div> -->
+                    <div style="width: 455px;height: 28px; border: 1px solid #337ab7;/*-webkit-border-radius: 56px;-moz-border-radius: 56px;border-radius: 56px;-webkit-box-shadow: #B3B3B3 5px 5px 5px;-moz-box-shadow: #B3B3B3 5px 5px 5px; box-shadow: #B3B3B3 5px 5px 5px;*/margin-left: 40%; float: left; font-size: 12px; border-radius: 3px; text-align: center;background-color: white;">
+                        <div style="/*-webkit-box-shadow: inset 0px -1px 52px -9px rgba(0,0,0,0.54);
+-moz-box-shadow: inset 0px -1px 52px -9px rgba(0,0,0,0.54); box-shadow: inset 0px -1px 52px -9px rgba(0,0,0,0.54); height: 100%; border-right: 1px solid #337ab7; border-radius: 56px;*/padding-top: 5px;" class="col-sm-4">
+                            Core Router : {{switchDetails.count.Core}}
+                        </div>
+                        <div style="/*-webkit-box-shadow: inset 0px -1px 52px -9px rgba(0,0,0,0.54);
+-moz-box-shadow: inset 0px -1px 52px -9px rgba(0,0,0,0.54); box-shadow: inset 0px -1px 52px -9px rgba(0,0,0,0.54); height: 100%; border-right: 1px solid #337ab7;border-left: 2px solid #337ab7; border-radius: 56px;*/padding-top: 5px;" class="col-sm-2">Spine : {{switchDetails.count.Spine}}
+                        </div><div style="/*-webkit-box-shadow: inset 0px -1px 52px -9px rgba(0,0,0,0.54);
+-moz-box-shadow: inset 0px -1px 52px -9px rgba(0,0,0,0.54); box-shadow: inset 0px -1px 52px -9px rgba(0,0,0,0.54); height: 100%; border-right: 1px solid #337ab7;border-left: 2px solid #337ab7; border-radius: 56px;*/padding-top: 5px;"
+                            class="col-sm-2">Leaf : {{switchDetails.count.Leaf}}
+                        </div><div style="/*-webkit-box-shadow: inset 0px -1px 52px -9px rgba(0,0,0,0.54);
+-moz-box-shadow: inset 0px -1px 52px -9px rgba(0,0,0,0.54); box-shadow: inset 0px -1px 52px -9px rgba(0,0,0,0.54); height: 100%; border-left: 2px solid #337ab7; border-radius: 56px;*/padding-top: 5px;"
+                            class="col-sm-4">Border Router : {{switchDetails.count.Border}}
+                        </div>
+                    </div>
+                    <button class="pull-right topo-btn" ng-click="toggleDetails()" ng-if="!toggleDetailsModel">
+                        <span class="glyphicon glyphicon-menu-hamburger"></span> Details
+                    </button>
+                    <button class="pull-right topo-btn" ng-click="toggleDetails()" ng-if="toggleDetailsModel">
+                        <a href="javascript:void(0);"><span class="glyphicon glyphicon-menu-right"></span></a>
+                    </button>
+                    <svg id="topology_svg" version="1.1" xmlns="http://www.w3.org/2000/svg" width="100%" height="600" viewBox="0 0 900 900"></svg>
+                </div>
+                
+                <div class="col-sm-4" id="topology_details" style="padding-right:0px" ng-if="toggleDetailsModel">
+                    <div class="topology_table scrollbar">
+                        <div class="topology_table_title">
+                            Details
+                            <input class="topology_search" type="text" ng-model="topology.details.search" placeholder="Search"></div>
+                        <table class="table table-hover table-striped table-condensed showedit">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Node</th>
+                                    <th>Local Port</th>
+                                    <th>Remote Node</th>
+                                    <th>Remote Port</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="link in topology.links | filter:topology.details.search" id="listItem_{{$index}}">
+                                    <td scope="row" ng-bind="$index+1"></td>
+                                    <td>
+										<a href="javascript:void(0)" ng-click="PopEdit(link.src_switch);"><span ng-bind="link.src_switch_name"></span></a>
+                                    </td>
+                                    <td>
+                                        <span ng-bind="link.src_ports.toString()"></span>
+                                    </td>
+                                    <td>
+										<a href="javascript:void(0)" ng-click="PopEdit(link.dst_switch);"><span ng-bind="link.dst_switch_name"></span></a>
+                                    </td>
+                                    <td>
+                                        <span ng-bind="link.dst_ports.toString()"></span>
+                                    </td>
+                                    <td>
+                                      <i class="glyphicon glyphicon-eye-open" ng-click="PopEditLink($index);"  data-toggle="tooltip" title="Edit Link"></i>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- <div class="col-sm-12">
+            <a href="javascript:void(0);" ng-click="deleteTopology(topology.id, 0)"  class="col-sm-1 pull-right">
+                <span class="glyphicon glyphicon-trash"></span> Delete
+            </a>
+        </div> -->
+    </section>
+    <div class="modal fade bs-example-modal-sm" id="myModalWarn" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog  modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Confirm</h4>
+                </div>
+                <div class="modal-body" id="modalContent">
+                    <p>{{modalContent}}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary"  data-dismiss="modal" ng-click="modify()">Modify</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- Modal Links -->
+    <div class="modal fade bs-example-modal-sm" id="myModalLink" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog  modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Add Link</h4>
+                </div>
+                <div class="modal-body" id="modalContent">
+                    <div class="popBody">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-addon link_switch_modal_field">Switch 1</span>
+
+                        <select class="form-control input-addon"
+                            ng-model="addLink.src_switch"
+                            ng-options="switch.id as switch.name for (k,switch) in topologyData.src_switch">
+                            <option value="">--Select--</option>
+                        </select>
+
+                    </div>
+                    <br>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-addon link_switch_modal_field">Switch 2</span>
+
+                        <select class="form-control input-addon"
+                            ng-model="addLink.dst_switch"
+                            ng-options="switch.id as switch.name for (k,switch) in topologyData.dst_switch">
+                            <option value="">--Select--</option>
+                    </select>
+
+                    </div>
+                    <br>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-addon link_switch_modal_field">Link Type</span>
+                        <select class="form-control input-addon"
+                            ng-model="addLink.link_type"
+                            ng-options="link.id as link.name for (k,link) in topologyData.linkType">
+                        </select>
+
+                    </div>
+                    <br>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-addon link_switch_modal_field">No. of Links</span>
+                        <input type="number" class="form-control input-addon" 
+                            placeholder="Number of Links"
+                            required name="num_links"
+                            max="8" min="1"
+                            ng-model="addLink.num_links">
+                    </div>
+                    </div>
+                    <br>
+                    <div class="alert alert-danger" id="alertLinkExists" style="display:none">
+                        Link already exists. Click on the circle between links to Edit or Remove a link.
+                    </div>
+                    <div class="alert alert-danger" id="alertLinkSame" style="display:none">
+                        Cannot add a link between the same switches.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="createLink(addLink);" ng-if="checkLinkExists(addLink);">Add</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- Modal Links -->
+<!-- Modal Delete -->
+    <div class="modal fade bs-example-modal-sm" id="myModalDelete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog  modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title red" id="myModalLabel">Confirm Deletion</h4>
+                </div>
+                <div class="modal-body">
+                    <p id="modalDeleteContent"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger"  data-dismiss="modal" ng-click="deleteItem()">Delete</button>
+                    <button type="button" class="btn btn-default"  data-dismiss="modal" ng-click="cancelDelete()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- Modal Delete End -->
+<!-- Switch Edit -->
+    <div ng-repeat="switch in topologyData.switches track by $index">
+        <div class="modal fade bs-example-modal-sm" id="popEdit_Item_{{switch.id}}"
+            tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog  modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" ng-click="closeSwitchEdit()" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <a href="javascript:void(0);" tooltip="Edit" class="pull-right pr-15" tooltip-placement="bottom" data-ng-if="!editSwitchFlag">
+                            <span class="glyphicon glyphicon-pencil" ng-click="editSwitch()" aria-hidden="true"></span>
+                        </a>
+                        <h4 class="modal-title" id="myModalLabel">Switch</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="popBody">
+                            <div class="input-group  input-group-sm">
+                                 <span class="input-group-addon link_switch_modal_field"> Switch Name</span>
+                                 <input type="text" id="switch_name" class="form-control"
+                                    ng-disabled="!editSwitchFlag"
+                                    ng-model="switch.name"
+                                    data-ng-readonly="source=='topology'">
+                            </div>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-addon link_switch_modal_field"> Switch Type</span>
+                                <input type="text" class="form-control" readonly
+                                    data-ng-if="!editSwitchFlag" ng-model="switch.type">
+                                <select class="form-control input-addon"
+                                    data-ng-if="editSwitchFlag && switch.tier == 'Core'"
+                                    ng-init="switch.model" ng-model="switch.model"
+                                    ng-options="v.id as v.name for (k,v) in switchDetails.selectList.Core">
+                                </select>
+                                <select class="form-control input-addon"
+                                    ng-init="switch.model" ng-model="switch.model"
+                                    data-ng-if="editSwitchFlag && switch.tier == 'Spine'"
+                                    ng-options="v.id as v.name for (k,v) in switchDetails.selectList.Spine">
+                                </select>
+                                <select class="form-control input-addon"
+                                    ng-init="switch.model" ng-model="switch.model"
+                                    data-ng-if="editSwitchFlag && switch.tier == 'Leaf'"
+                                    ng-options="v.id as v.name for (k,v) in switchDetails.selectList.Leaf">
+                                </select>
+                                <select class="form-control input-addon"
+                                    ng-init="switch.model" ng-model="switch.model"
+                                    data-ng-if="editSwitchFlag && switch.tier == 'Border'"
+                                    ng-options="v.id as v.name for (k,v) in switchDetails.selectList.Border">
+                                </select>
+                            </div>
+                            <div class="input-group  input-group-sm">
+                                <span class="input-group-addon link_switch_modal_field"> Switch Image</span>
+                                <select class="form-control input-addon" ng-disabled="!editSwitchFlag" ng-init="switch.image_profile" ng-model="switch.image_profile" ng-options="v.id as v.profile_name for (k,v) in switchDetails.selectList.imglist" data-ng-if="editSwitchFlag || (!editSwitchFlag && switch.image_profile != null)">
+                                    <option value="">--tier default--</option>
+                                </select>
+                                <input type="text" class="form-control" readonly
+                                    data-ng-if="switch.image_profile == null && !editSwitchFlag" value="--Tier Default--">
+                            </div>
+                            <div class="input-group input-group-sm" data-ng-if="source == 'fabric'">
+                                <span class="input-group-addon link_switch_modal_field"> Config Profile</span>
+                                <select class="form-control input-addon" ng-disabled="!editSwitchFlag" ng-init="switch.config_profile" ng-model="switch.config_profile" ng-options="v.id as v.name for (k,v) in switchDetails.selectList.config_list" data-ng-if="editSwitchFlag || (!editSwitchFlag && switch.config_profile != null)" >
+                                    <option value="">--tier default--</option>
+                                </select>
+                                <input type="text" class="form-control" readonly
+                                    data-ng-if="switch.config_profile == null && !editSwitchFlag" value="--Tier Default--">
+                            </div>
+                            <div class="input-group  input-group-sm" data-ng-if="source == 'fabric'">
+                                <span class="input-group-addon link_switch_modal_field"> Feature Profile</span>
+                                <select class="form-control input-addon" ng-disabled="!editSwitchFlag" ng-init="switch.feature_profile" ng-model="switch.feature_profile" ng-options="v.id as v.name for (k,v) in switchDetails.selectList.fabricProfile_list" data-ng-if="editSwitchFlag || (!editSwitchFlag && switch.feature_profile != null)" >
+                                    <option value="">--tier default--</option>
+                                </select>
+                                <input type="text" class="form-control" readonly
+                                    data-ng-if="switch.feature_profile == null && !editSwitchFlag" value="--Tier Default--">
+                            </div>
+                            <div class="input-group  input-group-sm" data-ng-if="source == 'fabric'">
+                                <span class="input-group-addon link_switch_modal_field"> Workflow</span>
+                                <select class="form-control input-addon" ng-disabled="!editSwitchFlag" ng-init="switch.workflow" ng-model="switch.workflow" ng-options="v.id as v.name for (k,v) in switchDetails.selectList.workflow_list" data-ng-if="editSwitchFlag || (!editSwitchFlag && switch.workflow != null)" >
+                                    <option value="">--tier default--</option>
+                                </select>
+                                <input type="text" class="form-control" readonly
+                                    data-ng-if="switch.workflow == null && !editSwitchFlag" value="--Tier Default--">
+                            </div>
+                            <div class="input-group  input-group-sm" data-ng-if="source == 'fabric'">
+                                <span class="input-group-addon link_switch_modal_field"> Serial Number</span>
+                                <input type="text" class="form-control"
+                                    data-ng-disabled="!editSwitchFlag" data-ng-model="switch.serial_num">
+                            </div>
+                        </div>
+                        <hr class="hr_fabSwitch" data-ng-if="source=='fabric' && (switch.boot_detail != null || switch.tier == 'Spine' || switch.tier == 'Leaf')">
+                        <div class="popBody" data-ng-if="source=='fabric' && (switch.boot_detail != null || switch.tier == 'Spine' || switch.tier == 'Leaf')">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-addon link_switch_modal_field"> Boot Status </span>
+                                <span ng-if="!switch.boot_detail"
+                                    class="input-group-addon" style="float: left">
+                                    Config not yet built
+                                </span>
+                                <span ng-if="switch.boot_detail.boot_status == 'Success'"
+                                    class="input-group-addon success-color" style="float: left">
+                                    {{switch.boot_detail.boot_status}}
+                                </span>
+                                <span ng-if="switch.boot_detail.boot_status == 'Failed'"
+                                    class="input-group-addon red" style="float: left">
+                                    {{switch.boot_detail.boot_status}}
+                                </span>
+                                <span ng-if="switch.boot_detail.boot_status == 'In progress'"
+                                    class="input-group-addon" style="float: left">
+                                    {{switch.boot_detail.boot_status}}
+                                </span>
+                                <span ng-if="switch.boot_detail != null && !switch.boot_detail.boot_status"
+                                    class="input-group-addon" style="float: left">
+                                    Not Initiated
+                                </span>
+                            </div>
+                            <div class="input-group input-group-sm"
+                                data-ng-if="switch.boot_detail && switch.boot_detail.match_type">
+                                <span class="input-group-addon link_switch_modal_field"> Match Type </span>
+                                <span class="input-group-addon" style="float: left">{{switch.boot_detail.match_type}}</span>
+                            </div>
+                            <div class="input-group input-group-sm"
+                                data-ng-if="switch.boot_detail && switch.boot_detail.boot_time">
+                                <span class="input-group-addon link_switch_modal_field"> Boot Time </span>
+                                <span class="input-group-addon" style="float: left">{{switch.boot_detail.boot_time | date : appSettings.dateFormat-short}}</span>
+                                <br/>
+                                <span class="input-group-addon" style="float: left">{{switch.boot_detail.boot_time | date : appSettings.timeFormat}}</span>
+                            </div>
+                            <div class="input-group input-group-sm"
+                                data-ng-if="switch.boot_detail">
+                                <span class="input-group-addon link_switch_modal_field">  </span>
+                                <span class="input-group-addon pull-left">
+                                    <a href="javascript:void(0)" ng-click="openDepSwitchConfigModal(switch.id)">Config</a>
+                                </span>
+                                <span class="input-group-addon pull-right"
+                                    data-ng-if="switch.boot_detail.boot_status">
+                                    <a href="javascript:void(0)" ng-click="openDepSwitchLogModal(switch.id)">Logs</a>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-danger" ng-click="deleteSwitch(switch.id)">Delete</button>
+                        <button type="button" class="btn btn-primary" ng-if="editSwitchFlag" data-dismiss="modal" ng-click="saveSwitchEdit(switch.id, $index)">Save</button>
+                        <button type="button" class="btn btn-default" ng-click="closeSwitchEdit()" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- Switch Edit End -->
+<!-- ******************************************* Pop Edit Link ********************************************-->
+<div ng-repeat="link in topologyData.links track by $index">
+    <div class="modal fade bs-example-modal-sm" id="popEditLink_Item{{$index}}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" ng-click="closeLinkEdit()"
+                        aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <a href="javascript:void(0);" tooltip="Edit" class="pull-right pr-15"
+                        tooltip-placement="bottom" data-ng-if="!editLinkFlag && source == 'fabric'">
+                        <span class="glyphicon glyphicon-pencil" ng-click="editLink()"
+                            aria-hidden="true"></span>
+                    </a>
+                    <h4 class="modal-title" id="myModalLabel">Link</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="popBody">
+                        <div class="alert alert-info" ng-if="link.link_type==''">
+                            Set the link type to enable this link
+                        </div>
+                        <div class="input-group  input-group-sm">
+                            <span class="input-group-addon link_switch_modal_field"> Link Type</span>
+                            <select class="form-control input-addon" ng-disabled="!editLinkFlag"
+                                ng-init="link.link_type" ng-model="link.link_type"
+                                ng-options="v.id as v.name for (k,v) in switchDetails.selectList.linkType | filter_link:[link.src_switch,link.dst_switch,topology.switches]" ng-change="updatePortsByLinkType(link)" data-ng-if="source=='fabric'">
+                            </select>
+                            <input class="form-control" readonly ng-model="link.link_type"
+                                data-ng-if="source=='topology'">
+                        </div>
+                        <br>
+                        <div class="input-group  input-group-sm">
+                            <span class="input-group-addon link_switch_modal_field"> No. of Links</span>
+                            
+                            <input type="number" class="form-control" ng-disabled="!editLinkFlag"
+                                data-ng-readonly="source=='topology'" ng-model="link.num_links">
+                        </div>
+                        <br>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-addon link_switch_modal_field"
+                                ng-repeat="switch in topology.switches track by switch.id"
+                                data-ng-if="switch.id == link.src_switch">
+                                {{switch.name}}
+                            <br><small>(Local Port)</small></span>
+                                <input type="text" class="form-control" ng-disabled="!editLinkFlag" ng-model="link.src_ports" data-ng-readonly="source=='topology'">
+                        </div>
+                        <br>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-addon link_switch_modal_field"
+                                 ng-repeat="switch in topology.switches track by switch.id"
+                                 data-ng-if="switch.id == link.dst_switch">
+                                {{switch.name}}
+                            <br><small>(Remote Port)</small></span>
+                                <input type="text" class="form-control" ng-disabled="!editLinkFlag" ng-model="link.dst_ports" data-ng-readonly="source=='topology'">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger" ng-click="removeItemLinkType(link.id, $index)">
+                        Delete
+                    </button>
+                    <button type="button" class="btn btn-primary" ng-if="editLinkFlag && source == 'fabric'" data-dismiss="modal" ng-click="saveLinkEdit(link.id, $index)">Save</button>
+                    <button type="button" class="btn btn-default" ng-click="closeLinkEdit()" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

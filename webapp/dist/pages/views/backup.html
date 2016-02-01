@@ -1,0 +1,85 @@
+<div id="main" class="content container">
+    <div class="table-header-cont">
+        <div class="pull-left">
+            <h5 class="page-header pull-left">Backup ({{tableParams.total()}})</h5>
+            <button class="btn btn-raised btn-primary"
+                style="margin-top: 8px; margin-left: 80px;"
+                ng-hide="action == 'view'" data-ng-disabled="setupForm.$invalid"
+                ng-click="ok()">
+                Start Backup
+            </button>
+        </div>
+        <div class="pull-right">
+            <div class="search-cont">
+                <input type="search" class="form-control" title="Search" ng-model="searchKeyword" data-toggle="tooltip" placeholder="Search">
+                <i class="glyphicon glyphicon-search"></i>
+            </div>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover" ng-table="tableParams">
+            <thead>
+                <tr>
+                    <th width="2%" class="hide">
+                        <input type="checkbox" class="form-control chk chk-trans">
+                    </th>
+                    <th width="2%">#</th>
+                    <th class="sortable" 
+                    ng-class="{
+                        'sort-asc': tableParams.isSortBy('name', 'asc'),
+                        'sort-desc': tableParams.isSortBy('name', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'name' : tableParams.isSortBy('name', 'asc') ? 'desc' : 'asc'})">Name</th>
+                    <th class="sortable" 
+                    ng-class="{
+                        'sort-asc': tableParams.isSortBy('time', 'asc'),
+                        'sort-desc': tableParams.isSortBy('time', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'time' : tableParams.isSortBy('time', 'asc') ? 'desc' : 'asc'})"
+                    >Date/Time</th>
+                    <!-- <th>Status</th> -->
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-class="{active: classVal}" ng-repeat="backup in $data | filter : search">
+                    <td class="hide">
+                        <input type="checkbox" class="form-control chk chk-trans" ng-click="getChecked()" ng-checked="checkbox1">
+                    </td>
+
+                    <td>{{appServices.generateSeq(tableParams.page(), tableParams.count(), $index)}}</td>
+                    <td><a href="javascript:void(0);" ng-click="downloadFile(backup.name)">{{backup.name}}</a>
+                    </td>
+                    <td>{{backup.time | date:appSettings.dateFormat}}</td>
+                    <!-- <td>{{aaa_setup.config_type}}</td> -->
+                    <!-- <td>
+                        {{backup.protocol}}
+                    </td> -->
+                    <td>
+                        <ul class="table_action_icons list-inline" ng-class="{'has-error' : !inputModel}">
+                            <!-- <li>
+                                <a href="javascript:void(0);"
+                                ng-click="view_aaa_setup(aaa_setup.id, $index)"
+                                tooltip="View Details"
+                                tooltip-placement="bottom">
+                                <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0);"
+                                ng-click="edit_aaa_setup(aaa_setup.id, $index)"
+                                tooltip="Edit" tooltip-placement="bottom">
+                                <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                            </a>
+                            </li> -->
+                            <li>
+                                <a href="javascript:void(0);"
+                                ng-click="deleteBackup(backup.name)"
+                                tooltip="Delete" tooltip-placement="bottom"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

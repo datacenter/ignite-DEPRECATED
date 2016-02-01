@@ -1,0 +1,119 @@
+{
+    "name": "Cisco Nexus 9332PQ",
+    "switch_type": "Fixed",
+    "switch_data": {
+        "tiers": ["Core", "Spine", "Leaf", "Border"],
+        "port_groups": [
+            {
+                "num_ports": 32,
+                "speed": "40G",
+                "transceiver" : "QSFP+",
+                "role": "Both"
+            }
+        ]
+    }
+}
+
+{
+    "name": "Cisco Nexus 9372PX",
+    "switch_type": "Fixed",
+    "switch_data": {
+        "tiers": ["Leaf", "Border"],
+        "port_groups": [
+            {
+                "num_ports": 48,
+                "speed": "1/10G",
+                "transceiver" : "SFP+",
+                "role": "Downlink"
+            },
+            {
+                "num_ports": 6,
+                "speed": "40G",
+                "transceiver" : "QSFP+",
+                "role": "Uplink"
+            }
+        ]
+    }
+}
+
+{
+    "name": "Cisco Nexus 93120TX",
+    "switch_type": "Fixed",
+    "switch_data": {
+        "tiers": ["Leaf", "Border"],
+        "port_groups": [
+            {
+                "num_ports": 96,
+                "speed": "1/10G",
+                "transceiver" : "GBASE-T",
+                "role": "Downlink"
+            },
+            {
+                "num_ports": 6,
+                "speed": "40G",
+                "transceiver" : "QSFP+",
+                "role": "Uplink"
+            }
+        ]
+    }
+}
+
+{
+    "name": "Cisco Nexus 9396PX with M6PQ",
+    "switch_type": "Fixed",
+    "switch_data": {
+        "tiers": ["Leaf", "Border"],
+        "port_groups": [
+            {
+                "num_ports": 48,
+                "speed": "1/10G",
+                "transceiver" : "SFP+",
+                "role": "Downlink"
+            }
+        ],
+        "module_id": 1
+    }
+}
+
+{
+    "name": "Cisco Nexus 9396PX with M12PQ",
+    "switch_type": "Fixed",
+    "switch_data": {
+        "tiers": ["Leaf", "Border"],
+        "port_groups": [
+            {
+                "num_ports": 48,
+                "speed": "1/10G",
+                "transceiver" : "SFP+",
+                "role": "Downlink"
+            }
+        ],
+        "module_id": 3
+    }
+}
+
+{
+    "name": "Cisco Nexus 9504 w/ 2 * 9536PQ",
+    "switch_type": "Chassis",
+    "switch_data": {
+        "tiers": ["Core", "Spine"],
+        "num_slots": 4,
+        "slots" : [
+            { "slot_num": 1, "lc_id": 6 },
+            { "slot_num": 2, "lc_id": 6 }
+        ]
+    }
+}
+
+{
+    "name": "Cisco Nexus 9504 w/ 2 * 9636PQ",
+    "switch_type": "Chassis",
+    "switch_data": {
+        "tiers": ["Core", "Spine"],
+        "num_slots": 4,
+        "slots" : [
+            { "slot_num": 2, "lc_id": 7 },
+            { "slot_num": 4, "lc_id": 7 }
+        ]
+    }
+}

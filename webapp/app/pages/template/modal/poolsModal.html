@@ -1,0 +1,141 @@
+<div>
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" ng-click="cancel()" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <h3 class="modal-title pull-left">Pool</h3>
+        <div class="pull-right modal-form-action">
+            <a href="javascript:void(0);" ng-click="changeAction('edit')" ng-show="action=='view'" ng-model="inputModel" tooltip="Edit" tooltip-placement="bottom">
+                <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+            </a>
+            <a href="javascript:void(0);" ng-click="deletePool()" ng-show="action=='view' || action=='edit'" ng-model="inputModel" tooltip="Delete" tooltip-placement="bottom">
+                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+            </a>
+        </div>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" class="form-control" id="Name" placeholder="Name" ng-disabled="action == 'view' || action == 'edit'" ng-model="submitData.name">
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label for="type">Type</label>
+                    <div class="select-label">
+                        <label>
+                    <select class="form-control"
+                        data-ng-disabled="action == 'view' || action == 'edit'"
+                        data-ng-model="submitData.type"
+                        data-ng-options="v.value as v.label for (k,v) in appSettings.fieldValues.pools.types">
+                    </select>
+                    </label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label for="scope">Scope</label>
+                    <div class="select-label">
+                        <label>
+                    <select class="form-control" ng-disabled="action == 'view' || action == 'edit'" ng-model="submitData.scope">
+                        <option ng-repeat="scope in appSettings.fieldValues.pools.scopes" value="{{scope.value}}">{{scope.label}}</option>
+                    </select>
+                    </label>
+                    </div>
+                </div>
+            </div>
+            <!-- <div class="col-sm-4">
+                <div class="form-group">
+                    <label for="scope">Start</label>
+                    <input type="text" class="form-control"
+                        id="startRange" ng-disabled="action == 'view'"
+                        placeholder="Start Range" ng-model="submitData.start"/>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label for="scope">End</label>
+                    <input type="text" class="form-control"
+                        id="endRange" ng-disabled="action == 'view'"
+                        placeholder="End Range" ng-model="submitData.end"/>
+                </div>
+            </div> -->
+        </div>
+        <div class="row_head">
+            <div class="row">
+                <div class="col-xs-4">
+                    <label for="startRange" class="grid_label">Start Range</label>
+                </div>
+                <div class="col-xs-4">
+                    <label for="endRange" class="grid_label">End Range</label>
+                </div>
+                <div class="col-xs-4">
+                    <label></label>
+                </div>
+            </div>
+        </div>
+        <div class="row" ng-repeat="range in submitData.blocks track by $index">
+            <div class="col-xs-4">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="startRange" ng-disabled="action == 'view' || (action == 'edit' && range.noEdit)" placeholder="Start Range" ng-model="range.start">
+                </div>
+            </div>
+            <div class="col-xs-4">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="endRange" ng-disabled="action == 'view' || (action == 'edit' && range.noEdit)" placeholder="End Range" ng-model="range.end">
+                </div>
+            </div>
+            <div class="col-xs-4">
+                <div class="form-group">
+                    <label></label>
+                    <div class="modal-form-action">
+                        <a href="javascript:void(0);" ng-hide="submitData.blocks.length == 1 || action == 'view' || (action == 'edit' && range.noEdit)" ng-click="removeRange($index)">
+                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                        </a>
+                        <a href="javascript:void(0);" ng-hide="$index < submitData.blocks.length - 1 || action == 'view'" ng-click="addRange()">
+                            <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+                            <span class="hidden-xs">Add Another</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Used data Grid -->
+        <div class="pull-right" ng-show="action == 'view'">
+            <div class="search-cont">
+                <input type="search" class="form-control" title="Search" data-toggle="tooltip" placeholder="Search" ng-model="searchKeyword">
+                <i class="glyphicon glyphicon-search"></i>
+            </div>
+        </div>
+        <div class="table-responsive" ng-show="action == 'view'">
+            <table class="table table-hover" ng-table="tableParams">
+                <thead>
+                    <tr>
+                        <th width="2%">#</th>
+                        <th>Value</th>
+                        <th>Assigned</th>
+                        <th>Last Modified</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-class="{active: usedData.Selected}" ng-repeat="udata in $data">
+                        <!-- <td>{{tableParams.page()}} -- {{tableParams.count()}} -- {{$index}}</td> -->
+                        <td>{{appServices.generateSeq(tableParams.page(), tableParams.count(), $index)}}</td>
+                        <td>{{udata.value}}</td>
+                        <td>{{udata.assigned}}</td>
+                        <td>{{udata.updated | date : appSettings.dateFormat}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- Used data Grid :: Till Here-->
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-trans btn-default btn-raised" ng-click="cancel()">Cancel</button>
+    <button class="btn btn-trans btn-raised btn-primary" ng-hide="action == 'view'" ng-click="ok()">Save</button>
+</div>
+</div>

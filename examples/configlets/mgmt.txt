@@ -1,0 +1,4 @@
+interface mgmt0
+vrf member management
+no cdp enable
+ip address $$MGMT_IP$$

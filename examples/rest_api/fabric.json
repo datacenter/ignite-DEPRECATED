@@ -1,0 +1,10 @@
+{
+    "name": "PodA",
+    "topology": 6,
+    "switches" : [
+        {"tier": "Core", "config_profile": 1, "feature_profile": 1},
+        {"tier": "Spine", "config_profile": 1, "feature_profile": 1},
+        {"tier": "Leaf", "config_profile": 1, "feature_profile": 1},
+        {"tier": "Border", "config_profile": 1, "feature_profile": 1},
+    ]
+}

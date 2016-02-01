@@ -1,0 +1,195 @@
+<div id="main" class="content container">
+    <div class="table-header-cont">
+        <div class="pull-left">
+            <h5 class="page-header pull-left">Workflows ({{tableParams.total()}})</h5>
+            <ul class="table-actions pull-left list-inline">
+                <li>
+                    <a href="#/workflow/add"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>Add</a>
+                </li>
+            </ul>
+        </div>
+        <div class="pull-right">
+            <div class="search-cont">
+                <input type="search" class="form-control" title="Search" ng-model='searchKeyword' data-toggle="tooltip" placeholder="Search">
+                <i class="glyphicon glyphicon-search"></i>
+            </div>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover" ng-table="tableParams">
+            <thead>
+                <tr>
+                    <th width="2%" class="hide">
+                        <input type="checkbox" class="form-control chk chk-trans">
+                    </th>
+                    <th width="2%">#</th>
+                    <th class="sortable" 
+                    ng-class="{
+                        'sort-asc': tableParams.isSortBy('name', 'asc'),
+                        'sort-desc': tableParams.isSortBy('name', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'name' : tableParams.isSortBy('name', 'asc') ? 'desc' : 'asc'})"
+                    >Name</th>
+                    <th>Submitted</th>
+                    <th class="sortable" 
+                    ng-class="{
+                        'sort-asc': tableParams.isSortBy('updated_by', 'asc'),
+                        'sort-desc': tableParams.isSortBy('updated_by', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'updated_by' : tableParams.isSortBy('updated_by', 'asc') ? 'desc' : 'asc'})">Last Modified by</th>
+                    <th class="sortable" 
+                    ng-class="{
+                        'sort-asc': tableParams.isSortBy('updated', 'asc'),
+                        'sort-desc': tableParams.isSortBy('updated', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'updated' : tableParams.isSortBy('updated', 'asc') ? 'desc' : 'asc'})">Last Modified on</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-class="{active: classVal}" ng-repeat="workflow in $data | filter : search">
+                    <td class="hide">
+                        <input type="checkbox" class="form-control chk chk-trans" ng-click="getChecked()" ng-checked="checkbox1">
+                    </td>
+                    <td>{{appServices.generateSeq(tableParams.page(), tableParams.count(), $index)}}</td>
+                    <td>
+                        <a href="#/workflow/view/{{workflow.id}}">{{workflow.name}}</a>
+                    </td>
+                    <td>
+                        <span class="glyphicon glyphicon-ok success-color" ng-show="workflow.submit == 'true' || workflow.submit == 'True' || workflow.submit == true" aria-hidden="true">
+                        </span>
+                    </td>
+                    <td>{{workflow.updated_by}}</td>
+                    <td>{{workflow.updated | date:appSettings.dateFormat}}</td>
+                    <td>
+                        <ul class="table_action_icons list-inline" ng-class="{'has-error' : !inputModel}">
+                            <li>
+                                <a href="#/workflow/view/{{workflow.id}}" tooltip="View" tooltip-placement="bottom">
+                                    <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/workflow/clone/{{workflow.id}}" tooltip="Clone" tooltip-placement="bottom"><span class="icon_clone" aria-hidden="true"></span></a>
+                            </li>
+                            <li>
+                                <a href="#/workflow/edit/{{workflow.id}}" tooltip="Edit" tooltip-placement="bottom"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0);" tooltip="Delete" tooltip-placement="bottom" ng-click="deleteWorkflow(workflow.id, $index)">
+                                    <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                                </a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+
+<!-- <div id="main" class="content container">
+    <div class="table-header-cont">
+        <div class="pull-left">
+            <h5 class="page-header pull-left">Workflows ({{tableParams.total()}})</h5>
+            <ul class="table-actions pull-left list-inline">
+                <li>
+                    <a href="#/workflow/add"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>Add</a>
+                </li>
+            </ul>
+        </div>
+        <div class="pull-right">
+            <div class="search-cont">
+                <input type="search" class="form-control" title="Search" ng-model='searchKeyword' data-toggle="tooltip" placeholder="Search">
+                <i class="glyphicon glyphicon-search"></i>
+            </div>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover" ng-table="tableParams">
+            <thead>
+                <tr>
+                    <th width="2%" class="hide">
+                        <input type="checkbox" class="form-control chk chk-trans">
+                    </th>
+                    <th width="2%">#</th>
+                    <th class="sortable" 
+                    ng-class="{
+                        'sort-asc': tableParams.isSortBy('name', 'asc'),
+                        'sort-desc': tableParams.isSortBy('name', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'name' : tableParams.isSortBy('name', 'asc') ? 'desc' : 'asc'})"
+                    >Name</th>
+                    <th class="sortable"  ng-class="{
+                        'sort-asc': tableParams.isSortBy('referenced', 'asc'),
+                        'sort-desc': tableParams.isSortBy('referenced', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'referenced' : tableParams.isSortBy('referenced', 'asc') ? 'desc' : 'asc'})">Referenced</th>
+                    <th class="sortable" ng-class="{
+                        'sort-asc': tableParams.isSortBy('submit', 'asc'),
+                        'sort-desc': tableParams.isSortBy('submit', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'submit' : tableParams.isSortBy('submit', 'asc') ? 'desc' : 'asc'})">Submitted</th>
+                    <th class="sortable" 
+                    ng-class="{
+                        'sort-asc': tableParams.isSortBy('last_modified_by', 'asc'),
+                        'sort-desc': tableParams.isSortBy('last_modified_by', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'last_modified_by' : tableParams.isSortBy('last_modified_by', 'asc') ? 'desc' : 'asc'})"
+
+                    >Last Modified by</th>
+                    <th class="sortable" 
+                    ng-class="{
+                        'sort-asc': tableParams.isSortBy('updated_date', 'asc'),
+                        'sort-desc': tableParams.isSortBy('updated_date', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'updated_date' : tableParams.isSortBy('updated_date', 'asc') ? 'desc' : 'asc'})"
+                    >Last Modified on</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="config in $data">
+                    <td class="hide">
+                        <input type="checkbox" class="form-control chk chk-trans" ng-click="getChecked()" ng-checked="checkbox1">
+                    </td>
+                    <td>{{appServices.generateSeq(tableParams.page(), tableParams.count(), $index)}}</td>
+                    <td><a href="#/constructs/view/{{config.id}}">{{config.name}}</a>
+                    </td>
+                    <td>{{config.referenced}}</td>
+                    <td>{{config.installed}}</td>
+                    <td>
+                        <span class="glyphicon glyphicon-ok success-color" ng-show="config.submit == 'true' || config.submit == 'True'" aria-hidden="true">
+                        </span>
+                    </td>
+                    <td>{{config.last_modified_by}}</td>
+                    <td>{{config.updated_date | date : appSettings.dateFormat}}</td>
+                    <td>
+                        <ul class="table_action_icons list-inline" ng-class="{'has-error' : !inputModel}">
+                            <li>
+                                <a href="#/constructs/view/{{config.id}}" tooltip="View" tooltip-placement="bottom">
+                                    <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#/constructs/clone/{{config.id}}" tooltip="Clone" tooltip-placement="bottom"><span class="icon_clone" aria-hidden="true"></span></a>
+                            </li>
+                            <li>
+                                <a href="#/constructs/edit/{{config.id}}" tooltip="Edit" tooltip-placement="bottom"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0);" tooltip="Delete" tooltip-placement="bottom" ng-click="deleteConfiguration(config.id, $index)">
+                                    <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                                </a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+                
+            </tbody>
+        </table>
+    </div>
+</div>
+ -->

@@ -1,0 +1,17 @@
+{
+    "profile_name": "Profile1",
+    "image_name": "n9000-dk9.6.1.2.I3.2.bin",
+    "image_server_ip": "192.168.1.2",
+    "image_server_username": "admin",
+    "image_server_password": "cisco123",
+    "access_protocol": "ftp"
+}
+
+{
+    "profile_name": "Profile2",
+    "image_name": "n9000-dk9.6.1.2.I3.2.bin",
+    "image_server_ip": "192.168.1.5",
+    "image_server_username": "admin",
+    "image_server_password": "cisco123",
+    "access_protocol": "scp"
+}

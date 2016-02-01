@@ -1,0 +1,16 @@
+{
+    "priority":"100",
+    "name": "Rule1",
+    "config_id":"1",
+    "match":"all",
+    "subrules":[
+        {
+            "rn_condition":"contain",
+            "rn_string":"Spine",
+            "rp_condition":"match",
+            "rp_string":"Ethernet1/2",
+            "lp_condition":"any",
+            "lp_string":"any"
+        }
+]
+}

@@ -1,0 +1,162 @@
+<div id="switchModal">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" ng-click="cancel()" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <h3 class="modal-title pull-left">Line Card / Module</h3>
+        <!-- <p class="pull-right errorHighlight" data-ng-show="fieldErr">
+            All fields are mandatory
+        <p> -->
+        <div class="pull-right modal-form-action">
+            <a href="javascript:void(0);" ng-show="action== 'view'" tooltip="Edit" tooltip-placement="bottom">
+                <span class="glyphicon glyphicon-pencil" ng-click="changeAction('edit')" aria-hidden="true"></span>
+            </a>
+            <a href="javascript:void(0);" ng-click="deleteSwitch()" tooltip="Delete" ng-show="action== 'view'"  tooltip-placement="bottom">
+                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+            </a>
+        </div>
+    </div>
+    <div class="modal-body">
+        <form name="lc_form">
+            <div classs="row">
+                <div class="col-xs-4">
+                    <div class="form-group">
+                        <label for="name">Model Name</label>
+                        <input type="text" class="form-control"
+                        name="name"
+                        placeholder="Name"
+                        required
+                        data-ng-class="{errorHighlight : switchForm.name.$invalid}"
+                        data-ng-change="checkModelName()"
+                        data-ng-disabled="action == 'view' || action == 'viewothers'"
+                        ng-model="submitData.name">
+                    </div>
+                </div>
+                <div class="col-xs-2"></div>
+                <div class="col-xs-4">
+                    <div class="form-group form-inline form_inline_style">
+                        <label for="lc_type" class="">Type</label>
+                        <div class="radio mt_10">
+                            <label>
+                                <input type="radio" name="lc_type" value="Linecard"
+                                ng-disabled="action == 'view'"
+                                ng-model="submitData.lc_type">
+                                Line Card
+                            </label>
+                        </div>
+                        <div class="radio mt_10">
+                            <label>
+                                <input type="radio" name="lc_type" value="Module"
+                                ng-disabled="action == 'view'"
+                                ng-model="submitData.lc_type">
+                                Module
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row"></div>
+            <div class="row switchModule">
+                <!-- <div class="row"></div> -->
+                <div class="portGroup"
+                 data-ng-repeat="portGrp in submitData.lc_data.port_groups">
+                    <div class="col-xs-4">
+                        <div class="form-group">
+                            <label for="num_ports">Number of Ports</label>
+                            <input type="number" class="form-control" 
+                            placeholder="Number of Ports"
+                            data-ng-required
+                            data-ng-change="checkNumPorts($index)"
+                            data-ng-disabled="action == 'view'"
+                            ng-model="portGrp.num_ports">
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        <div class="form-group">
+                            <label for="port_speed">Port Speed</label>
+                            <select class="form-control" data-ng-model="portGrp.speed"
+                                data-ng-options="portSpeed as portSpeed for portSpeed in domainValues.port_speed_list"
+                                data-ng-required
+                                data-ng-disabled="action == 'view'">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        <div class="form-group">
+                            <label for="transceiver">Transceiver</label>
+                            <select class="form-control"
+                                data-ng-model="portGrp.transceiver"
+                                data-ng-options="transceiver as transceiver for transceiver in domainValues.transceiver_list"
+                                data-ng-required
+                                data-ng-disabled="action == 'view'">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-xs-8">
+                        <!-- <div class="form-group">
+                            <div class="col-xs-12">
+                                <label for="port_roles">Port Roles</label>
+                            </div>
+                            <label data-ng-repeat="port_role in domainValues.port_role_list"
+                              class="text-capitalize checklist"
+                              style="font-weight: initial">
+                                <input type="checkbox"
+                                data-ng-disabled="action == 'view' || action == 'viewothers'"
+                                checklist-model="portGrp.port_roles"
+                                checklist-value="port_role">{{port_role}}
+                            </label>
+                        </div> -->
+                        <div class="col-xs-12">
+                            <div class="form-group form-inline form_inline_style">
+                                <label for="role" class="">Port Roles</label>
+                                <div class="radio mt_12"
+                                 data-ng-repeat="port_role in domainValues.port_role_list">
+                                    <label class="text-capitalize">
+                                        <input type="radio" name="role_{{$parent.$index}}"
+                                         value="{{port_role}}"
+                                         ng-disabled="action == 'view'"
+                                         ng-model="portGrp.role">
+                                        {{port_role}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        <a href="javascript:void(0);"
+                        ng-hide="submitData.lc_data.port_groups.length == 1 || action == 'view'"
+                        ng-click="delPortGrp($index)"
+                        class="bottom-align">
+                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                            <span class="hidden-xs"></span>
+                        </a>
+                    </div>
+                    <div class="row"></div>
+                    <a href="javascript:void(0);"
+                        ng-hide="$index < submitData.lc_data.port_groups.length - 1 || action == 'view'"
+                        ng-click="addPortGrp()"
+                        class="pull-right mt_10">
+                        <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+                        <span class="hidden-xs">Add Port-Group</span>
+                    </a>
+                    <!-- <div style="width: 96%; margin-left: 2%;"
+                    class="row row_head"
+                    ng-hide="$index == module.port_groups.length - 1"></div> -->
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal-footer">
+    <!-- <p class="pull-left errorHighlight" data-ng-show="fieldErr">
+            All fields are mandatory
+    <p> -->
+    <button class="btn btn-trans btn-default btn-raised" ng-click="cancel()">Cancel</button>
+    <button class="btn btn-raised btn-primary"
+        ng-hide="action == 'view'"
+        data-ng-disabled="lc_form.$invalid"
+        ng-click="ok()">
+        Save
+    </button>
+</div>
+</div>

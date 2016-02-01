@@ -1,22 +1,44 @@
-from django.conf.urls import patterns, include, url
-from django.contrib import admin
-from views import TopologyList, TopologyDetail, FabricList, FabricDetail, FabricRuleDBDetail,\
-                  DeployedFabric, DeployedFabricDetail, DeployedConfig, DeployedLogs, ImageList,\
-                  FabricImageEdit, Profiles
+from django.conf.urls import patterns, url
+
+from views import *
 
 urlpatterns = patterns('',
-    # Examples:
-     url(r'^$', FabricList.as_view(), name='home'),
-     url(r'^(?P<id>[0-9]+)$', FabricDetail.as_view(), name='detail_view'),
-     url(r'^fabricruledb/$', FabricRuleDBDetail.as_view(), name='detail_view'),
-     url(r'^topology/$', TopologyList.as_view(), name='home'),
-     url(r'^topology/(?P<id>[0-9]+)$', TopologyDetail.as_view(), name='detail_view'),
-     
-     url(r'^deployed$', DeployedFabric.as_view(), name='home'),
-     url(r'^deployed/(?P<fabric_id>[0-9]+)/(?P<replica_num>[0-9]+)$', DeployedFabricDetail.as_view(), name='detail_view'),
-     url(r'^deployed/config/(?P<id>[0-9]+)$', DeployedConfig.as_view(), name='detail_view'),
-     url(r'^deployed/logs/(?P<id>[0-9]+)$', DeployedLogs.as_view(), name='detail_view'),
-     url(r'^images$', ImageList.as_view(), name='home'),
-     url(r'^(?P<id>[0-9]+)/profiles/$', Profiles.as_view(), name='home'),
-     url(r'^(?P<id>[0-9]+)/images/$', FabricImageEdit.as_view(), name='home'),
+    url(r'^/fabric/(?P<fid>[1-9][0-9]*)/link/(?P<lid>[1-9][0-9]*)$',
+        FabricLinkDetailView.as_view()),
+    url(r'^/fabric/(?P<fid>[1-9][0-9]*)/switch/(?P<sid>[1-9][0-9]*)$',
+        FabricSwitchDetailView.as_view()),
+    url(r'^/fabric/(?P<id>[1-9][0-9]*)/build$',
+        FabricBuildView.as_view()),
+    url(r'^/fabric/(?P<id>[1-9][0-9]*)/defaults$',
+        FabricDefaultsView.as_view()),
+    url(r'^/fabric/(?P<id>[1-9][0-9]*)/link$',
+        FabricLinkView.as_view()),
+    url(r'^/fabric/(?P<id>[1-9][0-9]*)/profiles$',
+        FabricProfilesView.as_view()),
+    url(r'^/fabric/(?P<id>[1-9][0-9]*)/submit$',
+        FabricSubmitView.as_view()),
+    url(r'^/fabric/(?P<id>[1-9][0-9]*)/switch$',
+        FabricSwitchView.as_view()),
+    url(r'^/fabric/(?P<id>[1-9][0-9]*)$',
+        FabricDetailView.as_view()),
+    url(r'^/fabric$',
+        FabricListView.as_view()),
+    url(r'^/topology/(?P<tid>[1-9][0-9]*)/link/(?P<lid>[1-9][0-9]*)$',
+        TopologyLinkDetailView.as_view()),
+    url(r'^/topology/(?P<tid>[1-9][0-9]*)/switch/(?P<sid>[1-9][0-9]*)$',
+        TopologySwitchDetailView.as_view()),
+    url(r'^/topology/(?P<id>[1-9][0-9]*)/clear$',
+        TopologyClearView.as_view()),
+    url(r'^/topology/(?P<id>[1-9][0-9]*)/defaults$',
+        TopologyDefaultsView.as_view()),
+    url(r'^/topology/(?P<id>[1-9][0-9]*)/link$',
+        TopologyLinkView.as_view()),
+    url(r'^/topology/(?P<id>[1-9][0-9]*)/submit$',
+        TopologySubmitView.as_view()),
+    url(r'^/topology/(?P<id>[1-9][0-9]*)/switch$',
+        TopologySwitchView.as_view()),
+    url(r'^/topology/(?P<id>[1-9][0-9]*)$',
+        TopologyDetailView.as_view()),
+    url(r'^/topology$',
+        TopologyListView.as_view()),
 )

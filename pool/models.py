@@ -1,32 +1,28 @@
-__author__  = "arunrajms"
-
 from django.db import models
+from jsonfield import JSONField
 
-# Create your models here.
+from fabric.models import Fabric, Switch
 
 
 class Pool(models.Model):
 
-    name = models.CharField(max_length=100)
-    type = models.CharField(max_length=100)
-    used = models.IntegerField(default=0)
-    available = models.IntegerField(null=True)
-    range = models.TextField(null=True)
-    scope = models.CharField(max_length=16,default="global")
-    
+    name = models.TextField(unique=True)
+    type = models.TextField()
+    scope = models.TextField()
+    blocks = JSONField(default=[])
+    updated_by = models.TextField(default='')
+    ref_count = models.IntegerField(default=0)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
-class PoolDetail(models.Model):
 
-    index = models.ForeignKey(Pool)
+class PoolEntry(models.Model):
+
+    pool = models.ForeignKey(Pool, on_delete=models.CASCADE)
+    fabric = models.ForeignKey(Fabric, on_delete=models.CASCADE,
+                               null=True, default=None)
     value = models.TextField()
-    assigned = models.TextField()
-    lastmodified = models.DateTimeField(auto_now=True)
-    
-class PoolFabricDetail(models.Model):
-    pool_id = models.ForeignKey(Pool)
-    value = models.TextField()
-    fab_id = models.IntegerField(null=False,default=0)
-    lastmodified = models.DateTimeField(auto_now=True)
-    assigned = models.TextField()
-
-    
+    switch = models.ForeignKey(Switch, null=True, default=None,
+                                 on_delete=models.SET_NULL)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)

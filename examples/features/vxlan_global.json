@@ -1,0 +1,34 @@
+
+"vxlan" :
+{
+	"vxlan_global_config":{
+		"igp": "$$IGP$$",
+		"overlay": "$$OVERLAY_TO_USE$$",
+		"multicast": "$$MULTICAST_ENABLED$$",
+		"ingress_replication": "$$INGRESS_REPLICATION_ENABLED$$",
+		"anycast_gateway_mac": "$$ANYCAST_GATEWAY_MAC$$",
+		"rendezvous_point":[
+			{
+		       "node_id": "$$NODE_ID$$",
+			   "mcast_group": "$$MCAST_GROUP$$"
+			}
+		],
+        "tenant_info":[
+			{
+			   "id": "$$TENANT_ID$$",
+			   "l2_vni_list":[
+					{
+				   		"vni": "$$L2_VNI$$",
+				   		"vlan": "$$VLAN_ID$$",
+				   		"anycast_gateway": "$$ANYCAST_GATEWAY$$",
+				   		"mcast_group": "MCAST_GROUP"
+					}
+			   ],
+			   "vrf_context": "$$VRF_CONTEXT$$",
+        	   "l3_vni": "$$L3_VNI_ID$$",
+               "control_vlan" : "$$CONTROL_VLAN$$"
+			}
+		]
+	}
+}
+

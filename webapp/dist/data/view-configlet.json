@@ -1,0 +1,8 @@
+{
+	"id": 1,
+	"name": "Static Name 3",
+	"group"  : "static Group Name2",
+	"type"  : "template",
+	"configlet_file"    :   "",
+	"parameter_list"    :   ["instance_name"]
+}
