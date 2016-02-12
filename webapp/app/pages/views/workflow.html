@@ -43,7 +43,7 @@
                         'sort-desc': tableParams.isSortBy('updated', 'desc')
                     }"
                     ng-click="tableParams.sorting({'updated' : tableParams.isSortBy('updated', 'asc') ? 'desc' : 'asc'})">Last Modified on</th>
-                    <th></th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -56,7 +56,7 @@
                         <a href="#/workflow/view/{{workflow.id}}">{{workflow.name}}</a>
                     </td>
                     <td>
-                        <span class="glyphicon glyphicon-ok success-color" ng-show="workflow.submit == 'true' || workflow.submit == 'True' || workflow.submit == true" aria-hidden="true">
+                        <span class="glyphicon glyphicon-ok success_color" ng-show="workflow.submit == 'true' || workflow.submit == 'True' || workflow.submit == true" aria-hidden="true">
                         </span>
                     </td>
                     <td>{{workflow.updated_by}}</td>
@@ -161,7 +161,7 @@
                     <td>{{config.referenced}}</td>
                     <td>{{config.installed}}</td>
                     <td>
-                        <span class="glyphicon glyphicon-ok success-color" ng-show="config.submit == 'true' || config.submit == 'True'" aria-hidden="true">
+                        <span class="glyphicon glyphicon-ok success_color" ng-show="config.submit == 'true' || config.submit == 'True'" aria-hidden="true">
                         </span>
                     </td>
                     <td>{{config.last_modified_by}}</td>

@@ -218,8 +218,8 @@ angular.module('PoapServer').controller('ConfigletsModalCtrl', function($scope, 
 
     $scope.submitData = {
         "name":"",
-        "group":""/*,
-        "config_type": appSettings.defaultData.configlets.config_type*/
+        "group":"",
+        "type": appSettings.defaultData.configlets.config_type
     };
 
     $scope.ok = function() {

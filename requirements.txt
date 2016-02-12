@@ -10,3 +10,6 @@ configobj==4.7.1
 pyYAML==3.11
 django-rest-swagger==0.3.4
 django-radius
+celery==3.1.20
+futures==3.0.4
+requests==2.2.1

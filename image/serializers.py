@@ -2,7 +2,7 @@ from django.core.validators import validate_ipv4_address
 from rest_framework import serializers
 
 
-ACCESS_PROTOCOLS = ["ftp", "tftp", "scp", "http"]
+ACCESS_PROTOCOLS = ["sftp", "tftp", "scp", "http"]
 
 
 class ImageProfileSerializer(serializers.Serializer):
@@ -31,4 +31,14 @@ class ImageProfilePutSerializer(serializers.Serializer):
     access_protocol = serializers.ChoiceField(ACCESS_PROTOCOLS)
     updated_by = serializers.CharField()
     created = serializers.DateTimeField(read_only=True)
+    updated = serializers.DateTimeField(read_only=True)
+
+
+class ImageProfileListSerializer(serializers.Serializer):
+
+    id = serializers.IntegerField(read_only=True)
+    profile_name = serializers.CharField()
+    system_image = serializers.CharField()
+    image_server_ip = serializers.CharField(validators=[validate_ipv4_address])
+    updated_by = serializers.CharField()
     updated = serializers.DateTimeField(read_only=True)

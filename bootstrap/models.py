@@ -10,3 +10,4 @@ class SwitchBootDetail(models.Model):
     serial_number = models.TextField(default="")
     boot_time = models.DateTimeField(null=True, default=None)
     build_time = models.DateTimeField(default=None)
+    mgmt_ip = models.TextField(blank=True, default="")

@@ -25,7 +25,7 @@ def find_repeat_serial_num(serial_num_list):
     return
 
 
-def find_dup_serial_discovery(serial_list, rule_id=0):
+def find_dup_serial_discovery(serial_list, rule_id = 0, rma_case=False):
     rules = None
     if rule_id:
         rules = DiscoveryRule.objects.exclude(id=rule_id
@@ -39,14 +39,17 @@ def find_dup_serial_discovery(serial_list, rule_id=0):
         for rule in rules:
             if str(serial) in rule.subrules:
                 msg = serial + ERR_SERIAL_EXISTS_DISRULES + rule.name
-                raise IgniteException(msg)
-    return True
+                if rma_case==True:
+                    return rule
+                else:
+                    raise IgniteException(msg)
+    return None
 
 
 def find_duplicate(serial_list, rule_id=0):
     find_dup_serial_discovery(serial_list, rule_id)
 
-    switches = Switch.objects.values_list('serial_num',
+    switches = Switch.objects.exclude(topology_id=None).values_list('serial_num',
                                           flat=True).exclude(serial_num='')
     for serial in serial_list:
         if str(serial) in switches:

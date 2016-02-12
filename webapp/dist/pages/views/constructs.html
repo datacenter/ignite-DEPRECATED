@@ -108,7 +108,13 @@
                                 <span>
                                     {{param.param_name}}  = 
                                     <span class="para_val">
-                                        <span ng-if="param.param_type != 'Fixed'">{{param.param_type == "Pool"? "Pool" : param.param_type}}.</span>{{getParamValue(param.param_type,param.param_value)}}
+                                        <span ng-if="param.param_type != 'Fixed'">
+                                            {{param.param_type == "Pool"? "Pool" : param.param_type}}
+                                            <span ng-if="!(param.param_type == 'Fixed' || param.param_type == 'Eval')">.</span>
+                                            <span ng-if="param.param_type == 'Eval'">( '</span>
+                                        </span>
+                                        {{getParamValue(param.param_type,param.param_value)}}
+                                        <span ng-if="param.param_type == 'Eval'">' )</span>
                                     </span>
                                 </span>
                             </li>

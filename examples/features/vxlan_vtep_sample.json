@@ -1,0 +1,10 @@
+"vxlan" :
+{
+        "vxlan_vni_configured" :[
+                {
+                   "tenant_id": 10,
+                   "vni":[100]
+            }
+        ]
+}
+

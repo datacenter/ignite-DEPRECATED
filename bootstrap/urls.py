@@ -13,4 +13,8 @@ urlpatterns = patterns('',
         BootstrapSwitchStatusView.as_view()),
     url(r'^/booted$',
         BootstrapBootedSwitchView.as_view()),
+    url(r'^/rma/rma$',
+        RmaSerialUpdateView.as_view()),
+    url(r'^/rma/(?P<id>[0-9A-Za-z]+)$',
+        RmaSerialSearchView.as_view()),
 )

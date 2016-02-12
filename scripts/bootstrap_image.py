@@ -6,7 +6,7 @@ import sys
 
 
 #Set syslog server and port - fill in from ignite/config.py
-SYSLOG_SERVER = "172.31.219.35"
+SYSLOG_SERVER = "127.0.0.1"
 SYSLOG_PORT = 514
 
 MD5SUM_EXT = "md5"
@@ -27,7 +27,7 @@ PROTO_SFTP = 'sftp'
 PROTO_HTTP = 'http'
 
 #serial number of switch
-serial_num = ""
+serial_num_g = ""
 #default image of switch
 default_image_g = ""
 
@@ -41,7 +41,7 @@ LEVEL = {
 
 
 def syslog(info, level=LEVEL['info']):
-    message = "%s : %s : %s" % (serial_num, os.path.basename(__file__), info)
+    message = "%s : %s : %s" % (serial_num_g, os.path.basename(__file__), info)
     data = '<%d>%s' % (level + FACILITY*8, message)
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.sendto(data, (SYSLOG_SERVER, SYSLOG_PORT))
@@ -133,16 +133,15 @@ def same_md5(bin_file, md5_file):
 
 
 def set_system_info():
-    global serial_num
     global default_image_g
     system_info = json.loads(clid("show version"))
-    serial_num = str(system_info['proc_board_id'])
     default_image_g = str(system_info['kick_file_name'])
 
 
 def get_image(protocol="scp", port="", hostname="", file_src="",
               file_dst="bootflash:poap/", default_image="",
-              vrf="management", username="", password="", fatal=True):
+              vrf="management", username="", password="",
+              serial_num="", fatal=True):
 
     if "" in [protocol, hostname, file_src, file_dst, username, password]:
         abort_cleanup_exit()
@@ -159,6 +158,8 @@ def get_image(protocol="scp", port="", hostname="", file_src="",
     password_g = password
     global vrf_g
     vrf_g = vrf
+    global serial_num_g
+    serial_num_g = serial_num
 
     run_cli("terminal dont-ask")
 

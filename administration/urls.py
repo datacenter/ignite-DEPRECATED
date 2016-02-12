@@ -10,5 +10,5 @@ urlpatterns = patterns('',
     url(r'^/aaa/user/(?P<id>[1-9][0-9]*)$', AAAUserDetailView.as_view()),
 
     url(r'^/backup$', IgniteBackupView.as_view()),
-    url(r'^/backup/(?P<fn>\d\d\d\d_\d\d_\d\d_\d*)$', IgniteBackupDetailView.as_view()),
+    url(r'^/backup/(?P<fn>Ignite_\d\d\d\d_\d\d_\d\d_\d*)$', IgniteBackupDetailView.as_view()),
 )

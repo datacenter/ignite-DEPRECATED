@@ -177,6 +177,16 @@ angular.module('PoapServer').controller('AAA_SetupModalCtrl',function($scope, $m
         dataToModal.callerScope.deleteSetup(dataToModal.id, dataToModal.index);
     };
 
+    $scope.serverProtocolCh = function() {
+        if($scope.submitData.protocol == 'radius') {
+            $scope.submitData.port = 1812;
+        } else if($scope.submitData.protocol == 'tacacs+') {
+            $scope.submitData.port = 49;
+        } else {
+            $scope.submitData.port = '';
+        }
+    };
+
     $scope.validateIPaddress = function()   
     {
         var ipPattern = /^([0-9]{1,3}\.){3}[0-9]{1,3}$/;

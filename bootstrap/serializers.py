@@ -1,3 +1,5 @@
+from constants import *
+
 from rest_framework import serializers
 
 from fabric.constants import MATCH_TYPES
@@ -30,7 +32,7 @@ class BootstrapSwitchSerializer(serializers.Serializer):
         serial_number = serializers.CharField()
         boot_status = serializers.CharField()
         boot_time = serializers.DateTimeField()
-        match_type = serializers.ChoiceField(MATCH_TYPES)
+        match_type = serializers.ChoiceField(MATCH_TYPES, required=False)
         discovery_rule = serializers.IntegerField()
 
     id = serializers.IntegerField()
@@ -44,3 +46,16 @@ class SwitchBootStatusPostSerializer(serializers.Serializer):
 
     serial_num = serializers.CharField()
     status = serializers.BooleanField()
+
+
+class RmaSerializer(serializers.Serializer):
+
+    match = serializers.ChoiceField(RMA_MATCH)
+    switch_detail = BootstrapSwitchSerializer(required=False)
+    rule = serializers.IntegerField(required=False)
+
+
+class UpdateRmaSerializer(serializers.Serializer):
+
+    old_serial_num = serializers.CharField()
+    new_serial_num = serializers.CharField()

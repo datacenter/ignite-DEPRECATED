@@ -476,7 +476,7 @@
         // console.log(portText2.node.getBoundingClientRect());
 
         // portText2.textPath.attr({'startOffset':pathLength - (portText2.node.clientWidth/1.25)}); //80
-        portText2.textPath.attr({'startOffset':pathLength - 70}); //80
+        portText2.textPath.attr({'startOffset':pathLength - 20}); //80
         portText2.addClass('port');
 
         var g = paper.g();

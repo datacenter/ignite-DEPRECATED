@@ -1,0 +1,7 @@
+
+"igp":
+        {
+           "enabled":$$IGP_ENABLED$$,
+           "igp_prot":"$$IGP_PROTOCOL$$"
+        }
+

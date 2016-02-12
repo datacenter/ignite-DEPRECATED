@@ -1,0 +1,52 @@
+<div>
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" ng-click="cancel()" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <h3 class="modal-title pull-left">Group</h3>
+    </div>
+    <div class="modal-body">
+        <form name="creatGrpForm">
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="form-group">
+                        <label for="name" class="col-xs-2" style="float:none">Name</label>
+                        <input type="text" class="form-control" style="display: inline; width: inherit"
+                        name="name"
+                        placeholder="Name"
+                        required autofocus
+                        data-ng-class="{errorHighlight : creatGrpForm.name.$invalid}"
+                        ng-model="submitData.name">
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="form-group">
+                        <label for="username" class="col-xs-2" style="float:none">Username</label>
+                        <input type="text" class="form-control" style="display: inline; width: inherit"
+                        name="username"
+                        placeholder="Name"
+                        required autofocus
+                        data-ng-class="{errorHighlight : creatGrpForm.username.$invalid}"
+                        ng-model="submitData.username">
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="form-group">
+                        <label for="password" class="col-xs-2" style="float:none">Password</label>
+                        <input type="text" class="form-control" style="display: inline; width: inherit"
+                        name="password"
+                        placeholder="Name"
+                        required autofocus
+                        data-ng-class="{errorHighlight : creatGrpForm.password.$invalid}"
+                        ng-model="submitData.password">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-trans btn-default btn-raised" ng-click="cancel()">Cancel</button>
+    <button class="btn btn-raised btn-primary" data-ng-disabled="creatGrpForm.$invalid" ng-click="ok()">Save</button>
+</div>
+</div>

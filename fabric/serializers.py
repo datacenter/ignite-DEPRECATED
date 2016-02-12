@@ -154,6 +154,8 @@ class FabricPostSerializer(serializers.Serializer):
 
     name = serializers.CharField()
     topology = serializers.IntegerField()
+    config_profile = serializers.IntegerField(allow_null=True)
+    feature_profile = serializers.IntegerField(allow_null=True)
     switches = FabricProfilesSerializer(many=True)
 
 
@@ -197,6 +199,8 @@ class FabricSerializer(serializers.Serializer):
     name = serializers.CharField()
     model_name = serializers.CharField()
     submit = serializers.BooleanField()
+    config_profile = serializers.PrimaryKeyRelatedField(read_only=True)
+    feature_profile = serializers.PrimaryKeyRelatedField(read_only=True)
     site = serializers.CharField()
     defaults = FabricDefaultsSerializer()
     switches = FabricSwitchSerializer(many=True)
@@ -216,4 +220,6 @@ class FabricSwitchPutSerializer(serializers.Serializer):
 
 class FabricProfilesPutSerializer(serializers.Serializer):
 
+    config_profile = serializers.IntegerField(allow_null=True)
+    feature_profile = serializers.IntegerField(allow_null=True)
     profiles = FabricProfilesSerializer(many=True)

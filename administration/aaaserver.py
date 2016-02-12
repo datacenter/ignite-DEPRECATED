@@ -8,15 +8,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+# Server related function
 def get_all_servers():
     return AAAServer.objects.all()
-
-
-def get_all_users():
-    aaa_id_list = AAAUser.objects.values_list('user_id', flat=True).distinct()
-    if aaa_id_list:
-        return User.objects.all().exclude(id=aaa_id_list)
-    return User.objects.all()
 
 
 def add_server(data, username):
@@ -47,12 +41,36 @@ def _add_server(data, server, username):
     return server
 
 
+# User related functuons
+def get_all_users():
+    aaa_id_list = AAAUser.objects.values_list('user_id', flat=True).distinct()
+    if aaa_id_list:
+        return User.objects.all().exclude(id=aaa_id_list)
+    return User.objects.all()
+
+
 def add_user(data):
     user = User()
     user.username = data[USERNAME]
     user.set_password(data[PASSWORD])
     user.email = data[EMAIL]
     user.is_superuser = data[IS_SUPERUSER]
+    user.save()
+    return user
+
+
+def get_user(id):
+    return User.objects.get(pk=id)
+
+
+def update_user(data, id):
+    user = get_user(id)
+    if user.username == ADMIN:
+        raise IgniteException(ERR_ADMIN_UPDATE)
+    user.email = data[EMAIL]
+    user.is_superuser = data[IS_SUPERUSER]
+    if data[PASSWORD] is not None:
+        user.set_password(data[PASSWORD])
     user.save()
     return user
 

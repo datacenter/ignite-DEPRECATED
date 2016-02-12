@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 
-from exception import TokenException
+from exception import TokenException, UnauthorizedException
 
 import logging
 logger = logging.getLogger(__name__)
@@ -48,4 +48,4 @@ class AdminView(APIView):
             raise TokenException("Invalid Token")
 
         if not user_obj.is_superuser:
-            raise TokenException("Unauthorised access")
+            raise UnauthorizedException("Unauthorised access")

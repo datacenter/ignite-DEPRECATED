@@ -380,6 +380,7 @@ angular.module('PoapServer')
       $log.debug('src_switch and dst_switch');
       var src_switch = linkObj.src_switch;
       var dst_switch = linkObj.dst_switch;
+      var link_type = linkObj.link_type;
       console.log(linkObj.src_switch);
       console.log(linkObj.dst_switch);
       console.log(linkObj.link_type);
@@ -392,9 +393,11 @@ angular.module('PoapServer')
           $('#alertLinkSame').hide()
         }
 
+        debugger;
+
         for (var i = 0; i < $scope.topology.links.length; i++) {
 
-          if (($scope.topology.links[i].src_switch == src_switch && $scope.topology.links[i].dst_switch == dst_switch) || ($scope.topology.links[i].src_switch == dst_switch && $scope.topology.links[i].dst_switch == src_switch)) {
+          if ((link_type != 'VPC-Member') && ((($scope.topology.links[i].link_type == link_type) || $scope.linkFor != 'leaf2leaf')  && ($scope.topology.links[i].src_switch == src_switch && $scope.topology.links[i].dst_switch == dst_switch) || ($scope.topology.links[i].src_switch == dst_switch && $scope.topology.links[i].dst_switch == src_switch))) {
             $('#alertLinkExists').show();
             return false;
           } else {
@@ -407,7 +410,7 @@ angular.module('PoapServer')
       }
 
       return true;
-    }
+    };
 
 
 
@@ -667,6 +670,12 @@ angular.module('PoapServer')
     };
 
     $scope.getSwitchDetails = function(command) {
+      if(null == $scope.topology.config_profile) {
+        $scope.topology.config_profile = 0;
+      }
+      if(null == $scope.topology.feature_profile) {
+        $scope.topology.feature_profile = 0;
+      }
       angular.forEach($scope.topology.defaults.switches, function(value,key){
         $scope.fetchTierSwitches(value.tier);
         if(null == value.config_profile) {
@@ -816,7 +825,12 @@ angular.module('PoapServer')
     };
 
     $scope.fetchImageList = function() {
-      appServices.doAPIRequest(appSettings.appAPI.images.list, null, null).then(function(data) {
+      var reqHeader = {
+                appendToURL : true,
+                value : '?state=true',
+                noTrailingSlash : true
+            };
+      appServices.doAPIRequest(appSettings.appAPI.images.list, null, reqHeader).then(function(data) {
         $scope.switchDetails.selectList.imglist = data;
       });
     };
@@ -939,7 +953,9 @@ angular.module('PoapServer')
         };
 
         appServices.doAPIRequest(appSettings.appAPI.fabricInstance.edit, modalData.submitData, reqHeader).then(function(data) {
+          debugger;
           $scope.topology = data;
+          $scope.topologyData = angular.copy($scope.topology);
           $scope.tierCounter = 0;
           $scope.getLinkDetails();
           $scope.getSwitchDetails('reloadTopology');
@@ -1137,6 +1153,8 @@ angular.module('PoapServer').controller('FabricConfigCtrl',
         };
 
         $scope.transformData = function() {
+          $scope.requestData.config_profile = $scope.submitData.config_profile;
+          $scope.requestData.feature_profile = $scope.submitData.feature_profile;
           $scope.requestData.profiles = $scope.submitData.switches;
         };
 
@@ -1151,6 +1169,8 @@ angular.module('PoapServer').controller('FabricConfigCtrl',
 
         $scope.init = function() {
           var defaultVal = {"id" : 0, "name" : "--None--"};
+          $scope.submitData.config_profile = angular.copy(dataToModal.topology.config_profile);
+          $scope.submitData.feature_profile = angular.copy(dataToModal.topology.feature_profile);
           $scope.selectList.config_list.unshift(defaultVal);
           $scope.selectList.fabricProfile_list.unshift(defaultVal);
           $scope.selectList.workflow_list.unshift(defaultVal);
@@ -1165,6 +1185,13 @@ angular.module('PoapServer').controller('FabricConfigCtrl',
                 $scope.addFabricForm["config_profile"+index].$setValidity('required',true);
                 $scope.addFabricForm["feature_profile"+index].$setValidity('required',true);
                 $('.profile-note').removeClass('noteHighlight');
+            }
+            if((0 == $scope.submitData.switches[0].feature_profile && 0 == $scope.submitData.switches[1].feature_profile) || (0 != $scope.submitData.switches[0].feature_profile && 0 != $scope.submitData.switches[1].feature_profile)) {
+                $scope.addFabricForm["feature_profile0"].$setValidity('required',true);
+                $scope.addFabricForm["feature_profile1"].$setValidity('required',true);
+            } else {
+                $scope.addFabricForm["feature_profile0"].$setValidity('required',false);
+                $scope.addFabricForm["feature_profile1"].$setValidity('required',false);
             }
         };
 

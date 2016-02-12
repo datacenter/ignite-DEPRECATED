@@ -213,8 +213,16 @@ def build_bgp(anm):
     g_in = anm['input']
     g_l3 = anm['layer3']
 
+    g_ebgpv4 = anm.add_overlay("ebgp_v4", directed=True)
+    g_ebgpv6 = anm.add_overlay("ebgp_v6", directed=True)
+    g_ibgpv4 = anm.add_overlay("ibgp_v4", directed=True)
+    g_ibgpv6 = anm.add_overlay("ibgp_v6", directed=True)
+    g_bgp = anm.add_overlay("bgp", directed=True)
     if not anm['phy'].data.enable_routing:
         log.info("Routing disabled, not configuring BGP")
+        return
+    if g_in.data.bgp_enabled ==False:
+        log.info("BGP not enabled")
         return
 
     build_ebgp(anm)

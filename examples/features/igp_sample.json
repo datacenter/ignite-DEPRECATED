@@ -1,0 +1,7 @@
+"igp":
+        {
+           "enabled":true,
+           "igp_prot":ospf
+        }
+
+

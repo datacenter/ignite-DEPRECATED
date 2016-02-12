@@ -22,6 +22,18 @@ angular.module('PoapServer')
         this.openUserModal();
     };
 
+    $scope.viewUser = function(id, index) {
+        $scope.action = 'view';
+        $scope.selectedId = id;
+        this.openUserModal(index);
+    };
+
+    $scope.editUser = function(id, index) {
+        $scope.action = 'edit';
+        $scope.selectedId = id;
+        this.openUserModal(index);
+    };
+
     $scope.deleteUser = function(id) {
         $scope.selectedId = id;
 
@@ -95,11 +107,11 @@ angular.module('PoapServer')
                     $scope.aaaModalInstance.dismiss();
                 }*/
             });
-        }/* else if(modalData.action == 'edit') {
+        } else if(modalData.action == 'edit') {
             appServices.doAPIRequest(appSettings.appAPI.aaa_user.edit, modalData.submitData, reqHeader).then(function(data) {
                $scope.init();
             });
-        }*/
+        }
     };
 
     $scope.init = function() {
@@ -146,11 +158,21 @@ angular.module('PoapServer').controller('UserModalCtrl',function($scope, $modalI
     $scope.action = dataToModal.action;
     $scope.index = dataToModal.index;
 
+    $scope.submitData = {
+        username : '',
+        email : '',
+        password : '',
+        is_superuser : false
+    };
+
     $scope.cancel = function() {
         $modalInstance.dismiss('cancel');
     };
 
     $scope.verifyPwd = function() {
+        if($scope.action == 'edit') {
+            $scope.chPwd = true;
+        }
     	if($scope.submitData.password !== $scope.submitData.vpwd) {
     		$scope.userForm.pwd.$setValidity("error", false);
     		$scope.userForm.vpwd.$setValidity("error", false);
@@ -174,9 +196,16 @@ angular.module('PoapServer').controller('UserModalCtrl',function($scope, $modalI
         }
     };
 
+    $scope.changeAction = function(newAction) {
+        $scope.action = newAction;
+    };
+
     $scope.ok = function() {
+        if(!$scope.chPwd) {
+            $scope.submitData.password = $scope.submitData.vpwd = null;
+        }
         if(!$scope.submitData.is_superuser) {
-            $scope.submitData.is_superuser = !!$scope.submitData.is_superuser
+            $scope.submitData.is_superuser = !!$scope.submitData.is_superuser;
         }
         $modalInstance.close({
             submitData : $scope.submitData,
@@ -184,5 +213,24 @@ angular.module('PoapServer').controller('UserModalCtrl',function($scope, $modalI
             index : dataToModal.index
         });
     };
+
+    $scope.init = function() {
+        $scope.chPwd = true;
+        if($scope.action == 'view' || $scope.action == 'edit') {
+            var reqHeader = {
+                appendToURL : true,
+                value : dataToModal.id,
+                noTrailingSlash : true                 
+            };
+            appServices.doAPIRequest(appSettings.appAPI.aaa_user.view, null, reqHeader).then(function(data) {
+                $scope.submitData = data;
+                $scope.submitData.password = 'stars';
+                $scope.submitData.vpwd = 'stars';
+            });
+            $scope.chPwd = false;
+        }
+    };
+
+    $scope.init();
 
 });

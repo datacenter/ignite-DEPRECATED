@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from constants import PARAM_TYPES
+from constants import CONSTRUCT_TYPE_OPTIONS, PARAM_TYPES
 from utils.serializers import JSONSerializerField
 
 
@@ -9,6 +9,7 @@ class ConfigletBriefSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField()
     group = serializers.CharField()
+    type = serializers.ChoiceField(CONSTRUCT_TYPE_OPTIONS)
     parameters = JSONSerializerField()
     updated_by = serializers.CharField()
     created = serializers.DateTimeField(read_only=True)
@@ -19,6 +20,7 @@ class ConfigletPostSerializer(serializers.Serializer):
 
     name = serializers.CharField()
     group = serializers.CharField()
+    type = serializers.ChoiceField(CONSTRUCT_TYPE_OPTIONS)
 
 
 class ConfigletSerializer(serializers.Serializer):
@@ -26,6 +28,7 @@ class ConfigletSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField()
     group = serializers.CharField()
+    type = serializers.ChoiceField(CONSTRUCT_TYPE_OPTIONS)
     parameters = JSONSerializerField()
     file = serializers.ListField(child=serializers.CharField())
     updated_by = serializers.CharField()

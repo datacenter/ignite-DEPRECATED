@@ -3,6 +3,7 @@ import autonetkit.ank as ank_utils
 
 from autonetkit.ank_utils import call_log
 
+
 # TODO: extract the repeated code and use the layer2  and layer3 graphs
 
 
@@ -15,12 +16,38 @@ def build_igp(anm):
     # Build a protocol summary graph
     g_igp = anm.add_overlay("igp")
     igp_protocols = ["ospf", "eigrp", "isis", "rip"]
+    g_in = anm['input']
+    g_phy = anm['phy']
+    '''
+    if g_in.data.profiles:
+        node_profiles = g_in.data['profiles']
+    else:
+        return
+
+    flag_igp_enabled = False
+    print "**************"
+    for node in g_phy:
+        for prof in node_profiles:
+            if node.profile == prof['id']:
+                if 'configs' in prof and 'igp' in prof['configs']:
+                    if ('enabled' in prof['configs']['igp'] and prof['configs']['igp']['enabled'] == 1 and
+                        prof['configs']['igp']['igp_prot']):
+                        node.igp = prof['configs']['igp']['igp_prot']
+                        flag_igp_enabled = True
+                else:
+                    node.igp = None
+
+    if flag_igp_enabled == False:
+        return
+    print
+    '''
     for protocol in igp_protocols:
         g_protocol = anm[protocol]
         g_igp.add_nodes_from(g_protocol, igp=protocol)
         g_igp.add_edges_from(g_protocol.edges(), igp=protocol)
 
-#@call_log
+
+# @call_log
 
 
 def build_ospf(anm):
@@ -57,7 +84,7 @@ def build_ospf(anm):
     ank_utils.copy_int_attr_from(g_l3, g_ospf, "multipoint")
 
     # TODO: work out why this doesnt work
-    #ank_utils.copy_int_attr_from(g_in, g_ospf, "ospf_cost", dst_attr="cost",  type=int, default = 1)
+    # ank_utils.copy_int_attr_from(g_in, g_ospf, "ospf_cost", dst_attr="cost",  type=int, default = 1)
     for node in g_ospf:
         for interface in node.interfaces():
             interface.cost = 1
@@ -69,7 +96,7 @@ def build_ospf(anm):
         '''
 
     ank_utils.copy_attr_from(g_in, g_ospf, "ospf_area", dst_attr="area")
-    #ank_utils.copy_edge_attr_from(g_in, g_ospf, "ospf_cost", dst_attr="cost",  type=int, default = 1)
+    # ank_utils.copy_edge_attr_from(g_in, g_ospf, "ospf_cost", dst_attr="cost",  type=int, default = 1)
     ank_utils.copy_attr_from(
         g_in, g_ospf, "custom_config_ospf", dst_attr="custom_config")
 
@@ -169,7 +196,8 @@ def build_ospf(anm):
         router.loopback_zero.cost = 0
         router.process_id = router.asn
 
-#@call_log
+
+# @call_log
 
 
 def ip_to_net_ent_title_ios(ip_addr):
@@ -194,7 +222,8 @@ def ip_to_net_ent_title_ios(ip_addr):
     return ".".join([area_id, ip_octets[0:4], ip_octets[4:8], ip_octets[8:12],
                      "00"])
 
-#@call_log
+
+# @call_log
 
 
 def build_eigrp(anm):
@@ -220,7 +249,7 @@ def build_eigrp(anm):
     ank_utils.copy_attr_from(
         g_in, g_eigrp, "custom_config_eigrp", dst_attr="custom_config")
 
-# Merge and explode switches
+    # Merge and explode switches
     ank_utils.aggregate_nodes(g_eigrp, g_eigrp.switches())
     exploded_edges = ank_utils.explode_nodes(g_eigrp,
                                              g_eigrp.switches())
@@ -241,7 +270,8 @@ def build_eigrp(anm):
             interface.metric = edge.metric
             interface.multipoint = edge.multipoint
 
-#@call_log
+
+# @call_log
 
 
 def build_network_entity_title(anm):

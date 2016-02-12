@@ -134,23 +134,22 @@ class test:
 
 def main(topo_data, cfg_data, fab, syntax, fab_id, pool_dict):
     import json
-
     dst_folder = None
-
+    config_passed = False
     data = topo_data
-
+    if cfg_data is not None:
+    	cfg_data = {"device_profile": cfg_data}
+        #Above is done so that we don't need to make change to other functions
+        config_passed = True
     #Create JSOn from POAP json
-    ank_data = createAnkJsonData(data)
-
+    ank_data = createAnkJsonData(data, cfg_data)
     if ank_data['nodes'] is None:
         log.debug("json_converter.py...Error received in createAnkJsonData.")
         return None
 
     try:
     #Add config info onto nodes.
-        cfg_data = {"device_profile": cfg_data}
-        if (cfg_data.has_key('device_profile') and
-            cfg_data['device_profile'] is not None):
+        if config_passed == True:
             applyConfig(data, ank_data, cfg_data, fab, fab_id, pool_dict)
             log.debug("json_converter.py...applyConfig completed")
         else:
@@ -182,12 +181,9 @@ def main(topo_data, cfg_data, fab, syntax, fab_id, pool_dict):
 def applyConfig(data, ank_data, cfg_data, fab, fab_id, pool_dict):
 
     ank_data = add_generic_config_info(ank_data, cfg_data, fab, fab_id, pool_dict)
-
     ank_data = configure_bgp(ank_data)
-
     ank_data = configure_vxlan(ank_data)
-
-def createAnkJsonData(data):
+def createAnkJsonData(data, cfg):
     #Prepare ank json format from poap json
     ank_data = {"directed":"false",
                           "graph":[],
@@ -252,16 +248,21 @@ def createAnkJsonData(data):
     for node in ank_data["nodes"]:
         node["ports"] = []
 
+    #generate_pc_cfg = False
+    #if (cfg['device_profile'].has_key('pc_enabled') and
+    #    cfg['device_profile']['pc_enabled'] == True):
+    #    generate_pc_cfg = True
+
     #iterate thorugh the link_list and add them to links
     if data.has_key('links'):
         for links in data["links"]:
             links['src_ports'] = string_to_ports(links['src_ports'])
             links['dst_ports'] = string_to_ports(links['dst_ports'])
-
-            #process PC seperateley
-            if ( (re.search(VPC_LINK_TYPE , links['link_type'])) or
-                 (re.search(PC_LINK_TYPE , links['link_type'])) or
-                 (re.search(VPC_MEMBERLINK_TYPE , links['link_type'])) ):
+            #process PC seperately
+            #if ((generate_pc_config == True) and
+            if  ((re.search(VPC_LINK_TYPE , links['link_type'])) or
+                (re.search(PC_LINK_TYPE , links['link_type'])) or
+                (re.search(VPC_MEMBERLINK_TYPE , links['link_type']))):
                 configure_PC_VPC(links, ank_data, switchid_to_name)
                 continue
 
@@ -283,6 +284,8 @@ def createAnkJsonData(data):
                 link["src_port"] = port_list1
                 link["dst_port"] = port_list2
                 link["link_type"] = links['link_type']
+                #SHARAD: for not generating ip address
+                #link["link_type"] = 'is_not_l3'
                 ank_data["links"].append(link)
 
                 #In POAP json file src and dst ports are missing in node port lists. If its not available, update them in node[ports] list
@@ -293,6 +296,8 @@ def createAnkJsonData(data):
                 _p['subcategory'] = "physical"
                 _p['description'] = ""
                 _p['connected_to'] = dest_node_type
+                #_p['ipv4_address'] = "11.0.0.8"
+                #_p['ipv4_prefixlen'] = 30
 
                 src_node['ports'].append(_p)
 
@@ -302,6 +307,8 @@ def createAnkJsonData(data):
                 _p['subcategory'] = "physical"
                 _p['description'] = ""
                 _p['connected_to'] = src_node_type
+                #_p['ipv4_address'] = "11.0.0.9"
+                #_p['ipv4_prefixlen'] = 30
                 dest_node['ports'].append(_p)
 
     #print "completed all configs"
@@ -449,31 +456,58 @@ def configure_PC_VPC(links, ank_data, switchid_to_name):
 
 def add_generic_config_info(topo_data, config_data, fab, fab_id, pool_dict):
     import re
-    
     mgmt_block_specified = False
     if (config_data['device_profile'].has_key('profiles') and
         config_data['device_profile']['profiles'] is not None):
         topo_data['profiles'] = config_data['device_profile']['profiles']
+    if (config_data['device_profile'].has_key('fabric_profile') and
+        config_data['device_profile']['fabric_profile'].has_key('configs')):
+        configs = config_data['device_profile']['fabric_profile']['configs']
+        if configs.has_key('global_cfg'):
+            global_cfg = configs['global_cfg']
 
-    #add mgmt_ip block
-    if (config_data['device_profile'].has_key('mgmt_block') and
-        config_data['device_profile']['mgmt_block'] is not None):
-        topo_data['mgmt_ip_block'] = config_data['device_profile']['mgmt_block']
-	mgmt_block_specified = True
+            if global_cfg.has_key('pc_only'):
+                topo_data['pc_only'] = global_cfg['pc_only']
 
+	    if (global_cfg.has_key('igp_enabled') and
+                global_cfg['igp_enabled'] == True):
+                topo_data['igp'] = 'ospf'
+
+            if (global_cfg.has_key('bgp_enabled') and
+        	global_cfg['bgp_enabled'] is not None):
+        	topo_data['bgp_enabled'] = global_cfg['bgp_enabled']
+
+            if (global_cfg.has_key('enable_routing') and
+        	global_cfg['enable_routing'] is not None):
+        	topo_data['enable_routing'] = global_cfg['enable_routing']
+
+    	    if (global_cfg.has_key('infra_block') and
+        	global_cfg['infra_block'] is not None):
+       	 	topo_data['infra_block'] = global_cfg['infra_block']
+
+    	    if (global_cfg.has_key('loopback_block') and
+	        global_cfg['loopback_block'] is not None):
+        	topo_data['loopback_block'] = global_cfg['loopback_block']
+
+	    #add mgmt_ip block
+    	    if (global_cfg.has_key('mgmt_block') and
+	        global_cfg['mgmt_block'] is not None):
+        	topo_data['mgmt_ip_block'] = global_cfg['mgmt_block']
+		mgmt_block_specified = True
+
+        if (configs.has_key('vxlan') and 
+            configs['vxlan'].has_key('vxlan_global_config')):
+            config_vxlan = configs['vxlan']['vxlan_global_config']
+            if config_vxlan is not None: 
+                topo_data['vxlan_global_config'] = config_vxlan
+    
     if pool_dict is not None:
-        topo_data['ignite'] = {'fab': fab,
-                                'fab_id':fab_id,
-                               'pool_dict':pool_dict}
-	#for now we will assume that pool_dict contains mgmt block
-	mgmt_block_specified = True
+        topo_data['ignite'] =  pool_dict
+        if 'mgmt_pool_id' in pool_dict and pool_dict['mgmt_pool_id'] is not None:
+                mgmt_block_specified = True
 
     if mgmt_block_specified == False:
        topo_data['mgmt_ip_block'] = "192.168.0.0/24"
-
-    if (config_data['device_profile'].has_key('vxlan_global_config') and
-        config_data['device_profile']['vxlan_global_config'] is not None):
-        topo_data['vxlan_global_config'] = config_data['device_profile']['vxlan_global_config']
 
     if (config_data['device_profile'].has_key('vpcid_block') and
         config_data['device_profile']['vpcid_block'] is not None):
@@ -555,16 +589,18 @@ def configure_vxlan(ank_data):
 
         vxlan_global_data['l2_vni_info'] = l2_vni_info
         vxlan_global_data['l3_vni_info'] = l3_vni_info
-
         if 'tenant_info' in ank_data['vxlan_global_config']:
             ank_data['vxlan_global_config']['vni_info'] = vxlan_global_data
-
         for node in ank_data['nodes']:
             if node.has_key('profile') and node['profile'] is not None:
                 profile = node['profile']
                 for prof in ank_data['profiles']:
-                    if prof['id'] == profile and prof['configs'].has_key('vxlan_vni_configured'):
-                        node['vxlan_vni_configured'] = prof['configs']['vxlan_vni_configured']
+                    if prof['id'] == profile:
+                        if prof['configs'].has_key('vxlan'):
+                            vxlan_cfg = prof['configs']['vxlan']
+                            if (vxlan_cfg.has_key('vxlan_vni_configured') and
+                                vxlan_cfg['vxlan_vni_configured'] is not None):
+                                node['vxlan_vni_configured'] = vxlan_cfg['vxlan_vni_configured']
                         break
 
     return ank_data
@@ -581,15 +617,3 @@ def isPortsAvailable(pchannel, posts):
 
 def console_entry():
     args = parse_options()
-    main(args)
-
-if __name__ == "__main__":
-    try:
-        args = parse_options()
-        main(args)
-    except KeyboardInterrupt:
-        pass
-
-
-def run_ank(file, cfg, x, y):
-    val = main(file, cfg)

@@ -6,6 +6,7 @@
     var core_switches = [];
     var spine_switches = [];
     var leaf_switches = [];
+    var vpcMemLinks = [];
 
     var xpos = {
         "core":[],
@@ -13,6 +14,17 @@
         "leaf":[],
         "border":[],
     };
+
+    var vpcLinkDetails = [{
+        "member": {
+            "type": "member",
+            "x": 100,
+            "y": 650,
+            "w": 75,
+            "h": 75,
+            "img": "images/vpc-member.svg"
+        }
+    }]
 
     var switchDetails = [{
         "core": {
@@ -66,6 +78,152 @@
             return true;
         }
         return false;
+    }
+
+    var createElementVpcMember = function(count, switches, item, obj,pos) {
+
+        //Create a group
+        debugger;
+        g[switchCount] = paper.g();
+
+        //Set the groups coordinates
+        var gx = parseInt(pos[count]);
+        var gy = parseInt(obj[item].y);
+        var img = obj[item].img;
+        var titleClass = 'title';
+        var blockClass = 'block';
+
+        var hovertext = "VPC-Member Link";
+
+        /*if(switches.boot_detail !== undefined && !isObjectEmpty(switches.boot_detail) && switches.boot_detail.boot_status == 'Success') {
+            hovertext = hovertext+", Boot Status="+switches.boot_detail.boot_status;
+            img = obj[item].img_booted;
+            titleClass = 'success-title';
+            blockClass = 'success-block';
+        } else if(switches.boot_detail !== undefined && !isObjectEmpty(switches.boot_detail) && switches.boot_detail.boot_status == 'In progress') {
+            hovertext = hovertext+", Boot Status="+switches.boot_detail.boot_status;
+            img = obj[item].img_booted;
+            titleClass = 'progress-title';
+            blockClass = 'progress-block';
+        } else if(switches.boot_detail !== undefined && !isObjectEmpty(switches.boot_detail) && switches.boot_detail.boot_status == 'Failed') {
+            hovertext = hovertext+", Boot Status="+switches.boot_detail.boot_status;
+            img = obj[item].img_booted;
+            titleClass = 'failed-title';
+            blockClass = 'failed-block';
+        } else if (switches.boot_detail !== undefined){
+            hovertext = hovertext+", Boot Status=Not Initiated";
+        }*/
+
+        g[switchCount].attr({
+            "x": gx,
+            "y": gy,
+            "id":switches.id,
+            "title": hovertext,
+            "data-toggle": "tooltip",
+            "cursor":"pointer"
+        });
+
+        $("svg g").tooltip({
+        'container': 'body',
+        'placement': 'right'
+        });
+
+        //add a text title and place it in the rectangle
+        var switchDisplayName = "VPC-Member";
+        
+        var name = paper.text(gx + 38, gy - 6, switchDisplayName);
+        name.attr({"text-anchor":"middle"})
+        name.addClass(titleClass);
+
+        //add a rectangle below the title
+        var block = paper.rect(gx, gy - 20, 75, 20, 1, 1);
+        block.addClass(blockClass);
+
+        block.attr({
+            width: (name.node.clientWidth > block.attr("width")) ? (name.node.clientWidth + 20) : block.attr("width")
+        });
+
+        //add the switch image
+        var objs = paper.image(obj[item].img, gx, gy, obj[item].w, obj[item].h);
+
+        // objs.click(function(){
+        //    PopEdit(switches.id);
+        // });
+
+        objs.addClass('objs');
+
+        //add a text type and place it below the switch image
+        var type = paper.text(gx + 38, gy + 70, switches.type);
+        type.attr({id:switches.name,"text-anchor":"middle"})
+        type.addClass('type');
+
+
+        //g[switchCount].add(objs, block, name, type);
+        g[switchCount].add(objs, block, name);
+
+
+        g[switchCount].click(function(){
+            //PopEdit(switches.id);
+        });
+
+       // console.log('*******************');
+       // console.log(g[switchCount].getBBox());
+
+        g[switchCount].drag(dragMove,startDrag,stopDrag);
+
+        switchCount ++;
+
+
+
+
+
+
+
+
+        /*var s1_pos = 0;
+        var s2_pos = 0;
+        for(var i = 0; i < leaf_switches.length; i++) {
+            if(leaf_switches[i].id == s1) {
+                s1_pos = i;
+            }
+            if(leaf_switches[i].id == s2) {
+                s2_pos = i;
+            }
+        }
+        g[switchCount] = paper.g();
+        var gx = parseInt((xpos.leaf[s1_pos]+xpos.leaf[s2_pos])/2);
+        var gy = parseInt(switchDetails[2].leaf.y+100);
+        var img = "images/vpc-member.svg";
+        g[switchCount].attr({
+            "x": gx,
+            "y": gy,
+            "id": '0',
+            "title": hovertext,
+            "data-toggle": "tooltip",
+            "cursor":"pointer"
+        });
+
+        $("svg g").tooltip({
+        'container': 'body',
+        'placement': 'right'
+        });
+
+        var objs = paper.image(img, gx, gy, 50, 50);
+
+        objs.click(function(){
+           PopEditLink(link_index);
+        });
+
+        objs.addClass('objs');
+
+
+        g[switchCount].add(objs);
+
+
+        g[switchCount].drag(dragMove,startDrag,stopDrag);
+
+        switchCount ++;*/
+
     }
 
      var createTierElement = function(count, switches, item, obj,pos) {
@@ -227,10 +385,19 @@
                 }
         }
 
+
+
         //Create Border
         if(!isObjectEmpty(border_switches)){
                 for (var i = 0; i < border_switches.length; i++) {
                      createTierElement(i, border_switches[i], 'border', switchDetails[3],xpos.border);
+                }
+        }
+
+        //Create VPC-Server
+        if(!isObjectEmpty(vpcMemLinks)){
+                for (var i = 0; i < vpcMemLinks.length; i++) {
+                     createElementVpcMember(i, vpcMemLinks[i], 'member', vpcLinkDetails[0],xpos.vpcMem);
                 }
         }
 
@@ -246,8 +413,10 @@
         "spine":[],
         "leaf":[],
         "border":[],
+        "vpcMem":[]
      };
 
+     debugger;
 
      var svgWidth = $('#topology_svg').width();
 
@@ -272,13 +441,46 @@
 
         if(!isObjectEmpty(border_switches)){
 
-            for(var i=1; i<border_switches.length+1;i++){
-                xpos.border.push(parseInt(svgWidth)/(border_switches.length +1)*i);
+            for(var i=1; i<border_switches.length+vpcMemLinks.length+1;i++){
+                xpos.border.push(parseInt(svgWidth)/(border_switches.length+vpcMemLinks.length +1)*i);
             }
         }
+        debugger;
+
+        fetchVpcServerPos(vpcMemLinks);
+
         console.log('xPos');
         console.log(xpos);
 
+    }
+
+    var fetchVpcServerPos = function(vpcMemLinks) {
+        vpcMemLinks.filter(function(link){
+            var s1_pos = 0;
+            var s2_pos = 0;
+            s1 = link.src_switch;
+            s2 = link.dst_switch;
+            for(var i = 0; i < leaf_switches.length; i++) {
+                if(leaf_switches[i].id == s1) {
+                    s1_pos = i;
+                }
+                if(leaf_switches[i].id == s2) {
+                    s2_pos = i;
+                }
+            }
+            var vpc_x = parseInt((xpos.leaf[s1_pos]+xpos.leaf[s2_pos])/2);
+                var min_pos = 0;
+                var min_distance = 999;
+            for(var i = 0; i<xpos.border.length; i++) {
+                if(Math.abs(xpos.border[i] - vpc_x) < min_distance) {
+                    min_distance = Math.abs(xpos.border[i] - vpc_x);
+                    min_pos = i;
+                }
+            }
+            xpos.vpcMem.push(xpos.border[min_pos]);
+            xpos.border.splice(min_pos,1);
+        });
+        
     }
 
      /****************************************** createConnections **************************************************************/
@@ -291,6 +493,7 @@
 
             s1 = topology.links[i].src_switch;
             s2 = topology.links[i].dst_switch;
+            s3 = topology.links[i].id;
 
             s1_name = topology.links[i].src_switch_name;
             s2_name = topology.links[i].dst_switch_name;
@@ -302,6 +505,7 @@
 
             c1 = {};
             c2 = {};
+            c3 = {};
 
             for (j = 0; j < g.length; j++) {
                 var gp = g[j].attr("id");
@@ -312,6 +516,9 @@
                 }
                 if (gp == s2) {
                     c2 = g[j];
+                }
+                if (gp == s3) {
+                    c3 = g[j];
                 }
             }
 
@@ -338,25 +545,81 @@
             if (p1 != undefined && p2 != undefined) {
 
                 var hovertext = "Link Type="+link+",  Local Port ("+s1_name+") ="+p1+", Remote Port ("+s2_name+") ="+p2;
-                var connObj = paper.connection(c1, c2, linkcolor, i , hovertext);
+                
+                if(link == 'VPC-Member') {
+                    // createElementVpcMember(s1,s2,hovertext,i);
+                    // c3 = g[switchCount-1];
+                    var connObj1 = paper.connection(c1, c3, linkcolor, i , hovertext);
+                    var connObj2 = paper.connection(c3, c2, linkcolor, i , hovertext);
 
-                console.log('connObj');
-                console.log(connObj);
+                    console.log('connObj1');
+                    console.log(connObj1);
+                    var path1 = connObj1.line.node.attributes.d.nodeValue;
 
-                connections.push(connObj);
+                    console.log('connObj2');
+                    console.log(connObj2);
+                    var path2 = connObj2.line.node.attributes.d.nodeValue;
+
+                    connections.push(connObj1);
+                    connections.push(connObj2);
+
+                    addContentToVpcMember(path1,linkcolor,p1,link,s1);
+                    addContentToVpcMember(path2,linkcolor,p2,link,s2);
+                } else {
+                    var connObj = paper.connection(c1, c2, linkcolor, i , hovertext);
+
+                    console.log('connObj');
+                    console.log(connObj);
+
+                    connections.push(connObj);
+
+                    var x1 = connObj.line.node.attributes.x1.nodeValue;
+                    var y1 = connObj.line.node.attributes.y1.nodeValue;
+                    var x4 = connObj.line.node.attributes.x4.nodeValue;
+                    var y4 = connObj.line.node.attributes.y4.nodeValue;
+                    var path = connObj.line.node.attributes.d.nodeValue;
+                    debugger;
+                    addContentToPath(x1,y1,x4,y4,path,linkcolor,p1, p2,link,i,s1,s2,hovertext);
+                }
 
                 //Get path start and end points
 
-                var x1 = connObj.line.node.attributes.x1.nodeValue;
-                var y1 = connObj.line.node.attributes.y1.nodeValue;
-                var x4 = connObj.line.node.attributes.x4.nodeValue;
-                var y4 = connObj.line.node.attributes.y4.nodeValue;
-                var path = connObj.line.node.attributes.d.nodeValue;
-                addContentToPath(x1,y1,x4,y4,path,linkcolor,p1, p2,link,i,s1,s2,hovertext);
+                
              }
 
 
         }
+    }
+
+    var addContentToVpcMember = function(path,linkcolor,p1,link,s1){
+        var portText1 = paper.text(10, 0, p1.toString());
+        portText1.attr({
+            fill:linkcolor,
+            textpath:path,
+            id:"port-"+s1
+        });
+        portText1.addClass('port');
+        var pathLength = Snap.path.getTotalLength(path);
+
+        /*var portText2 = paper.text(0, 0, p2.toString());
+        portText2.attr({
+            fill:linkcolor,
+            textpath:path,
+            id:"port-"+s2
+        });*/
+
+        // console.log('-------------------------------------------');
+        // console.log(portText2.node);
+        // console.log('*******************************************');
+        // console.log(portText2.node.getBoundingClientRect());
+
+        // portText2.textPath.attr({'startOffset':pathLength - (portText2.node.clientWidth/1.25)}); //80
+        portText1.textPath.attr({'startOffset':pathLength - 70}); //80
+        // portText2.addClass('port');
+
+        var g = paper.g();
+        g.add(portText1);
+
     }
 
 
@@ -476,7 +739,7 @@
         // console.log(portText2.node.getBoundingClientRect());
 
         // portText2.textPath.attr({'startOffset':pathLength - (portText2.node.clientWidth/1.25)}); //80
-        portText2.textPath.attr({'startOffset':pathLength - 70}); //80
+        portText2.textPath.attr({'startOffset':pathLength - 20}); //80
         portText2.addClass('port');
 
         var g = paper.g();
@@ -497,6 +760,7 @@
         spine_switches = topology.switches.filter(function(a) {return a.tier === 'Spine'});
         leaf_switches = topology.switches.filter(function(a) {return a.tier === 'Leaf'});
         border_switches = topology.switches.filter(function(a) {return a.tier === 'Border'});
+        vpcMemLinks = topology.links.filter(function(a) {return a.link_type == 'VPC-Member'});
 
         var sWidth = $('#topology_svg').width();
 

@@ -56,7 +56,7 @@
                     }"
                     ng-click="tableParams.sorting({'updated' : tableParams.isSortBy('updated', 'asc') ? 'desc' : 'asc'})"
                     >Last Modified on</th>
-                    <th></th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -68,7 +68,7 @@
                     <td><a href="#/constructs/view/{{config.id}}">{{config.name}}</a>
                     </td>
                     <td>
-                        <span class="glyphicon glyphicon-ok success-color" ng-show="config.submit" aria-hidden="true">
+                        <span class="glyphicon glyphicon-ok success_color" ng-show="config.submit" aria-hidden="true">
                         </span>
                     </td>
                     <td>{{config.updated_by}}</td>
@@ -94,29 +94,7 @@
                         </ul>
                     </td>
                 </tr>
-                
             </tbody>
         </table>
     </div>
-    <!--div class="pagination-nav pull-right">
-        <span class="pagination_info">Displaying 1 - 10 of 124</span>
-        <nav>
-            <ul class="pagination pagination-sm">
-                <li><a href="javascript:void(0);"><span aria-hidden="true">«</span><span class="sr-only">Previous</span></a>
-                </li>
-                <li class="active"><a href="javascript:void(0);">1</a>
-                </li>
-                <li><a href="javascript:void(0);">2</a>
-                </li>
-                <li><a href="javascript:void(0);">3</a>
-                </li>
-                <li><a href="javascript:void(0);">4</a>
-                </li>
-                <li><a href="javascript:void(0);">5</a>
-                </li>
-                <li><a href="javascript:void(0);"><span aria-hidden="true">»</span><span class="sr-only">Next</span></a>
-                </li>
-            </ul>
-        </nav>
-    </div-->
 </div>

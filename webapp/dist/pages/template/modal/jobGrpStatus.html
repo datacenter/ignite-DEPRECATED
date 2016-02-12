@@ -1,0 +1,48 @@
+<div>
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" ng-click="cancel()" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <h3 class="modal-title pull-left">Group Status</h3>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-xs-8">
+                <div class="form-group">
+                    <label for="name" class="col-xs-2" style="float:none">Name</label>
+                    <input type="text" class="form-control" style="display: inline; width: inherit"
+                    name="groupName"
+                    placeholder="Group Name"
+                    required readonly
+                    ng-model="groupName">
+                </div>
+            </div>
+        </div>
+        <!-- <h4>Switches</h4> -->
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th class="col-xs-3">Switch</th>
+                    <th class="col-xs-3">Status</th>
+                    <th class="col-xs-3">Completion Time</th>
+                    <th class="col-xs-3">Logs</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-ng-repeat="switch in grpSwitches">
+                    <td data-ng-if="switch.switch_name">{{switch.switch_name}}</td>
+                    <td data-ng-if="switch.name">{{switch.name}}</td>
+                    <td>{{switch.status}}</td>
+                    <td>{{switch.ctime | date : appSettings.dateFormat}}</td>
+                    <td><a href="javascript:void(0)" data-ng-if="switch.log"
+                        ng-click="openLog(switch.log)">Logs</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-trans btn-default btn-raised" ng-click="cancel()">Cancel</button>
+</div>
+</div>

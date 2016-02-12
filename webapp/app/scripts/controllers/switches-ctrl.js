@@ -392,7 +392,6 @@ angular.module('PoapServer').controller('SwitchModalCtrl', function($scope, $mod
     };
 
     $scope.getLinecardList = function() {
-        debugger;
         var abc = angular.copy(appSettings.appAPI.linecard.list);
         abc.url = abc.url+"?type=linecards";
         appServices.doAPIRequest(appSettings.appAPI.linecard.list, null, null).then(function(data) {
@@ -452,18 +451,3 @@ angular.module('PoapServer').controller('SwitchModalCtrl', function($scope, $mod
 
     $scope.init();
 });
-/*
-angular.module('PoapServer').controller('SwitchDeleteModalCtrl',
-    function($scope, $modalInstance, appSettings, appServices, dataToModal) {
-    $scope.ok = function() {
-        $modalInstance.close({
-            action : 'delete',
-            id : dataToModal.id,
-            index : dataToModal.index
-        });
-    };
-
-    $scope.cancel = function() {
-        $modalInstance.dismiss('cancel');
-    };
-});*/

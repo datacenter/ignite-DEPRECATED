@@ -140,11 +140,50 @@ def load_json(input_data, defaults = True):
     if 'ignite' in data:
         graph.graph['ignite'] = data['ignite']
 
+    if 'pc_only' in data:
+        graph.graph['pc_only'] = data['pc_only']
+
+    if 'igp' in data:
+        graph.graph['igp'] = data['igp']
+
+    if 'bgp_enabled' in data:
+        graph.graph['bgp_enabled'] = data['bgp_enabled']
+    else:
+        graph.graph['bgp_enabled'] = False
+
     if 'vpcid_block' in data:
         graph.graph['vpcid_block'] = data['vpcid_block']
 
     if 'vxlan_global_config' in data:
         graph.graph['vxlan_global_config'] = data['vxlan_global_config']
+
+    if 'enable_routing' in data:
+        graph.graph['enable_routing'] = data['enable_routing']
+
+    ## blocks from pool will take precedence over fixed blocks
+    if 'infra_block' in data:
+        infra_block = data['infra_block']
+        pos_mask = infra_block.find('/')
+        if pos_mask != -1:
+            network = infra_block[:pos_mask]
+            mask = int(infra_block[pos_mask+1:])
+        else:
+            network = infra_block
+            mask = 32
+        settings['IP Addressing']['v4']['infra_subnet'] = network
+        settings['IP Addressing']['v4']['infra_prefix'] = mask
+
+    if 'loopback_block' in data:
+        loopback_block = data['loopback_block']
+        pos_mask = loopback_block.find('/')
+        if pos_mask != -1:
+            network = loopback_block[:pos_mask]
+            mask = int(loopback_block[pos_mask+1:])
+        else:
+            network = loopback_block
+            mask = 32
+        settings['IP Addressing']['v4']['loopback_subnet'] = network
+        settings['IP Addressing']['v4']['loopback_prefix'] = mask
 
     if defaults:
         ank_graph_defaults = settings['JSON']['Graph Defaults']
@@ -179,7 +218,7 @@ def load_json(input_data, defaults = True):
                     data[key] = val
 
         graph.graph['address_family'] = 'v4'
-        graph.graph['enable_routing'] = True
+        #graph.graph['enable_routing'] = True
 
         #TODO: move out of defaults boolean, and try/catch
         for node in sorted(graph):

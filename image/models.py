@@ -14,5 +14,5 @@ class ImageProfile(models.Model):
     image_server_password = models.TextField()
     access_protocol = models.TextField()
     updated_by = models.TextField(default='')
-    created = models.DateTimeField(auto_now_add=True, default=datetime.utcnow())
-    updated = models.DateTimeField(auto_now=True, default=datetime.utcnow())
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)

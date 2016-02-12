@@ -1,0 +1,7 @@
+"bgp":
+        {
+           "asn":2,
+           "route_reflector":true
+        }
+
+

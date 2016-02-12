@@ -4,6 +4,7 @@ import os
 import task
 from config.constants import TRUE, FALSE
 from constants import *
+from fabric.constants import SERIAL_NUM
 from ignite.conf import IGNITE_IP, IGNITE_USER, IGNITE_PASSWORD
 from ignite.settings import SCRIPT_PATH
 from models import Task, Workflow
@@ -79,7 +80,7 @@ def delete_workflow(id):
         raise IgniteException(ERR_TASK_IN_USE)
 
 
-def build_workflow(wf, img, cfg_file):
+def build_workflow(wf, img, cfg_file, serial_number):
     location_list = dict()
     task_list = list()
     workflow = dict()
@@ -92,12 +93,14 @@ def build_workflow(wf, img, cfg_file):
             loc = _get_server_location()
             task_data[HANDLER] = os.path.join(SCRIPT_PATH,
                                               BOOTSTRAP_CONF_SCRIPT)
-            task_data[PARAMETERS] = _update_config_params(cfg_file)
+            task_data[PARAMETERS] = _update_config_params(cfg_file,
+                                                          serial_number)
         elif task_obj.id == BOOTSTRAP_IMAGE_ID:
             loc = _get_server_location()
             task_data[HANDLER] = os.path.join(SCRIPT_PATH,
                                               BOOTSTRAP_IMAGE_SCRIPT)
-            task_data[PARAMETERS] = _update_image_params(img)
+            task_data[PARAMETERS] = _update_image_params(img,
+                                                         serial_number)
         else:
             loc = _get_server_location(task_obj)
             task_data[PARAMETERS] = task_const[PARAMETERS]
@@ -120,8 +123,9 @@ def _build_task(task_obj):
     return task_data
 
 
-def _update_config_params(cfg_file):
+def _update_config_params(cfg_file, serial_number):
     param = dict()
+    param[SERIAL_NUM] = serial_number
     param[HOSTNAME] = IGNITE_IP
     param[FILE_SRC] = cfg_file
     param[USERNAME] = IGNITE_USER
@@ -146,11 +150,12 @@ def _get_server_location(task_obj=None):
     return location
 
 
-def _update_image_params(img):
+def _update_image_params(img, serial_number):
     param = dict()
+    param[SERIAL_NUM] = serial_number
     param[PROTOCOL] = img.access_protocol
     param[HOSTNAME] = img.image_server_ip
-    param[FILE_SRC] = img.image_name
+    param[FILE_SRC] = img.system_image
     param[USERNAME] = img.image_server_username
     param[PASSWORD] = img.image_server_password
     return param

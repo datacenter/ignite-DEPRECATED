@@ -8,6 +8,8 @@ import autonetkit.exception
 import autonetkit.log as log
 import networkx as nx
 
+from pool.pool import allocate_pool_entry
+
 SETTINGS = autonetkit.config.settings
 
 # TODO: revisit phy_neighbors for eg ASN and use layer3 instead
@@ -82,11 +84,21 @@ def initialise(input_graph):
     anm = autonetkit.anm.NetworkModel(all_multigraph=all_multigraph)
 
     g_in = anm.initialise_input(input_graph)
+    if g_in.data.igp:
+        if g_in.data.profiles:
+            node_profiles = g_in.data['profiles']
+            for node in g_in:
+                for prof in node_profiles:
+                    if node.profile == prof['id']:
+                        if 'configs' in prof and 'igp' in prof['configs']:
+                            if ('enabled' in prof['configs']['igp'] and prof['configs']['igp']['enabled'] == 1 and
+                                prof['configs']['igp']['igp_prot']):
+                                node.igp = prof['configs']['igp']['igp_prot']
+    else:
+        g_in.data.igp = None
+
     if g_in.data.vxlan_global_config:
         #sharad: right now enable multicast on all nodes by default
-        if 'igp' in g_in.data.vxlan_global_config:
-            for node in g_in:
-                node.igp = g_in.data.vxlan_global_config['igp']
         if 'multicast' in g_in.data.vxlan_global_config:
             for node in g_in:
                 node.multicast = g_in.data.vxlan_global_config['multicast']
@@ -159,6 +171,71 @@ def check_server_asns(anm):
                              "not auto-correcting", server, server.asn)
 
 
+def assign_interface_ip_pool(anm):
+    g_in = anm['input']
+
+    pool_provided = False
+    if g_in.data.ignite is not None:
+        pool = g_in.data.ignite
+        if 'infra_subnet' in pool:
+            pool_provided =True
+            infra_pool_id = pool['infra_subnet']
+    if pool_provided==False:
+        log.debug("Infra Pool not provided")
+        return
+
+    l3_devices = [d for d in g_in if d.device_type in ('router', 'server')]
+    for device in l3_devices:
+        physical_interfaces = list(device.edge_interfaces())
+        for interface in physical_interfaces:
+            #call pool func:Will be completed when pool func is written
+            #log an error if something fails
+	    infra_ip = allocate_pool_entry(infra_pool_id, device.name, None)
+	    #print infra_ip, infra_pool_id, device.name
+	    pos_mask = infra_ip.find('/')
+            if pos_mask != -1:
+                network = infra_ip[:pos_mask]
+                mask = int(infra_ip[pos_mask+1:])
+            else:
+                network = infra_ip[:pos_mask]
+                mask = 32
+
+            interface.ipv4_address = network
+            interface.ipv4_prefixlen = mask
+
+    log.debug("Allocated IP's from Infra Pool")
+
+def assign_loopback_ip_pool(anm):
+    g_in = anm['input']
+    g_ipv4 = anm['ipv4']
+    pool_provided = False
+    if g_in.data.ignite is not None:
+        pool = g_in.data.ignite
+        if 'loopback_subnet' in pool:
+            pool_provided =True
+            loopback_pool_id = pool['loopback_subnet']
+    if pool_provided==False:
+        log.debug("loopback Pool not provided")
+        return
+    for l3_device in g_ipv4.l3devices():
+        #call pool func:Will be completed when pool func is written
+        #log an error if something fails
+        loopback_ip = allocate_pool_entry(loopback_pool_id, l3_device.name, None)
+        pos_mask = loopback_ip.find('/')
+        if pos_mask != -1:
+            network = loopback_ip[:pos_mask]
+            mask = int(loopback_ip[pos_mask+1:])
+        else:
+            network = loopback_ip[:pos_mask]
+            mask = 32
+
+        l3_device.loopback = network
+       # l3_device.loopback_prefix = mask
+        #    interface.ipv4_prefixlen = mask
+
+    log.debug("Allocated IP's from loopback Pool")
+
+
 def apply_design_rules(anm):
     """Applies appropriate design rules to ANM"""
     # log.info("Building overlay topologies")
@@ -182,6 +259,12 @@ def apply_design_rules(anm):
 
     # log.info("Building layer3")
     build_layer3(anm)
+
+    #assign interface ip from pool
+    #assign_interface_ip_pool(anm)
+
+    #assign loopback ip from pool
+   # assign_loopback_ip_pool(anm)
 
     check_server_asns(anm)
 
@@ -221,8 +304,9 @@ def apply_design_rules(anm):
         g_phy.update(g_phy, use_ipv6=True)
     else:
         anm.add_overlay("ipv6")  # placeholder for compiler logic
-
-    default_igp = g_in.data.igp or "ospf"
+    assign_loopback_ip_pool(anm)
+    #default_igp = g_in.data.igp or "ospf"
+    default_igp = g_in.data.igp
     ank_utils.set_node_default(g_in, igp=default_igp)
     ank_utils.copy_attr_from(g_in, g_phy, "igp")
 
@@ -292,12 +376,17 @@ def build_phy(anm):
     g_in = anm['input']
     g_phy = anm['phy']
 
-    g_phy.data.enable_routing = g_in.data.enable_routing
+    if g_in.data.enable_routing is not None:
+        g_phy.data.enable_routing = g_in.data.enable_routing
+
     if g_in.data.mgmt_block:
         g_phy.data['mgmt_block'] = g_in.data['mgmt_block']
 
     if g_in.data.ignite:
         g_phy.data['ignite'] = g_in.data['ignite']
+
+    if g_in.data.pc_only is not None:
+        g_phy.data['pc_only'] = g_in.data['pc_only']
 
     if g_in.data.vpcid_block:
         g_phy.data['vpcid_block'] = g_in.data['vpcid_block']
@@ -308,10 +397,11 @@ def build_phy(anm):
     if g_phy.data.enable_routing is None:
         g_in.data.enable_routing = True  # default if not set
 
+
     g_phy.add_nodes_from(g_in, retain=['name', 'label', 'update', 'device_type', 'devsubtype',
                                        'asn', 'specified_int_names', 'x', 'y',
                                        'device_subtype', 'platform', 'host', 'syntax',
-                                       'profile', 'syslog', 'vpc-peer', 'igp',
+                                       'profile', 'syslog', 'vpc-peer',
                                         'vxlan_vni_configured'])
 
     if g_in.data.Creator == "Topology Zoo Toolset":

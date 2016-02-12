@@ -20,7 +20,8 @@ class ConfigletList(BaseView):
   response_serializer: "ConfigletBriefSerializer"
 
         """
-        return Response(services.get_all_configlets())
+        type = request.GET.get(CONSTRUCT_TYPE)
+        return Response(services.get_all_configlets(type))
 
     def post(self, request, format=None):
         """

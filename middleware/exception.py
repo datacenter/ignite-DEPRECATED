@@ -12,7 +12,9 @@ from image.models import ImageProfile
 from pool.models import Pool
 from switch.models import LineCard, SwitchModel
 from utils.exception import IgniteException, TokenException
+from utils.exception import UnauthorizedException
 from workflow.models import Workflow, Task
+from group.models import *
 
 import logging
 logger = logging.getLogger(__name__)
@@ -75,6 +77,18 @@ class ExceptionMiddleware(object):
         elif isinstance(exception, Workflow.DoesNotExist):
             msg = "Workflow does not exist"
             code = status.HTTP_404_NOT_FOUND
+        elif isinstance(exception, Group.DoesNotExist):
+            msg = "Group does not exist"
+            code = status.HTTP_404_NOT_FOUND
+        elif isinstance(exception, GroupSwitch.DoesNotExist):
+            msg = "switch does not exist in the group"
+            code = status.HTTP_404_NOT_FOUND
+        elif isinstance(exception, Job.DoesNotExist):
+            msg = "Job does not exist "
+            code = status.HTTP_404_NOT_FOUND
+        elif isinstance(exception, Task.DoesNotExist):
+            msg = "Task does not exist "
+            code = status.HTTP_404_NOT_FOUND
         # ignite exceptions
         elif isinstance(exception, IgniteException):
             msg = exception.message
@@ -83,6 +97,10 @@ class ExceptionMiddleware(object):
         elif isinstance(exception, TokenException):
             msg = exception.message
             code = status.HTTP_401_UNAUTHORIZED
+        # Unauthorized exception
+        elif isinstance(exception, UnauthorizedException):
+            msg = exception.message
+            code = status.HTTP_403_FORBIDDEN
 
         if msg:
             logger.debug(msg)

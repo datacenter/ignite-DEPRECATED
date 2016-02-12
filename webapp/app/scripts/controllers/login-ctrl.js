@@ -28,7 +28,7 @@ angular.module('PoapServer')
                         "auth_token" : data.auth_token
                     }
                     lclStorage.set('userDetails', loginDetails);
-                    $location.path('configlets');
+                    $location.path('fabricInstance');
                 }
 
 

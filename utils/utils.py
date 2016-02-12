@@ -1,5 +1,6 @@
 import re
 
+from config.constants import PARAM_IDENTIFIER_CONFIGLET, PARAM_EXP_CONFIGLET
 from exception import IgniteException
 
 import logging
@@ -9,11 +10,13 @@ logger = logging.getLogger(__name__)
 ERR_PORTS = "Invalid port numbers"
 
 
-def parse_file(file_content):
+def parse_file(file_content,
+               param_exp=PARAM_EXP_CONFIGLET,
+               identifier=PARAM_IDENTIFIER_CONFIGLET):
     param_list = []
-    get_parameter_list = re.findall('\$\$[0-9a-zA-Z_]+\$\$', file_content)
+    get_parameter_list = re.findall(param_exp, file_content)
     for one_param in get_parameter_list:
-        one_param = one_param.strip('$$')
+        one_param = one_param.strip(identifier)
         if one_param not in param_list:
             param_list.append(one_param)
     return param_list

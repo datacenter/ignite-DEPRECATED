@@ -88,7 +88,12 @@ def _add_profile(data, user, id=0):
         obj = get_profile(id)
         update_ref_count(obj.construct_list, -1)
         obj.name = data[NAME]
-        obj.construct_list = data[CONSTRUCT_LIST]
+
+        if not data[CONSTRUCT_LIST]: 
+            raise IgniteException(ERR_PROF_IS_EMPTY)
+        else:
+            obj.construct_list = data[CONSTRUCT_LIST]
+        
         obj.submit = data[SUBMIT]
         obj.updated_by = user
         update_ref_count(data[CONSTRUCT_LIST], +1)
@@ -97,7 +102,12 @@ def _add_profile(data, user, id=0):
     else:
         fp_object = Profile()
         fp_object.name = data[NAME]
-        fp_object.construct_list = data[CONSTRUCT_LIST]
+
+        if not data[CONSTRUCT_LIST]:
+            raise IgniteException(ERR_PROF_IS_EMPTY)
+        else:
+            fp_object.construct_list = data[CONSTRUCT_LIST]
+
         fp_object.submit = data[SUBMIT]
         fp_object.updated_by = user
         update_ref_count(data[CONSTRUCT_LIST], +1)

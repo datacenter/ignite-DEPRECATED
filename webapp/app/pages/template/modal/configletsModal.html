@@ -16,7 +16,7 @@
     <div class="modal-body">
         <form>
             <div class="row">
-                <div class="col-xs-6">
+                <div class="col-xs-4">
                     <div class="form-group">
                         <label for="name">Name</label>
                         <input type="text" class="form-control" 
@@ -26,7 +26,7 @@
                         >
                     </div>
                 </div>
-                <div class="col-xs-6">
+                <div class="col-xs-4">
                     <div class="form-group">
                         <label for="group_name">Group Name</label>
                         <input type="text" 
@@ -36,20 +36,20 @@
                         ng-model="submitData.group" />
                     </div>
                 </div>
-                <!-- <div class="col-xs-4">
+                <div class="col-xs-4">
                     <div class="form-group">
                         <label for="type">Type</label>
                         <div class="select-label">
                         <label>
                         <select class="form-control" 
                         ng-disabled="action == 'view' || action == 'edit' || action == 'viewothers'"
-                        ng-model="submitData.config_type">
+                        ng-model="submitData.type">
                             <option ng-repeat="type in appSettings.fieldValues.configlets.types" value="{{type.value}}">{{type.label}}</option>
                         </select>
                         </label>
                         </div>
                     </div>
-                </div> -->
+                </div>
                
                 <div class="col-xs-12" ng-hide="action == 'view' || action == 'viewothers'">
                     <div class="form-group">

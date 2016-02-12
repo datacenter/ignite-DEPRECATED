@@ -159,7 +159,6 @@ angular.module('PoapServer')
 
     $scope.submitData = function(modalData) {
         if(modalData.action == 'create'){
-          debugger;
           var dataToSubmit = modalData.submitData;
           appServices.doAPIRequest(appSettings.appAPI.topology.create, dataToSubmit, null).then(function(data) {
                 /*localStorage.topologyId = JSON.stringify(data.id);

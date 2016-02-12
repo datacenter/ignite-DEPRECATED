@@ -34,10 +34,26 @@ features = [
     {
         "name": "ntp",
         "group": "default"
+    },
+    {
+        "name": "vxlan_global",
+        "group": "default"
+    },
+    {
+        "name": "vxlan_vtep",
+        "group": "default"
+    },
+    {
+        "name": "global_cfg",
+        "group": "default"
+    },
+    {
+        "name": "igp",
+        "group": "default"
     }
 ]
 
-fname_d = ["bgp.json", "snmp.json", "ntp.json"]
+fname_d = ["bgp.json", "snmp.json", "ntp.json", "vxlan_global.json", "vxlan_vtep.json", "global_cfg.json", "igp.json"]
 
 
 def upload_feature():

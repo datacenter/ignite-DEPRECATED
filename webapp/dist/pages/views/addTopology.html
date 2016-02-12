@@ -2,11 +2,16 @@
     <section>
         <div class="container">
             <div class="row tool-bar">
-                <div class="col-sm-5" >
-                    <h4 class="col-sm-3" data-ng-if="source == 'topology'">Topology</h4>
-                    <h4 class="col-sm-3" data-ng-if="source == 'fabric'">Fabric</h4>
+                <div class="col-sm-1">
+                    <a href="javascript:void(0);" ng-click="goBackToList()">
+                        <span class="glyphicon glyphicon-chevron-left">Back</span>
+                    </a>
+                </div>
+                <div class="col-sm-4" >
+                    <h4 class="col-sm-3 no-margin" data-ng-if="source == 'topology'">Topology</h4>
+                    <h4 class="col-sm-3 no-margin" data-ng-if="source == 'fabric'">Fabric</h4>
                     <!-- <span class="alert alert-danger hide" ng-if="topology.name==''">Please enter a topology name</span> -->
-                    <input type="text" class="form-control" style="display: inline; width: inherit"
+                    <input type="text" class="form-control" style="display: inline; width: 50%; margin-top: -6px"
                         name="name" data-ng-disabled="!nameEdit"
                         placeholder="Name"
                         ng-model="topologyData.name">
@@ -56,9 +61,9 @@
                     </button>
                     <button class="btn btn-sm btn-default" ng-if="!topology.submit"
                         ng-click="submitWork()">
-                        <span class="glyphicon glyphicon-ok success-color"></span> Submit
+                        <span class="glyphicon glyphicon-ok success_color"></span> Submit
                     </button>
-                    <span ng-if="topology.submit" class="success-color" style="padding-left: 25px;">
+                    <span ng-if="topology.submit" class="success_color" style="padding-left: 25px;">
                         <i class="glyphicon glyphicon-ok"></i> Submitted
                     </span>
                 </div>
@@ -69,10 +74,10 @@
                     <span>
                         <a href="javascript:void(0);" data-ng-click="showDefaults()">View Defaults</a>
                     </span>
-                    <span>
+                    <!-- <span>
                         <button type="button" class="btn btn-sm btn-default" ng-click="goBackToList()">
                             <span class="glyphicon glyphicon-chevron-left"></span>Back to List</button>
-                    </span>
+                    </span> -->
                 </div>
             </div>
         </div>
@@ -372,18 +377,18 @@
                                     class="input-group-addon" style="float: left">
                                     Config not yet built
                                 </span>
-                                <span ng-if="switch.boot_detail.boot_status == 'Success'"
-                                    class="input-group-addon success-color" style="float: left">
+                                <span ng-class="{success_color : switch.boot_detail.boot_status == 'Success', red : switch.boot_detail.boot_status == 'Failed'}"
+                                    class="input-group-addon" style="float: left">
                                     {{switch.boot_detail.boot_status}}
                                 </span>
-                                <span ng-if="switch.boot_detail.boot_status == 'Failed'"
+                                <!-- <span ng-if="switch.boot_detail.boot_status == 'Failed'"
                                     class="input-group-addon red" style="float: left">
                                     {{switch.boot_detail.boot_status}}
                                 </span>
                                 <span ng-if="switch.boot_detail.boot_status == 'In progress'"
                                     class="input-group-addon" style="float: left">
                                     {{switch.boot_detail.boot_status}}
-                                </span>
+                                </span> -->
                                 <span ng-if="switch.boot_detail != null && !switch.boot_detail.boot_status"
                                     class="input-group-addon" style="float: left">
                                     Not Initiated

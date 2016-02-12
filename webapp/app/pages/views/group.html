@@ -1,0 +1,129 @@
+<div id="main" class="content container">
+    <div class="table-header-cont">
+        <div class="pull-left">
+            <h5 class="page-header pull-left">Maintenance Group</h5>
+        </div>
+        <div class="pull-right">
+            <ul class="list-inline table-actions">
+                <li ng-hide="mode == 'clone' || mode == 'add'">
+                    <a href="javascript:void(0);" ng-click="deleteGroup()"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>
+                </li>
+                <li>
+                    <button type="button" class="btn btn-default btn-raised" ng-click="goBack('/group')">Cancel</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <hr/>
+    <div class="row groupSwitches">
+        <div class="form-group col-sm-3">
+            <label for="name">Name</label>
+            <input type="text" 
+            class="form-control" 
+            placeholder="Group Name" 
+            ng-model="groupData.name"
+            readonly
+            >
+        </div>
+        <div class="form-group col-sm-3">
+            <label for="username">Username</label>
+            <input type="text" 
+            class="form-control" 
+            placeholder="Username" 
+            ng-model="groupData.username"
+            readonly
+            >
+        </div>
+        <div class="form-group col-sm-3">
+            <label for="password">Password</label>
+            <input type="text" 
+            class="form-control" 
+            placeholder="Password" 
+            ng-model="groupData.password"
+            readonly
+            >
+        </div>
+        <div class="form-group col-sm-3" style="padding-top: 40px;">
+            <a href="javascript:void(0);" tooltip="Edit Group Details" tooltip-placement="bottom">
+                <span class="glyphicon glyphicon-pencil" ng-click="editGroupDetails()" aria-hidden="true">
+                </span>
+            </a>
+        </div>
+    </div>
+    <hr/>
+    <div class="table-header-cont dropdown_headercont">
+        <div class="pull-left mt_10">
+            <a href="javascript:void(0);"
+                ng-click="addSwitch()">
+                <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+                <span class="hidden-xs">Add Switches</span>
+            </a>
+            <button class="btn btn-danger ml_18 btn-xs" ng-disabled="delSwitches.length < 1"
+            ng-click="deleteSwitches()" ng-show="grpSwitches.length > 0">Delete Switches</button>
+        </div>
+        <div class="pull-right">
+            <div class="search-cont">
+                <input type="search" class="form-control" title="Search" ng-model="searchKeyword" data-toggle="tooltip" placeholder="Search">
+                <i class="glyphicon glyphicon-search"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert alert-info mt_10" ng-show="grpSwitches.length == 0">
+          No switches found.
+    </div>
+
+    <div class="table-responsive mt_10" ng-show="grpSwitches.length > 0">
+        <table class="table table-hover" ng-table="tableParams">
+            <thead>
+                <tr>
+                    <th width="2%">
+                        <input type="checkbox" id="selectAll"
+                            class="form-control chk chk-trans"
+                            ng-click="selectAllSwitchesToggle()">
+                    </th>
+                    <th width="2%">#</th>
+                    <th class="sortable" 
+                        ng-class="{
+                            'sort-asc': tableParams.isSortBy('switch_name', 'asc'),
+                            'sort-desc': tableParams.isSortBy('switch_name', 'desc')
+                        }"
+                        ng-click="tableParams.sorting({'switch_name' : tableParams.isSortBy('switch_name', 'asc') ? 'desc' : 'asc'})">Switch</th>
+                        <th class="sortable" 
+                        ng-class="{
+                            'sort-asc': tableParams.isSortBy('fabric_name', 'asc'),
+                            'sort-desc': tableParams.isSortBy('fabric_name', 'desc')
+                        }"
+                        ng-click="tableParams.sorting({'fabric_name' : tableParams.isSortBy('fabric_name', 'asc') ? 'desc' : 'asc'})">Fabric Name</th>
+                        <th class="sortable" 
+                        ng-class="{
+                            'sort-asc': tableParams.isSortBy('serial_num', 'asc'),
+                            'sort-desc': tableParams.isSortBy('serial_num', 'desc')
+                        }"
+                        ng-click="tableParams.sorting({'serial_num' : tableParams.isSortBy('serial_num', 'asc') ? 'desc' : 'asc'})">Serial Number</th>
+                        <th class="sortable" 
+                        ng-class="{
+                            'sort-asc': tableParams.isSortBy('switch_ip', 'asc'),
+                            'sort-desc': tableParams.isSortBy('switch_ip', 'desc')
+                        }"
+                        ng-click="tableParams.sorting({'switch_ip' : tableParams.isSortBy('switch_ip', 'asc') ? 'desc' : 'asc'})">IP Address</th>
+                </tr>
+            </thead>
+            <tbody id="constructsList">
+                <tr ng-repeat="switch in $data | filter : search">
+                    <td>
+                        <input type="checkbox"
+                                name="del_switch_{{switch.id}}"
+                                checklist-model="delSwitches"
+                                checklist-value="{'switch_id':switch.switch_id}">
+                    </td>
+                    <td>{{$index + 1}}</td>
+                    <td>{{switch.switch_name}}</td>
+                    <td>{{switch.fabric_name}}</td>
+                    <td>{{switch.serial_num}}</td>
+                    <td>{{switch.switch_ip}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

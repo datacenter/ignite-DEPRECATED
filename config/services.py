@@ -11,8 +11,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def get_all_configlets():
-    cfgs = configlet.get_all_configlets()
+def get_all_configlets(type):
+    cfgs = configlet.get_all_configlets(type)
     serializer = ConfigletBriefSerializer(cfgs, many=True)
     return serializer.data
 

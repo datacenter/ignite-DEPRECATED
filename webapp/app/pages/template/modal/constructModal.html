@@ -17,12 +17,25 @@
         <div class="row">
             <div class="col-sm-6">
                 <div class="form-group">
-                    <label>Name</label>
+                    <label for="construct">Construct</label>
+                    <select class="form-control" 
+                    ng-disabled="action=='view'"
+                    ng-model="submitData.construct_type"  
+                    ng-change="filterConfiglets()"
+                    ng-options = "v.value as v.label for (k, v) in appSettings.fieldValues.configlets.types"
+                    >
+                    <option value="">Select</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>Template/Script</label>
                     <select class="form-control" 
                     ng-model="submitData.configlet_id" 
                     ng-disabled="submitData.construct_type == '' || action == 'view'"
                     ng-change="filterParams()"
-                    ng-options = "v.id as v.name for (k, v) in configletsCache"
+                    ng-options = "v.id as v.name for (k, v) in configlets"
                     >
                         <option value="">Select</option>
                     </select>
@@ -49,7 +62,50 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="param in params_list">
+                    <tr ng-repeat="param in submitData.param_list">
+                        <td>{{$index + 1}}</td>
+                        <td>{{param.param_name}}
+                            <input type="hidden" 
+                            ng-model="param.param_name" /> 
+                        </td>
+                        <td>
+                            <select 
+                            ng-disabled="action=='view'"
+                            class="form-control" ng-model="param.param_type"
+                            ng-options = "v.value as v.label for (k, v) in appSettings.fieldValues.construct.paramTypes"
+                            data-ng-change="clearParamValue({{$index}});"
+                            >
+                            <option value=''>Select</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select 
+                                class="form-control" 
+                                ng-disabled="action=='view'"
+                                ng-if="param.param_type == 'Instance'" 
+                                ng-model="param.param_value"
+                                ng-options = "v.value as v.label for (k, v) in appSettings.fieldValues.construct.instanceTypes"
+                                >
+                                <option value=''>Select</option>
+                            </select>
+                            <select 
+                                class="form-control" 
+                                ng-disabled="action=='view'"
+                                ng-if="param.param_type == 'Pool'" 
+                                ng-model="param.param_value"
+                                ng-options = "v.id.toString() as v.name for (k, v) in pools"
+                                >
+                                <option value=''>Select</option>
+                            </select>
+                            <input type="text" 
+                                ng-disabled="action=='view'"
+                                ng-if="!(param.param_type == 'Instance' || param.param_type == 'Pool')" 
+                                class="form-control" 
+                                ng-model="param.param_value"
+                                />
+                        </td>
+                    </tr>
+                    <!-- <tr ng-repeat="param in params_list">
                         <td>{{$index + 1}}</td>
                         <td>{{param.param_name}}
                             <input type="hidden" 
@@ -72,7 +128,7 @@
                                 ng-disabled="action=='view'"
                                 ng-if="submitData.param_list[$index].param_type == 'Instance'" 
                                 ng-model="submitData.param_list[$index].param_value"
-                                ng-options = "v.id as v.name for (k, v) in instances"
+                                ng-options = "v.value as v.label for (k, v) in appSettings.fieldValues.construct.instanceTypes"
                                 >
                                 <option value=''>Select</option>
                             </select>
@@ -92,7 +148,7 @@
                                 ng-model="submitData.param_list[$index].param_value"
                                 />
                         </td>
-                    </tr>
+                    </tr> -->
                 </tbody>
             </table>
         </div>

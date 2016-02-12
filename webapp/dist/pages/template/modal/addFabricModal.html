@@ -12,10 +12,10 @@
     </div>
     <div class="modal-body">
         <form name="addFabricForm">
-            <div class="row" data-ng-if="source != 'fabric'">
-                <div class="col-xs-6">
+            <div class="row">
+                <div class="col-xs-6" data-ng-if="source != 'fabric'">
                     <div class="form-group">
-                        <label for="name" class="col-xs-2" style="float:none">Name</label>
+                        <label for="name" class="col-xs-5" style="float:none">Name</label>
                         <input type="text" class="form-control" style="display: inline; width: inherit"
                             name="name"
                             placeholder="Name"
@@ -24,13 +24,37 @@
                             ng-model="submitData.name">
                     </div>
                 </div>
-                <div class="col-xs-6">
+                <div class="col-xs-6" data-ng-if="source != 'fabric'">
                     <div class="form-group">
-                        <label for="topology" class="col-xs-2" style="float:none;width: 23%;">Topology</label>
-                        <select class="form-control" name="topology" style="display: inline; width: 50%;"
+                        <label for="topology" class="col-xs-5" style="float:none;">Topology</label>
+                        <select class="form-control wid50" name="topology" style="display: inline;"
                             required data-ng-class="{errorHighlight : addFabricForm.topology.$invalid}"
                             data-ng-model="submitData.topology"
                             data-ng-options="v.id as v.name for (k,v) in selectList.topology_list">
+                        </select>
+                    </div>
+                </div>
+                <div class="col-xs-6">
+                    <div class="form-group">
+                        <label for="config" class="col-xs-5" style="float:none">Fabric Config Profile</label>
+                        <select class="form-control wid50" name="config_profile"
+                             style="display: inline;"
+                             data-ng-model="submitData.config_profile"
+                             data-ng-disabled="!configEdit"
+                             data-ng-class="{errorHighlight : addFabricForm.config_profile.$invalid}"
+                             data-ng-options="v.id as v.name for (k,v) in selectList.config_list">
+                        </select>
+                    </div>
+                </div>
+                <div class="col-xs-6">
+                    <div class="form-group">
+                        <label for="feature" class="col-xs-5" style="float:none;">Fabric Feature Profile</label>
+                        <select class="form-control wid50" name="feature_profile"
+                             style="display: inline;"
+                             data-ng-model="submitData.feature_profile"
+                             data-ng-disabled="!configEdit"
+                             data-ng-class="{errorHighlight : addFabricForm.feature_profile.$invalid}"
+                             data-ng-options="v.id as v.name for (k,v) in selectList.fabricProfile_list">
                         </select>
                     </div>
                 </div>
@@ -88,6 +112,7 @@
 </div>
 <div class="modal-footer">
     <div class="small pull-left profile-note"><b>Note:</b> For a Tier both Config Profile and Feature Profile cannot be --None--</div>
+    <div class="small pull-left"><b>Note:</b> Feature Profile should be either --None-- for both the tiers or shouldnot be --None-- for any of the tiers</div>
     <button class="btn btn-trans btn-default btn-raised" ng-click="cancel()">Cancel</button>
     <button class="btn btn-raised btn-primary" ng-hide="!configEdit" data-ng-disabled="addFabricForm.$invalid" ng-click="ok()">Save</button>
 </div>

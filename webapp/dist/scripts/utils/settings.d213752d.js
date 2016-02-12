@@ -533,12 +533,12 @@
                 },
               "rma" : {
                     "search" : {
-                      "url": "",
+                      "url": "/api/bootstrap/rma/",
                       "method": "GET",
                       "auth": "true"
                     },
                     "replace" : {
-                      "url": "",
+                      "url": "/api/bootstrap/rma/rma",
                       "method": "POST",
                       "auth": "true"
                     }
@@ -564,6 +564,70 @@
                       "method": "GET",
                       "auth": "true"
                     }
+              },
+              "group" : {
+                    "list" : {
+                      "url": "/api/manage/group",
+                      "method": "GET",
+                      "auth": "true"
+                    },
+                    "create": {
+                      "url": "/api/manage/group",
+                      "method": "POST",
+                      "auth": "true"
+                    },
+                    "getById": {
+                      "url": "/api/manage/group/",
+                      "method": "GET",
+                      "auth": "true"
+                    },
+                    "addSwitches": {
+                      "url": "/api/manage/group/",
+                      "method": "POST",
+                      "auth": "true"
+                    },
+                    "edit": {
+                      "url": "/api/manage/group/",
+                      "method": "PUT",
+                      "auth": "true"
+                    },
+                    "getGrpSwitch": {
+                      "url": "/api/manage/group/",
+                      "method": "GET",
+                      "auth": "true"
+                    },
+                    "delete": {
+                      "url": "/api/manage/group/",
+                      "method": "DELETE",
+                      "auth": "true"
+                    }
+              },
+              "job" : {
+                    "list": {
+                      "url": "/api/manage/job",
+                      "method": "GET",
+                      "auth": "true"
+                    },
+                    "add": {
+                      "url": "/api/manage/job",
+                      "method": "POST",
+                      "auth": "true"
+                    },
+                    "getById": {
+                      "url": "/api/manage/job/",
+                      "method": "GET",
+                      "auth": "true"
+                    },
+                    "edit": {
+                      "url": "/api/manage/job/",
+                      "method": "PUT",
+                      "auth": "true"
+                    },
+                    "delete": {
+                      "url": "/api/manage/job/",
+                      "method": "DELETE",
+                      "auth": "true"
+                    }
               }
             },
             "dateFormat": 'dd/MMM/yyyy hh:mm:ss a',
@@ -572,7 +636,7 @@
             "fieldValues": {
                 "configlets": {
                     "types": [{
-                        "value": "template",
+                        "value": "configlet",
                         "label": "Template"
                     }, {
                         "value": "script",
@@ -603,6 +667,12 @@
                       "value" : "Fabric",
                       "label" : "Fabric"
                     }
+                  ],
+                  "roles" : [
+                    {
+                      "value" : "Mgmt",
+                      "label" : "Mgmt"
+                    }
                   ]
                 },
                 'construct' : {
@@ -625,6 +695,34 @@
                     },{
                       "value" : "Value",
                       "label" : "Value"
+                    },{
+                      "value" : "Eval",
+                      "label" : "Evaluate"
+                    }
+                  ],
+                  'instanceTypes' : [{
+                      "value" : "HOST_NAME",
+                      "label" : "HOST_NAME"
+                    },
+                    {
+                      "value" : "VPC_PEER_SRC",
+                      "label" : "VPC_PEER_SRC"
+                    },
+                    {
+                      "value" : "VPC_PEER_DST",
+                      "label" : "VPC_PEER_DST"
+                    },
+                    {
+                      "value" : "VPC_PEER_PORTS",
+                      "label" : "VPC_PEER_PORTS"
+                    },
+                    {
+                      "value" : "UPLINK_PORTS",
+                      "label" : "UPLINK_PORTS"
+                    },
+                    {
+                      "value" : "DOWNLINK_PORTS",
+                      "label" : "DOWNLINK_PORTS"
                     }
                   ]
                 },
@@ -729,11 +827,36 @@
                       "label" : "Network-Operator"
                     }
                   ]
+                },
+                "jobs" : {
+                  "upgrade_type" : [
+                    {
+                      "value" : "switch_upgrade",
+                      "label" : "Switch Upgrade"
+                    },
+                    {
+                      "value" : "epld_upgrade",
+                      "label" : "EPLD Upgrade"
+                    }
+                  ],
+                  "failure_actions" : [
+                    {
+                      "value" : "continue",
+                      "label" : "continue"
+                    },
+                    {
+                      "value" : "abort",
+                      "label" : "abort"
+                    }
+                  ]
                 }
             },
             "defaultData": {
                 "configlets": {
-                    "config_type": "template"
+                    "config_type": "configlet"
+                },
+                "jobs": {
+                    "failure_action": "continue"
                 },
                 "images": {
                     "access_protocol": "scp"

@@ -8,8 +8,10 @@
              "image_server_ip": "127.0.0.1",
              "image_server_username": "admin",
              "image_server_password": "admin",
-             "access_protocol": "ftp",
-             "updated_by" : "admin"
+             "access_protocol": "tftp",
+             "updated_by" : "admin",
+            "created": "2016-01-11 09:29:51.405893+00:00",
+            "updated": "2016-01-11 09:29:51.405893+00:00"
          }
     }
 ]

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from utils.serializers import JSONSerializerField
-from constants import POOL_TYPES, SCOPE_OPTIONS
+from constants import POOL_TYPES, SCOPE_OPTIONS, ROLE_OPTIONS
 
 
 class PoolSerializer(serializers.Serializer):
@@ -16,6 +16,7 @@ class PoolSerializer(serializers.Serializer):
     name = serializers.CharField()
     type = serializers.ChoiceField(POOL_TYPES)
     scope = serializers.ChoiceField(SCOPE_OPTIONS)
+    role = serializers.ChoiceField(ROLE_OPTIONS)
     blocks = JSONSerializerField()
     entries = PoolEntrySerializer(required=False, many=True)
     updated_by = serializers.CharField()
@@ -34,6 +35,7 @@ class PoolPostSerializer(serializers.Serializer):
     name = serializers.CharField()
     type = serializers.ChoiceField(POOL_TYPES)
     scope = serializers.ChoiceField(SCOPE_OPTIONS)
+    role = serializers.ChoiceField(ROLE_OPTIONS)
     blocks = BlockSerializer(many=True)
 
 class PoolPutSerializer(serializers.Serializer):

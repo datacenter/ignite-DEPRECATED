@@ -194,6 +194,18 @@ a {
   font-size: 16px;
   color:#333;
 }
+.version-sup {
+  color: white;
+  /*margin-top: 10px;*/
+}
+.login-version-sub {
+  font-size: small;
+  color: #23539E;
+  bottom: 0.75em;
+}
+.logo-login {
+  margin-top: -8px;
+}
 /**./Dashboard**/
 /**Popover**/
 
@@ -352,7 +364,7 @@ ul.table-actions {
 }
 
 .table > tbody > tr > td {
-  padding: 5px 4px;
+  //padding: 5px 4px;
 }
 
 #loading-bar .bar {
@@ -420,9 +432,16 @@ ul.table-actions {
   margin-left:10px !important;
 }
 
+.pt_10 {
+  padding-top: 10px;
+}
 
 .ml_18 {
   margin-left: 18px;
+}
+
+.no-margin {
+  margin: 0px;
 }
 
 .normal-case{
@@ -433,6 +452,15 @@ ul.table-actions {
   color:#333;
   font-weight:normal;
   font-size:14px;
+}
+
+.info-label{
+  color:black;
+  font-weight: normal;
+}
+
+.info-label span {
+    color: black;
 }
 
 .log-row{
@@ -509,20 +537,27 @@ ul.table-actions {
   margin-bottom: 6px !important;
 }
 
-
-
-.odometer {
-    font-size: 16px;
-    border-radius: 0.34em;
-    padding: 0.15em;
-    background: black;
-  /* position: absolute; */
-    top: 0;
-    float: left;
-  /* margin-left: 50%; */
-}
 .hr_fabSwitch {
     height: 12px;
     border: 0;
     box-shadow: inset 0 12px 12px -12px rgba(0, 0, 0, 0.5);
+}
+
+.schedulePicker .dropdown-menu button {
+    margin: 0px;
+}
+
+.groupSwitches > .form-group{
+  margin-bottom : 0px;
+}
+.wid50{
+  width:50%;
+}
+
+.noSpinners::-webkit-inner-spin-button, 
+.noSpinners::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none; 
+  margin: 0;
 }

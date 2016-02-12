@@ -715,3 +715,140 @@ class LeafSpineTopology(BaseTopology):
                                          topology_id=self._top.id, dummy=False)
         else:
             return Switch.objects.filter(topology_id=self._top.id, dummy=False)
+
+    def get_uplink_ports(self, switch, all_ports=False):
+
+        if all_ports:
+            logger.debug("Get all uplink ports for switch %s" % switch.name)
+            ports = switch.model.meta[UPLINK] + switch.model.meta[BOTH]
+            logger.debug("Uplink ports %s" % str(ports))
+            return ports
+
+        ports = []
+        logger.debug("Get uplink ports for switch %s" % switch.name)
+
+        if switch.tier == CORE:
+            raise IgniteException(ERR_NO_UPLINK_PORTS)
+
+        elif switch.tier == SPINE:
+            target_tier = CORE
+
+        elif switch.tier == LEAF:
+            target_tier = SPINE
+
+        elif switch.tier == BORDER:
+            target_tier = LEAF
+
+        else:
+            raise IgniteException(ERR_TIER_NOT_RECOGNIZED)
+
+
+        logger.debug("Get downlink ports for topology-id % s, switch-id % s, target_tier % s"
+                     % (switch.topology.id, switch.id, target_tier))
+
+        try:
+            ports = Link.objects.filter(topology_id=switch.topology.id,
+                                        dst_switch_id=switch.id,
+                                        src_switch__tier=target_tier,
+                                        link_type=PHYSICAL).values_list(
+                                        'dst_ports', flat=True)
+            logger.debug("Uplink ports %s" % ports)
+            return ports
+        except Link.DoesNotExist:
+            raise IgniteException("%s- %s" % (ERR_NO_UPLINK_PORTS, switch.name))
+            logger.debug("%s- %s" % (ERR_NO_UPLINK_PORTS, switch.name))
+
+    def get_downlink_ports(self, switch, all_ports=False):
+
+        if all_ports:
+            logger.debug("Get all downlink ports for switch %s" % switch.name)
+            ports = switch.model.meta[DOWNLINK] + switch.model.meta[BOTH]
+            logger.debug("Downlink ports %s" % str(ports))
+            return ports
+
+        ports = []
+        logger.debug("Get downlink ports for switch %s" % switch.name)
+
+        if switch.tier == LEAF:
+            target_tier = BORDER
+
+        elif switch.tier == CORE:
+            target_tier = SPINE
+
+        elif switch.tier == SPINE:
+            target_tier = LEAF
+
+        else:
+            raise IgniteException(ERR_TIER_NOT_RECOGNIZED)
+
+        logger.debug("Get downlink ports for topology-id % s, switch-id % s, target_tier % s"
+                     % (switch.topology.id, switch.id, target_tier))
+
+        try:
+            ports = Link.objects.filter(topology_id=switch.topology.id,
+                                        src_switch=switch.id,
+                                        dst_switch__tier=target_tier,
+                                        link_type=PHYSICAL).values_list(
+                                        'src_ports', flat=True)
+            logger.debug("Downlink Ports %s" % ports)
+            return ports
+        except Link.DoesNotExist:
+            logger.debug("%s- %s" % (ERR_NO_DOWNLINK_PORTS, switch.name))
+            raise IgniteException("%s- %s" % (ERR_NO_DOWNLINK_PORTS,
+                                              switch.name))
+
+    def get_vpc_peer_ports(self, switch):
+        ports = []
+        logger.debug("Get VPC ports for switch %s" % switch.name)
+
+        try:
+            link = Link.objects.get(topology_id=switch.topology.id,
+                                    src_switch=switch.id,
+                                    dst_switch__tier=switch.tier,
+                                    link_type=VPC_PEER,
+                                    dummy=False)
+            logger.debug("VPC ports %s" % str(link.src_ports))
+            return string_to_ports(link.src_ports)
+
+        except Link.DoesNotExist:
+
+            try:
+                link = Link.objects.get(topology_id=switch.topology.id,
+                                        dst_switch=switch.id,
+                                        src_switch__tier=switch.tier,
+                                        link_type=VPC_PEER,
+                                        dummy=False)
+                logger.debug("VPC ports %s" % str(link.dst_ports))
+                return string_to_ports(link.dst_ports)
+
+            except Link.DoesNotExist:
+                logger.debug("%s- %s" % (ERR_NO_VPC_PEER_PORTS, switch.name))
+                raise IgniteException("%s- %s" % (ERR_NO_VPC_PEER_PORTS,
+                                                  switch.name))
+
+    def get_vpc_peer_switch(self, switch):
+        logger.debug("Get VPC peer switch for switch %s" % switch.name)
+
+        try:
+            link = Link.objects.get(topology_id=switch.topology.id,
+                                    src_switch=switch.id,
+                                    dst_switch__tier=switch.tier,
+                                    link_type=VPC_PEER,
+                                    dummy=False)
+            logger.debug("VPC Peer Switch %s" % link.dst_switch.name)
+            return link.dst_switch
+        except Link.DoesNotExist:
+
+            try:
+                link = Link.objects.get(topology_id=switch.topology.id,
+                                        dst_switch=switch.id,
+                                        src_switch__tier=switch.tier,
+                                        link_type=VPC_PEER,
+                                        dummy=False)
+                logger.debug("VPC Peer Switch %s" % link.src_switch.name)
+                return link.src_switch
+
+            except:
+                logger.debug("%s- %s" % (ERR_NO_VPC_PEER_SWITCH, switch.name))
+                raise IgniteException("%s- %s" % (ERR_NO_VPC_PEER_SWITCH,
+                                                  switch.name))

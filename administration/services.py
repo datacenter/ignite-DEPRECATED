@@ -12,22 +12,6 @@ def get_all_servers():
     return serializer.data
 
 
-def get_all_users():
-    users = aaaserver.get_all_users()
-    serializer = UserSerializer(users, many=True)
-    return serializer.data
-
-
-@transaction.atomic
-def add_user(data):
-    serializer = UserCreateSerializer(data=data)
-    if not serializer.is_valid():
-        IgniteException(serializer.errors)
-    user = aaaserver.add_user(data)
-    serializer = UserSerializer(user)
-    return serializer.data
-
-
 @transaction.atomic
 def add_server(data, username):
     serializer = ServerSerializer(data=data)
@@ -57,6 +41,38 @@ def update_server(data, id, username):
 @transaction.atomic
 def delete_server(id):
     aaaserver.delete_server(id)
+
+
+def get_all_users():
+    users = aaaserver.get_all_users()
+    serializer = UserSerializer(users, many=True)
+    return serializer.data
+
+
+@transaction.atomic
+def add_user(data):
+    serializer = UserCreateSerializer(data=data)
+    if not serializer.is_valid():
+        raise IgniteException(serializer.errors)
+    user = aaaserver.add_user(data)
+    serializer = UserSerializer(user)
+    return serializer.data
+
+
+def get_user(id):
+    user = aaaserver.get_user(id)
+    serializer = UserDetailSerializer(user)
+    return serializer.data
+
+
+@transaction.atomic
+def update_user(data, id):
+    serializer = UserPutSerializer(data=data)
+    if not serializer.is_valid():
+        raise IgniteException(serializer.errors)
+    user = aaaserver.update_user(data, id)
+    serializer = UserSerializer(user)
+    return serializer.data
 
 
 @transaction.atomic

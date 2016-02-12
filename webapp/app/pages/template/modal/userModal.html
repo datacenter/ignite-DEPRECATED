@@ -26,7 +26,7 @@
                             <input type="text" class="form-control" 
                             placeholder="User Name"
                             required name="uname"
-                            data-ng-disabled="action == 'view'"
+                            data-ng-disabled="action == 'view' || action == 'edit'"
                             ng-model="submitData.username">
                         </div>
                     </div>
@@ -64,15 +64,7 @@
                     </div>
                     <div class="col-xs-6">
                         <div class="form-group">
-                            <!-- <div class="col-xs-12"> -->
-                                <label for="role">Role</label>
-                            <!-- </div> -->
-                           <!--  <select class="form-control"
-                             data-ng-model="submitData.role"
-                             data-ng-options="v.value as v.label for (k,v) in appSettings.fieldValues.users.roles" required
-                             data-ng-disabled="action == 'view'">
-                             <option value="">--Select--</option>
-                            </select> -->
+                            <label for="role">Role</label>
                             <label class="text-capitalize checklist" style="font-weight: initial">
                                 Superuser
                                 <input type="checkbox" class="ml_10"
@@ -82,6 +74,14 @@
                             </label>
                         </div>
                     </div>
+                    <!-- <div class="col-xs-6" data-ng-if="action == 'edit' && !chPwd">
+                        <div class="form-group">
+                            <a href="javascript:void(0);" data-ng-click="changePwd()">
+                                <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+                                Update Password
+                            </a>
+                        </div>
+                    </div> -->
                     <!-- <div class="col-xs-6">
                         <div class="form-group">
                             <div class="col-xs-12">

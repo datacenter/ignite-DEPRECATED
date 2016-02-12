@@ -352,7 +352,7 @@ Add / Edit Modal controller begins from here
 
 angular.module('PoapServer').controller('constructModalCtrl', function($scope, $modalInstance, $modal, appServices, appSettings, dataToModal) {
     $scope.appSettings = appSettings;
-    $scope.params_list = [];
+    // $scope.params_list = [];
     $scope.action = dataToModal.action;
 
     $scope.submitData = {
@@ -364,19 +364,25 @@ angular.module('PoapServer').controller('constructModalCtrl', function($scope, $
 
     $scope.resetValues = function() {
         $scope.submitData.configlet_id = '';
-        $scope.params_list = [];
+        $scope.submitData.param_list = [];
+        $scope.configlets = [];
     };
 
 
     $scope.filterConfiglets = function() {
         $scope.resetValues();
-        $scope.configlets = $scope.configletsCache;
-        /*if($scope.submitData.construct_type == 'append_configlet') {
-            $scope.configlets = $scope.filterConstruct('template');
+        
+        if($scope.submitData.construct_type == '') {
+            return;
         }
-        else if($scope.submitData.construct_type == 'append_script') {
-            $scope.configlets = $scope.filterConstruct('script');
-        }*/
+        var reqHeader = {
+            appendToURL : true,
+            value : '?type='+$scope.submitData.construct_type,
+            noTrailingSlash : true
+        };
+        appServices.doAPIRequest(appSettings.appAPI.configlets.list, null, reqHeader).then(function(data) {
+            $scope.configlets = data;
+        });
     };
 
     $scope.filterConstruct = function(config_type) {
@@ -390,7 +396,7 @@ angular.module('PoapServer').controller('constructModalCtrl', function($scope, $
     };
 
     $scope.filterParams = function() {
-        $scope.params_list = [];
+        $scope.submitData.param_list = [];
         angular.forEach($scope.configletsCache, function(val, key) {
             if(val.id == $scope.submitData.configlet_id) {
                 angular.forEach(val.parameters, function(val1, key1) {
@@ -399,7 +405,7 @@ angular.module('PoapServer').controller('constructModalCtrl', function($scope, $
                         "param_type": "",
                         "param_value": ""
                     };
-                    $scope.params_list.push(paramObject);
+                    $scope.submitData.param_list.push(paramObject);
                 });
             }
         });
@@ -423,7 +429,7 @@ angular.module('PoapServer').controller('constructModalCtrl', function($scope, $
         $scope.filterConfiglets();
         setTimeout(function() {
             $scope.submitData.configlet_id = dataToModal.editData.configlet_id;
-            angular.copy(dataToModal.editData.param_list, $scope.params_list);
+            // angular.copy(dataToModal.editData.param_list, $scope.params_list);
             angular.copy(dataToModal.editData.param_list, $scope.submitData.param_list);
             $scope.$digest();
         }, 500);
@@ -435,7 +441,6 @@ angular.module('PoapServer').controller('constructModalCtrl', function($scope, $
 
     $scope.init = function(){
         $scope.pools = dataToModal.pools;
-        $scope.instances = [{"id":"HOST_NAME","name":"HOST_NAME"}]
         $scope.configletsCache = dataToModal.configlets;
         $scope.mode = dataToModal.mode;
         $scope.constructIndex = dataToModal.index;

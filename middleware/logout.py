@@ -26,8 +26,7 @@ class LogoutMiddleWare(object):
                     User.objects.get(pk=id).delete()
                 msg = "successfully logedout"
                 resp['status'] = msg
-                return JsonResponse(resp, status=status.HTTP_401_UNAUTHORIZED)
-
+                return JsonResponse(resp)
             except:
                 resp['error'] = "Token not found"
                 return JsonResponse(resp, status=status.HTTP_401_UNAUTHORIZED)

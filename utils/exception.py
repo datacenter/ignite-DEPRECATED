@@ -4,3 +4,7 @@ class IgniteException(Exception):
 
 class TokenException(Exception):
     pass
+
+
+class UnauthorizedException(Exception):
+    pass

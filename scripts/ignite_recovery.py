@@ -29,11 +29,11 @@ def execute_cmd(cmd):
 
 
 def db_recover(f):
-    cmd = "createdb -U %s %s" %(DB_USER, DB_NAME)
+    cmd = "export PGPASSWORD=%s\ncreatedb -U %s %s" %(DB_PASSWORD, DB_USER, DB_NAME)
     status = execute_cmd(cmd)
 
     filename = os.path.join(os.getcwd(), "..", MEDIA, f)
-    command = 'export PGPASSWORD=%s\npsql -U %s -d %s  -f %s' % (DB_PASSWORD, DB_USER, DB_NAME, filename)
+    command = 'psql -U %s -d %s  -f %s' % (DB_USER, DB_NAME, filename)
     status = execute_cmd(command)
     if not status:
         exit()

@@ -6,10 +6,10 @@
         <h3 class="modal-title pull-left">Image</h3>
         <p class="pull-right message"><p>
         <div class="pull-right modal-form-action">
-            <a href="javascript:void(0);" ng-show="action== 'view'" tooltip="Edit" tooltip-placement="bottom">
+            <a href="javascript:void(0);" ng-show="action== 'view' && !readonly" tooltip="Edit" tooltip-placement="bottom">
                 <span class="glyphicon glyphicon-pencil" ng-click="changeAction('edit')" aria-hidden="true"></span>
             </a>
-            <a href="javascript:void(0);" ng-click="deleteImage()" tooltip="Delete" ng-show="action== 'view'"  tooltip-placement="bottom">
+            <a href="javascript:void(0);" ng-click="deleteImage()" tooltip="Delete" ng-show="action== 'view' && !readonly"  tooltip-placement="bottom">
                 <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
             </a>
         </div>
@@ -30,7 +30,7 @@
                 <div class="row"></div>
                 <div class="col-xs-4">
                     <div class="form-group">
-                        <label for="group_name">Path/Image</label>
+                        <label for="group_name">System Image</label>
                         <input type="text" 
                         class="form-control" 
                         placeholder="System Image"

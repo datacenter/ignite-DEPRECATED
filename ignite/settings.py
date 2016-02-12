@@ -55,6 +55,7 @@ INSTALLED_APPS = (
     'discovery',
     'fabric',
     'feature',
+    'group',
     'image',
     'pool',
     'switch',
@@ -71,10 +72,11 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     # Ignite Middleware
+    'middleware.tokenexpire.TokenExpiredMiddleware',
+    'middleware.logout.LogoutMiddleWare',
     'middleware.exception.ExceptionMiddleware',
     'middleware.crossdomainxhr.XsSharing',
     'middleware.logger.LoggingMiddleware',
-    'middleware.logout.LogoutMiddleWare',
 )
 
 AUTHENTICATION_BACKENDS = (
@@ -148,7 +150,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 SCRIPT_PATH = os.path.join(BASE_DIR, "scripts/")
 
 # Packages Path
-PKG_PATH = os.path.join(SCRIPT_PATH, "package/")
+PKG_PATH = os.path.join(SCRIPT_PATH, "packages/")
 
 #Repository path
 REPO_PATH = os.path.join(MEDIA_ROOT, "repo/")
@@ -205,6 +207,10 @@ LOGGING = {
             'level': 'DEBUG',
         },
         'feature': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+        },
+        'group': {
             'handlers': ['file'],
             'level': 'DEBUG',
         },

@@ -24,3 +24,13 @@ SYSLOG_PORT = 514
 
 # number of lines to display in logs
 LOG_LINE_COUNT = 500
+
+# RabbitMQ Settings
+RMQ_USERNAME = "admin"
+RMQ_PASSWORD = "admin"
+RMQ_VHOST = "vhost"
+
+#Celery Daemon Settings
+CELERYD_USER = "user"
+CELERYD_GROUP = "user"
+

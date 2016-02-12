@@ -225,12 +225,10 @@ angular.module('PoapServer').controller('TaskModalCtrl', function($scope, $modal
     };
 
     $scope.$watch("submitData.task.parameters", function() {
-        debugger;
       $scope.paramSize = Object.keys($scope.submitData.task.parameters).length;
     });
 
     $scope.ok = function() {
-        debugger;
         delete $scope.submitData.task.parameters[""];
         console.log($scope.submitData);
         $modalInstance.close({

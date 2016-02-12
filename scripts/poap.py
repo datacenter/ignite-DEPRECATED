@@ -136,7 +136,14 @@ def ignored_ext(file_name):
 def yaml_pkg_exist():
     yaml_lib_path = ''
     pkg_name_exp = 'PyYAML'
-    dir_list = os.listdir(yaml_download_loc_u)
+    dir_list = []
+    try:
+        dir_list = os.listdir(yaml_download_loc_u)
+    except OSError:
+        poap_log("Creating bootflash:poap directory")
+        cmd = "mkdir %s" % YAML_DOWNLOAD_LOC
+        run_cli(cmd)
+
     for dir in dir_list:
         if pkg_name_exp in dir:
             if not ignored_ext(dir):
@@ -437,7 +444,7 @@ def fetch_task():
         file_dst = TASK_FILE_LOC + os.path.basename(file_src)
         copy_status = get_file(access_protocol, hostname, port,
                                username, password, file_src, file_dst)
-        poap_log("Task fetch sucess")
+        poap_log("Task fetch success")
 
         if not copy_status:
             poap_log("Fetch failed for task %s" % file_src)

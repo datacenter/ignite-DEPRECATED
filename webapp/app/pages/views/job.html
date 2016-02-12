@@ -1,0 +1,191 @@
+<div id="main" class="content container">
+    <div class="table-header-cont">
+        <div class="pull-left">
+            <h5 class="page-header pull-left">Job</h5>
+        </div>
+        <div class="pull-right">
+            <ul class="list-inline table-actions">
+                <li ng-hide="mode == 'clone' || mode == 'add'">
+                    <a href="javascript:void(0);" ng-click="deleteJob()"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>
+                </li>
+                <li ng-hide="mode == 'edit' || mode == 'add' || mode == 'clone' || job.status != 'SCHEDULED'">
+                    <a href="#/job/edit/{{job.id}}" ng-click=""><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a>
+                </li>
+                <li>
+                    <button type="button" class="btn btn-default btn-raised" ng-click="goBack('/jobs')">Cancel</button>
+                </li>
+                <li ng-hide="mode == 'view'|| ( mode == 'edit' && job.status != 'SCHEDULED')">
+                    <button type="button" class="btn btn-raised btn-primary"
+                        data-ng-disabled="jobForm.$invalid" data-ng-click="save()">Save</button>
+                </li><!-- 
+                <li ng-hide="mode == 'view'">
+                    <button type="submit" class="btn btn-default btn-raised"
+                        data-ng-if="!submitData.submit"
+                        data-ng-disabled="jobForm.$invalid" data-ng-click="submit()">Submit</button>
+                </li> -->
+            </ul>
+        </div>
+    </div>
+    <hr/>
+    <div class="row groupSwitches">
+        <form name="jobForm">
+            <div class="form-group col-sm-3">
+                <label for="name">Name</label>
+                <input type="text" 
+                class="form-control" 
+                placeholder="Job Name" 
+                ng-model="job.name"
+                data-ng-disabled="mode == 'view'|| ( mode == 'edit' && job.status != 'SCHEDULED')"
+                >
+            </div>
+            <div class="form-group col-sm-3">
+                <label for="username">Schedule</label>
+                <h5 data-ng-if="mode == 'view'" style="font-weight: lighter;">
+                    {{job.schedule | date : appSettings.dateFormat}}
+                </h5>
+                <p class="input-group schedulePicker" data-ng-if="mode != 'view'">
+                  <input type="text" class="form-control"
+                      datepicker-popup="dd/MMM/yyyy" ng-model="job.scheduleDate"
+                      is-open="status.opened" datepicker-options="dateOptions"
+                      min-date="selectList.currentDate"
+                      date-disabled="disabled(date, mode)" ng-required="true"
+                      close-text="Close" data-ng-change="prepareSchedule()" disabled/>
+                    <span class="input-group-btn">
+                      <button type="button" class="btn btn-default" ng-click="open()"
+                          data-ng-disabled="mode == 'view'|| ( mode == 'edit' && job.status != 'SCHEDULED')">
+                          <i class="glyphicon glyphicon-calendar"></i>
+                      </button>
+                    </span>
+              </p>
+              <!-- <p class="input-group">
+              <input type="date" class="form-control" datepicker-popup ng-model="dt" is-open="opened" datepicker-options="dateOptions" date-disabled="disabled(date, mode)" ng-required="true" close-text="Close"/>
+              <span class="input-group-btn">
+                <button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+              </span>
+            </p> -->
+            </div>
+            <div class="col-sm-2" data-ng-if="mode != 'view'">
+                <timepicker ng-model="job.scheduleTime" style="margin-top: -10px;"
+                     hour-step="hstep" minute-step="mstep" class="ScheduleTimePicker"
+                    show-meridian="true" data-ng-change="prepareSchedule()" readonly-input="'view' == mode|| ( mode == 'edit' && job.status != 'SCHEDULED')">
+                </timepicker>
+            </div>
+            <div class="col-sm-2" data-ng-if="job.status != null">
+                <label for="status">Status</label>
+                <h5 data-ng-class="{red : job.status == 'FAILURE', success_color : job.status == 'SUCCESS'}">{{job.status}}</h5>
+            </div>
+            <div class="col-sm-2" data-ng-if="job.status == 'SCHEDULED' || job.status == 'RUNNING'">
+                <label for="ctime">Job Completion Time</label>
+                <h5>--</h5>
+            </div>
+            <div class="col-sm-3" data-ng-if="!(job.status == null || job.status == 'SCHEDULED' || job.status == 'RUNNING')">
+                <label for="ctime">Job Completion Time</label>
+                <h5 style="font-weight: lighter;">{{job.ctime | date : appSettings.dateFormat}}</h5>
+            </div>
+        </form>
+    </div>
+    <hr/>
+    <div class="table-header-cont dropdown_headercont">
+        <div class="pull-left">
+            <h5 class="page-header pull-left">List of Groups</h5>
+            <div class="pull-left" ng-hide='mode == "view"|| ( mode == "edit" && job.status != "SCHEDULED")'>
+                <div class="btn-group" >
+                    <button type="button" class="btn btn-default btn-xs">Add Another</button>
+                    <button type="button" class="btn btn-default dropdown-toggle btn-xs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="caret"></span>
+                        <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a href="javascript:void(0);" ng-click="groupDialog('add','before',null)"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> Add Row Before</a>
+                        </li>
+                        <li><a href="javascript:void(0);" ng-click="groupDialog('add','after',null)"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> Add Row After</a>
+                        </li>
+                        <li><a href="javascript:void(0);" ng-click="groupDialog('add','start',null)"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> Add Start</a>
+                        </li>
+                        <li><a href="javascript:void(0);" ng-click="groupDialog('add','end',null)"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> Add End</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="pull-right" ng-show="job.tasks.length > 0">
+            <div class="search-cont">
+                <input type="search" class="form-control" title="Search" ng-model="search" data-toggle="tooltip" placeholder="Search">
+                <i class="glyphicon glyphicon-search"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="alert alert-info" ng-if="job.tasks.length == 0">
+          No groups found.
+    </div>
+
+    <div class="table-responsive" ng-if="job.tasks.length > 0">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th width="2%">
+                        <input type="checkbox" class="form-control chk chk-trans" ng-disabled="mode == 'view'|| ( mode == 'edit' && job.status != 'SCHEDULED')">
+                    </th>
+                    <th width="2%">#</th>
+                    <th>Group</th>
+                    <th>Task Input</th>
+                    <th>Task Type</th>
+                    <th>Run <br> Size</th>
+                    <th>Retry <br> Count</th>
+                    <th>Failure Action<br> Individual </th>
+                    <th>Failure Action<br> Group</th>
+                    <!-- <th colspan="2">
+                       <div>Failure Action</div>
+                        <div class="pull-left wid50">Individual</div>
+                        <div class="pull-left wid50" style="padding-left: 8px;">Group</div>
+                    </th> -->
+                    <th>Group Status</th>
+                    <th>Completion Time</th>
+                    <th></th>
+                </tr>
+                 
+            </thead>
+            <tbody id="taskList">
+                <tr ng-repeat="task in job.tasks | filter : search">
+                    <td>
+                        <input type="checkbox" class="form-control chk chk-trans" ng-disabled="mode == 'view'|| ( mode == 'edit' && job.status != 'SCHEDULED')">
+                    </td>
+                    <td>{{$index + 1}}</td>
+                    <!-- <td><a href="javascript:void(0);" ng-click="groupDialog('view',null, $index)">{{construct.construct_type}}</a>
+                    </td> -->
+                    <td><a href="javascript:void(0);" ng-click="viewGroup(task.group_id, task.status)">{{task.group_name}}</a></td>
+                    <td>
+                        <a href="javascript:void(0);" ng-click="viewImage(task.image_id)">
+                            {{task.image_name}}
+                        </a>
+                    </td>
+                    <td>{{task.type_display}}</td>
+                    <td>{{task.run_size}}</td>
+                    <td>{{task.retry_count}}</td>
+                    <td class="text-capitalize">{{task.failure_action_ind}}</td>
+                    <td class="text-capitalize">{{task.failure_action_grp}}</td>
+                    <td>{{task.status.status}}</td> 
+                    <td data-ng-if="task.ctime">{{task.ctime | date : appSettings.dateFormat}}</td>
+                    <td data-ng-if="!task.ctime">--</td>
+                    <td>
+                        <ul class="table_action_icons list-inline" ng-class="{'has-error' : !inputModel}" ng-hide="mode == 'view'|| ( mode == 'edit' && job.status != 'SCHEDULED')">
+                            <li>
+                                <a href="javascript:void(0);" ng-click="groupDialog('edit',null, $index)" 
+                                 tooltip="Edit" tooltip-placement="bottom"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0);" 
+                                tooltip="Delete" 
+                                ng-click="deleteTask($index)"
+                                tooltip-placement="bottom">
+                                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                                </a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

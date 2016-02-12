@@ -9,7 +9,8 @@ from config.profile import build_config_profile
 from constants import *
 import discovery.discoveryrule as discoveryrule
 from fabric.constants import SERIAL_NUM, SERIAL_NUMBER, NEIGHBOR
-from fabric.fabric import search_fabric
+from fabric.build import build_switch_config
+from fabric.fabric import search_fabric, get_switch_workflow, get_switch_image
 from fabric.models import Switch
 from ignite.conf import IGNITE_IP, IGNITE_USER, IGNITE_PASSWORD
 from ignite.conf import REMOTE_SYSLOG_PATH, LOG_LINE_COUNT
@@ -30,74 +31,122 @@ def ignite_request(request):
 
     if switch:
 
-        if switch.boot_detail:
-            wf_file = os.path.join(REPO_PATH + str(switch.id) + YAML_FILE_EXT)
-            _log_boot_detail(switch, serial_number, match_type, None)
-            return _get_server_response(True, wf_file)
+        if not switch.boot_detail:
+            build_switch_config(switch)
 
-        return _get_server_response(False, err_msg=ERR_CONFIG_NOT_BUILD)
+        # fetch switch workflow
+        wf = get_switch_workflow(switch)
+
+        # fetch switch image
+        image = get_switch_image(switch)
+
+        logger.debug("Build workflow")
+        cfg_file = os.path.join(REPO_PATH + str(switch.id) + CFG_FILE_EXT)
+        wf_file = os.path.join(REPO_PATH + str(switch.id) + YAML_FILE_EXT)
+
+        with open(wf_file, 'w') as output_fh:
+            output_fh.write(yaml.safe_dump(build_workflow(wf,
+                                                          image,
+                                                          cfg_file,
+                                                          serial_number),
+                                           default_flow_style=False))
+
+        update_boot_detail(switch, serial_number=serial_number,
+                           match_type=match_type, boot_status=BOOT_PROGRESS,
+                           boot_time=timezone.now())
+
+        return _get_server_response(True, wf_file)
 
     logger.debug("No match found in fabric")
+
     rule = discoveryrule.match_discovery_rules(request)
 
-    workflow_obj = None
+    wf = None
+
     if rule:
         try:
             switch = Switch.objects.get(name=serial_number,
                                         topology__isnull=True)
-            switch.boot_detail.build_time = timezone.now()
-            switch.boot_detail.save()
         except Switch.DoesNotExist:
             switch = Switch()
             switch.name = serial_number
-            boot_detail = SwitchBootDetail()
-            boot_detail.build_time = timezone.now()
-            boot_detail.save()
-            switch.boot_detail = boot_detail
+            switch.serial_num = serial_number
             switch.save()
 
         if rule.workflow:
-            workflow_obj = rule.workflow
+            wf = rule.workflow
         else:
-            workflow_obj = get_workflow(BOOTSTRAP_WORKFLOW_ID)
+            wf = get_workflow(BOOTSTRAP_WORKFLOW_ID)
 
         logger.debug("Discovery rule match- workflow: %s, config: %s"
-                     % (workflow_obj.name, rule.config.name))
-        cfg_file = os.path.join(REPO_PATH + str(switch.id) + CFG_FILE_EXT)
+                     % (wf.name, rule.config.name))
 
-        with open(cfg_file, 'w') as output_fh:
-            output_fh.write(build_config_profile(rule.config, switch))
-
-        logger.debug("Build workflow")
-        wf_file = os.path.join(REPO_PATH + str(switch.id) + YAML_FILE_EXT)
-
-        with open(wf_file, 'w') as output_fh:
-            output_fh.write(yaml.safe_dump(build_workflow(workflow_obj,
-                                                          rule.image,
-                                                          cfg_file),
-                                           default_flow_style=False))
+        build_switch_config(switch, switch_cfg=rule.config)
 
         if rule.match == SERIAL_NUM:
             match_type = SERIAL_NUMBER
         else:
             match_type = NEIGHBOR
 
-        _log_boot_detail(switch, serial_number, match_type, rule)
+        update_boot_detail(switch, serial_number=serial_number,
+                           match_type=match_type, discovery_rule=rule,
+                           boot_time=timezone.now(), boot_status=BOOT_PROGRESS)
+
+        logger.debug("Build workflow")
+        cfg_file = os.path.join(REPO_PATH + str(switch.id) + CFG_FILE_EXT)
+        wf_file = os.path.join(REPO_PATH + str(switch.id) + YAML_FILE_EXT)
+
+        with open(wf_file, 'w') as output_fh:
+            output_fh.write(yaml.safe_dump(build_workflow(wf,
+                                                          rule.image,
+                                                          cfg_file,
+                                                          serial_number),
+                                           default_flow_style=False))
+
         return _get_server_response(True, wf_file)
 
     return _get_server_response(False)
 
 
-def _log_boot_detail(switch, serial_number, match_type, rule):
-    switch.boot_detail.boot_status = BOOT_PROGRESS
-    switch.boot_detail.boot_time = timezone.now()
-    switch.boot_detail.match_type = match_type
-    switch.boot_detail.serial_number = serial_number
+def update_boot_detail(switch, boot_status="",
+                       match_type="",
+                       discovery_rule=None,
+                       serial_number="",
+                       boot_time="",
+                       build_time="",
+                       mgmt_ip=""):
 
-    if rule:
-        switch.boot_detail.discovery_rule = rule.id
+    if not switch.boot_detail:
+        if not build_time:
+            raise IgniteException(ERR_CREATE_BOOT_STATUS)
+        boot_detail = SwitchBootDetail()
+    else:
+        boot_detail = switch.boot_detail
 
-    switch.boot_detail.save()
+    if boot_status:
+        boot_detail.boot_status = boot_status
+
+    if match_type:
+        boot_detail.match_type = match_type
+
+    if discovery_rule:
+        boot_detail.discovery_rule = discovery_rule.id
+
+    if serial_number:
+        boot_detail.serial_number = serial_number
+
+    if boot_time:
+        boot_detail.boot_time = boot_time
+
+    if build_time:
+        boot_detail.build_time = build_time
+
+    if mgmt_ip:
+        boot_detail.mgmt_ip = mgmt_ip
+
+    boot_detail.save()
+    switch.boot_detail = boot_detail
+    switch.save()
 
 
 def _get_server_response(status, yaml_file=None, err_msg=""):
@@ -132,10 +181,9 @@ def update_boot_status(data):
     try:
         switch = Switch.objects.get(boot_detail__serial_number=serial_num)
         if status:
-            switch.boot_detail.boot_status = BOOT_SUCCESS
+            update_boot_detail(switch, boot_status=BOOT_SUCCESS)
         else:
-            switch.boot_detail.boot_status = BOOT_FAIL
-        switch.boot_detail.save()
+            update_boot_detail(switch, boot_status=BOOT_FAIL)
     except Switch.DoesNotExist:
         raise IgniteException(ERR_SERIAL_NUM_MISMATCH)
 

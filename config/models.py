@@ -1,6 +1,8 @@
 from django.db import models
 from jsonfield import JSONField
 
+from constants import CONFIGLET
+
 
 def generate_groupname(self, filename):
     url = "configlets/%s" % (self.name)
@@ -11,6 +13,7 @@ class Configlet(models.Model):
 
     name = models.TextField(unique=True)
     group = models.TextField()
+    type = models.TextField(default=CONFIGLET)
     path = models.FileField(upload_to=generate_groupname)
     parameters = JSONField(default=[])
     created = models.DateTimeField(auto_now_add=True)

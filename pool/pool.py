@@ -1,6 +1,7 @@
 from django.db.models import F
 from netaddr import IPAddress, IPNetwork
 
+import bootstrap
 from constants import *
 from fabric.models import Fabric, Switch
 from models import Pool, PoolEntry
@@ -31,6 +32,7 @@ def add_pool(data, user):
     pool.name = data[NAME]
     pool.type = data[TYPE]
     pool.scope = data[SCOPE]
+    pool.role = data[ROLE]
     pool.blocks = data[BLOCKS]
     pool.updated_by = user
     pool.save()
@@ -57,7 +59,8 @@ def update_pool(data, id, user):
     pool.save()
 
     if pool.scope == FABRIC:
-      # here, get unique list of fabric id's to extend pool entry with new blocks
+      # here, get unique list of fabric id's to
+      # extend pool entry with new blocks
         fabric_list = PoolEntry.objects.filter(pool_id=pool.id).exclude(fabric=None).values_list('fabric', flat=True).distinct()
         for fabric_id in fabric_list:
             fabric = Fabric.objects.get(pk=fabric_id)
@@ -230,13 +233,10 @@ def allocate_pool_entry(pool_id, switch_id, switch):
                 _create_ipv6_pool(pool, pool.blocks, fabric)
 
     # check if pool entry has already been allocated to this switch
-    try:
-        entry = PoolEntry.objects.get(pool=pool, fabric=fabric,
-                                      switch=switch)
-        logger.debug("value = %s", entry.value)
+    entry = get_assigned_entry(pool, fabric, switch)
+
+    if entry:
         return entry.value
-    except PoolEntry.DoesNotExist:
-        pass
 
     # find new entry to allocate
     entries = PoolEntry.objects.filter(pool=pool, fabric=fabric, switch=None)
@@ -249,4 +249,39 @@ def allocate_pool_entry(pool_id, switch_id, switch):
     entry.switch = switch
     entry.save()
     logger.debug("value = %s", entry.value)
+
+    if pool.role == MGMT:
+        bootstrap.bootstrap.update_boot_detail(switch, mgmt_ip=entry.value)
+
     return entry.value
+
+
+def get_assigned_entry(pool, fabric, switch):
+    try:
+        entry = PoolEntry.objects.get(pool=pool, fabric=fabric, switch=switch)
+        logger.debug("value = %s", entry.value)
+        return entry
+    except PoolEntry.DoesNotExist:
+        return None
+
+
+def get_peer_mgmt_ip(switch, peer_switch):
+    try:
+        pools = Pool.objects.filter(role=MGMT)
+    except Pool.DoesNotExist:
+        raise IgniteException(ERR_MGMT_POOL_NOT_FOUND)
+
+    for pool in pools:
+        entry = get_assigned_entry(pool, peer_switch.topology, peer_switch)
+
+        if entry:
+            return entry.value
+
+    for pool in pools:
+        entry = get_assigned_entry(pool, switch.topology, switch)
+
+        if entry:
+            return allocate_pool_entry(entry.pool_id,
+                                       peer_switch.id, peer_switch)
+
+    return None

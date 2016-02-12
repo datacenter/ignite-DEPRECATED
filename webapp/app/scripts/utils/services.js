@@ -156,10 +156,22 @@
 
 
                 if(callAPISettings.auth == "true") {
-                    var requestHeader = {
-                        "Content-Type" : "application/json",
-                        "Authorization" : lclStorage.get('userDetails').auth_token
-                    };
+                    try{
+                        var requestHeader = {
+                            "Content-Type" : "application/json",
+                            "Authorization" : lclStorage.get('userDetails').auth_token
+                        };
+                    } catch(e) {
+                        var errMsg = {
+                                msg : {
+                                    error_message : "Session Expired! Please login again."
+                                }
+                            }
+                            appServices.errors.push(errMsg)
+                            $rootScope.errorFlag = true;
+                            $location.path("/");
+                            return error;
+                    }
                     httpParams.headers = requestHeader;
                 }
 
@@ -218,22 +230,51 @@
                             defer.resolve(data);
                         })
                         .error(function(error, status, headers, config) {
-
+                            var errMsg = null;
                             if(status == 401) {
-                                errMsg = {
-                                    msg : error
+                                if(error.error != undefined){
+                                    errMsg = {
+                                        msg : {
+                                            error_message : error.error
+                                        }
+                                    }
+                                } else if(error.status != undefined){
+                                    errMsg = {
+                                        msg : {
+                                            error_message : error.status
+                                        }
+                                    }
+                                } else if (errMsg == null) {
+                                    errMsg = {
+                                        msg : {
+                                            error_message : "Session Expired! Please login again."
+                                        }
+                                    }
                                 }
-                                if(typeof errMsg.msg.error_message == "undefined") {
-                                    errMsg.msg = {};
-                                    errMsg.msg.error_message = "Session Expired! Please login again.";
-                                }
-                                appServices.errors.push(errMsg)
+                                appServices.errors.push(errMsg);
                                 $rootScope.errorFlag = true;
                                 $location.path("/");
                                 return error;
-                            } else if (status >= 400 && status < 600) {
-                                var errMsg = null;
-
+                            } /*else if(status == 403) {
+                                if(typeof error.error_message !="undefined") {
+                                    errMsg = {
+                                        msg : error.error_message
+                                    }
+                                } else {
+                                    errMsg = {
+                                        msg : error
+                                    }
+                                    if(typeof errMsg.msg.error_message == "undefined") {
+                                        errMsg.msg = {};
+                                        errMsg.msg.error_message = "Error! Please look into server logs for details.";
+                                    }
+                                }
+                                appServices.errors.push(errMsg);
+                                $rootScope.errorFlag = true;
+                                $location.path($rootScope.prevLocation);
+                                return error;
+                            }*/ else if (status >= 400 && status < 600) {
+                                
                                 if(typeof error.errorMessage !="undefined") {
                                     errMsg = {
                                         msg : error.errorMessage
@@ -243,7 +284,12 @@
 
                                 else if(typeof error.non_field_errors != "undefined") {
                                     appServices.loginError = error.non_field_errors[0];
-
+                                    errMsg = {
+                                        msg : {
+                                            error_message : error.non_field_errors[0]
+                                        }
+                                    }
+                                    appServices.errors.push(errMsg)
                                 }
                                 else {
                                     errMsg = {
@@ -256,6 +302,10 @@
                                     appServices.errors.push(errMsg)
                                 }
                                 $rootScope.errorFlag = true;
+                                if(status == 403 && $rootScope.prevLocation != undefined) {
+                                    $location.path(angular.copy($rootScope.prevLocation));
+                                    $rootScope.prevLocation = undefined;
+                                }
                                 return error;
                             } else {
                                 $log.debug('Error: Could not fetch data from:\n----------------------------------\n' + httpParams.url);

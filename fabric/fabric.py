@@ -31,6 +31,11 @@ def add_fabric(data, user):
     fabric.name = data[NAME]
     fabric.model_name = top.model_name
     fabric.is_fabric = True
+
+    if data[CONFIG_PROFILE]:
+        fabric.config_profile = config.get_profile(data[CONFIG_PROFILE])
+    if data[FEATURE_PROFILE]:
+        fabric.feature_profile = feature.get_profile(data[FEATURE_PROFILE])
     fabric.updated_by = user
     fabric.save()
 
@@ -233,6 +238,20 @@ def update_defaults(fab_id, data, user):
 
 
 def update_profiles(fab_id, data, user):
+    # setting global level config and feture profiles
+    fabric = Fabric.objects.get(pk=fab_id)
+
+    if data[CONFIG_PROFILE]:
+        fabric.config_profile = config.get_profile(data[CONFIG_PROFILE])
+    else:
+        fabric.config_profile = None
+
+    if data[FEATURE_PROFILE]:
+        fabric.feature_profile = feature.get_profile(data[FEATURE_PROFILE])
+    else:
+        fabric.feature_profile = None
+    fabric.save()
+
     cfg = dict()
     feat = dict()
     wf = dict()

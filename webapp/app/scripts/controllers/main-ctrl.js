@@ -14,7 +14,12 @@ angular.module('PoapServer')
 
     	$scope.deleteError = function($index){
 			appServices.errors.splice($index, 1);
-		}
+		};
+
+        $scope.goto = function(path) {
+            $rootScope.prevLocation = $location.path();
+            $location.path(path);
+        };
 
         $scope.logout = function() {
             debugger;

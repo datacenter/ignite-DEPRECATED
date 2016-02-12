@@ -10,7 +10,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def get_all_configlets():
+def get_all_configlets(type):
+    if type:
+        return Configlet.objects.filter(type=type).order_by(NAME)
+
     return Configlet.objects.all().order_by(NAME)
 
 
@@ -18,6 +21,7 @@ def add_configlet(data, user):
     cfg = Configlet()
     cfg.name = data[NAME]
     cfg.group = data[GROUP]
+    cfg.type = data[CONSTRUCT_TYPE]
     cfg.updated_by = user
     cfg.save()
     return cfg
@@ -40,7 +44,14 @@ def update_configlet(id, data, user):
     file_obj = data[FILE]
     cfg.path = file_obj
     file_content = file_obj.read()
-    params = parse_file(file_content)
+
+    if cfg.type == SCRIPT:
+        params = parse_file(file_content, PARAM_EXP_SCRIPT,
+                            PARAM_IDENTIFIER_SCRIPT)
+    else:
+        params = parse_file(file_content, PARAM_EXP_CONFIGLET,
+                            PARAM_IDENTIFIER_CONFIGLET)
+
     cfg.parameters = params
     cfg.updated_by = user
     cfg.save()

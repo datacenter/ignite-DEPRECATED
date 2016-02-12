@@ -61,7 +61,8 @@ NEIGHBOR_LIST = 'neighbor_list'
 MATCH_TYPES = [SERIAL_NUMBER, NEIGHBOR]
 
 # error messages
-ERR_BUILD_WITHOUT_SUBMIT = "Submit the fabric first before build config"
+ERR_BUILD_WITHOUT_SUBMIT = "Submit the fabric before build config"
+ERR_REQUEST_WITHOUT_SUBMIT = "Submit the fabric first before POAP request"
 ERR_CANT_DEL_BOOTED_FABRIC = "Cannot delete a fabric that is already booted"
 ERR_CANT_DEL_BOOTED_SWITCH = "Cannot delete a switch that is already booted"
 ERR_INV_PORTS = "Ports are either in use or not of right type"
@@ -73,3 +74,10 @@ ERR_NO_NAME_CHANGE = "Name change not allowed after fabric switch has booted"
 ERR_SERIAL_NUM_IN_USE = "Serial number is already assigned"
 ERR_SW_NAME_IN_USE = "Switch name is already in use"
 ERR_VALUE_NOT_FOUND = "Failed to get value for parameter"
+ERR_NO_DOWNLINK_PORTS = "No Downlink ports found for switch"
+ERR_NO_UPLINK_PORTS = "No Uplink ports found for switch"
+ERR_NO_VPC_PEER_PORTS = "No VPC peer ports found for switch"
+ERR_PEER_MGMT_IP_NOT_DETERMINED = "Failed to determine the peer switch Mgmt IP"
+ERR_NO_VPC_PEER_SWITCH = "No VPC peer switch found"
+ERR_MGMT_IP_NOT_DETERMINED = "Failed to get the Mgmt IP"
+ERR_TIER_NOT_RECOGNIZED = "Not a valid tier for topology"

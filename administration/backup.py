@@ -30,7 +30,8 @@ def db_dump(filename):
 def create_backup():
     current_date = datetime.utcnow().strftime(FILE_TIME_FORMAT)
     filename = os.path.join(MEDIA_ROOT, current_date + SQL_FORMAT)
-    tar_name = os.path.join(MEDIA_ROOT, BACKUP, current_date + TAR_FORMAT)
+    backup_name = "Ignite_" + current_date + TAR_FORMAT
+    tar_name = os.path.join(MEDIA_ROOT, BACKUP, backup_name)
 
     db_dump(filename)
 
@@ -39,7 +40,6 @@ def create_backup():
         file_obj.add(MEDIA + "/" + name)
 
     file_obj.add(MEDIA + "/" + current_date + SQL_FORMAT)
-    file_obj.add(CONF_FILE)
     file_obj.close()
 
     try:
@@ -50,7 +50,7 @@ def create_backup():
 
     resp = {}
     resp["status"] = "success"
-    resp["filename"] = current_date + TAR_FORMAT
+    resp["filename"] = backup_name
     return resp
 
 

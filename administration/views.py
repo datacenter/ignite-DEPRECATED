@@ -75,6 +75,23 @@ class AAAUserListView(AdminView):
 
 
 class AAAUserDetailView(AdminView):
+    def get(self, request, id, format=None):
+        """
+        To get an User by id
+        ---
+  response_serializer: "UserDetailSerializer"
+        """
+        return Response(services.get_user(id))
+
+    def put(self, request, id, format=None):
+        """
+        To edit an User
+        ---
+  request_serializer: "UserPutSerializer"
+  response_serializer: "UserSerializer"
+        """
+        return Response(services.update_user(request.data, id))
+
     def delete(self, request, id, format=None):
         """
         To delete an user

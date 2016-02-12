@@ -1,3 +1,6 @@
+'use strict';
+
+
 angular.module('PoapServer')
   .controller('BackupCtrl', function($scope, $rootScope, $location, $filter, ngTableParams, appSettings, appServices, gettextCatalog, lclStorage, $modal, $log, roundProgressService, ngToast) {
 
@@ -34,7 +37,7 @@ angular.module('PoapServer')
     };
 
     $scope.downloadFile = function(file_name) {
-        var url = angular.copy("http://127.0.0.1:8000"+appSettings.appAPI.backup.download.url+file_name.split('.')[0]);
+        var url = angular.copy(appSettings.appAPI.baseURL+appSettings.appAPI.backup.download.url+file_name.split('.')[0]);
         window.open(url);
         /*var reqHeader = {
             appendToURL : true,
@@ -47,7 +50,7 @@ angular.module('PoapServer')
         });*/
     };
 
-    var saveData = (function () {
+    /*var saveData = (function () {
                 var a = document.createElement("a");
             document.body.appendChild(a);
             a.style = "display: none";
@@ -60,7 +63,7 @@ angular.module('PoapServer')
                 a.click();
                 window.URL.revokeObjectURL(url);
                 };
-            }());
+            }());*/
 
     $scope.deleteBackup = function(id) {
         $scope.selectedId = id;
@@ -126,8 +129,8 @@ angular.module('PoapServer')
             });
             $scope.backups = $scope.backups.filter(function(a){
                 var date = a.time.split('_');
-                var newDate = date[1]+"/"+date[2]+"/"+date[0]+" "+date[3].substr(0,2)+":"+date[3].substr(2,2)+":"+date[3].substr(4,2)+" UTC";
-                a.time = new Date(newDate).toString();
+                var newDate = date[2]+"/"+date[3]+"/"+date[1]+" "+date[4].substr(0,2)+":"+date[4].substr(2,2)+":"+date[4].substr(4,2)+" UTC";
+                a.time = new Date(newDate).toISOString();
                 return a;
             });
             $scope.tableParams.reload();

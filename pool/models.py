@@ -9,6 +9,7 @@ class Pool(models.Model):
     name = models.TextField(unique=True)
     type = models.TextField()
     scope = models.TextField()
+    role = models.TextField(blank=True, default='')
     blocks = JSONField(default=[])
     updated_by = models.TextField(default='')
     ref_count = models.IntegerField(default=0)
@@ -23,6 +24,6 @@ class PoolEntry(models.Model):
                                null=True, default=None)
     value = models.TextField()
     switch = models.ForeignKey(Switch, null=True, default=None,
-                                 on_delete=models.SET_NULL)
+                               on_delete=models.SET_NULL)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)

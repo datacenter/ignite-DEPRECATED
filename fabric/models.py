@@ -15,6 +15,10 @@ class Topology(models.Model):
     model_name = models.TextField()
     is_fabric = models.BooleanField(default=True)
     submit = models.BooleanField(default=False)
+    config_profile = models.ForeignKey(ConfigProfile, null=True, default=None,
+                                       on_delete=models.PROTECT)
+    feature_profile = models.ForeignKey(FeatureProfile, null=True, default=None,
+                                       on_delete=models.PROTECT)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     updated_by = models.TextField(default="")

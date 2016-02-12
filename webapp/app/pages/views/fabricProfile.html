@@ -66,7 +66,7 @@
                     }"
                     ng-click="tableParams.sorting({'updated' : tableParams.isSortBy('updated', 'asc') ? 'desc' : 'asc'})"
                     >Last Modified on</th>
-                    <th></th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -80,7 +80,7 @@
                     <!-- <td>{{fProfile.referenced}}</td>
                     <td>{{fProfile.installed}}</td> -->
                     <td>
-                        <span class="glyphicon glyphicon-ok success-color" ng-show="fProfile.submit" aria-hidden="true">
+                        <span class="glyphicon glyphicon-ok success_color" ng-show="fProfile.submit" aria-hidden="true">
                         </span>
                     </td>
                     <td>{{fProfile.updated_by}}</td>

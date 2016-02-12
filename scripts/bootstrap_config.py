@@ -5,7 +5,7 @@ import socket
 import sys
 
 #Set syslog server and port - fill in from ignite/config.py
-SYSLOG_SERVER = "172.31.219.35"
+SYSLOG_SERVER = "127.0.0.1"
 SYSLOG_PORT = 514
 
 md5sum_ext_src = "md5"
@@ -18,7 +18,7 @@ password_g = ""
 vrf_g = ""
 
 #serial number of switch
-serial_num = ""
+serial_num_g = ""
 
 #Remote log infra
 #Log levels and facility
@@ -30,7 +30,7 @@ LEVEL = {
 
 
 def syslog(info, level=LEVEL['info']):
-    message = "%s : %s : %s" % (serial_num, os.path.basename(__file__), info)
+    message = "%s : %s : %s" % (serial_num_g, os.path.basename(__file__), info)
     data = '<%d>%s' % (level + FACILITY*8, message)
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.sendto(data, (SYSLOG_SERVER, SYSLOG_PORT))
@@ -105,15 +105,9 @@ def check_md5sum(filename_src, filename_dst):
     return True
 
 
-def set_system_info():
-    global serial_num
-    system_info = json.loads(clid("show version"))
-    serial_num = str(system_info['proc_board_id'])
-
-
 def get_config(protocol="scp", port="", hostname="", file_src="",
                file_dst="volatile:poap.cfg", vrf="management",
-               username="", password="", fatal=True):
+               username="", password="", serial_num="", fatal=True):
 
     if "" in [protocol, hostname, file_src, file_dst, username, password]:
 
@@ -132,10 +126,10 @@ def get_config(protocol="scp", port="", hostname="", file_src="",
     password_g = password
     global vrf_g
     vrf_g = vrf
+    global serial_num_g
+    serial_num_g = serial_num
 
     run_cli("terminal dont-ask")
-
-    set_system_info()
 
     rm_rf(file_dst)
     status = do_copy(file_src, file_dst)

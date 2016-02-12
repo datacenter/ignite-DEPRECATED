@@ -27,3 +27,18 @@ class UserCreateSerializer(serializers.Serializer):
     password = serializers.CharField()
     email = serializers.CharField()
     is_superuser = serializers.BooleanField()
+
+
+class UserDetailSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    username = serializers.CharField()
+    password = serializers.CharField()
+    email = serializers.CharField()
+    is_superuser = serializers.BooleanField()
+
+
+class UserPutSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    email = serializers.CharField()
+    password = serializers.CharField(allow_null=True)
+    is_superuser = serializers.BooleanField()

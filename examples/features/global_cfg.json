@@ -1,0 +1,10 @@
+
+"global_cfg":
+{
+	"pc_only":$$PORT_CHANNEL_ONLY_ENABLED$$,
+	"igp_enabled":$$IGP_ENABLED$$,
+	"bgp_enabled":$$BGP_ENABLED$$,
+	"enable_routing":$$ROUTING_ENABLED$$,
+	"infra_block":"$$INFRA_BLOCK$$",
+	"loopback_block":"$$LOOPBACK_BLOCK$$"
+}

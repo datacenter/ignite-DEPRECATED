@@ -251,6 +251,8 @@ angular.module('PoapServer').controller('FabricCreateCtrl',
         $scope.submitData = {
             'name': '',
             'topology': '',
+            'config_profile': 0,
+            'feature_profile': 0,
             'switches': [
                 { 'tier': 'Core', 'config_profile': 0, 'feature_profile': 0, 'workflow': 0 },
                 { 'tier': 'Spine', 'config_profile': 0, 'feature_profile': 0, 'workflow': 0 },
@@ -291,7 +293,7 @@ angular.module('PoapServer').controller('FabricCreateCtrl',
                     for(var index = 0; index < $scope.submitData.switches.length; index++) {
                         if(undefined !== $scope.addFabricForm["config_profile"+index]){
                             $scope.addFabricForm["config_profile"+index].$setValidity('required',false);
-                            $scope.addFabricForm["feature_profile"+index].$setValidity('required',false);   
+                            $scope.addFabricForm["feature_profile"+index].$setValidity('required',false);
                         }
                     }
                     $('.profile-note').addClass('noteHighlight');
@@ -308,6 +310,13 @@ angular.module('PoapServer').controller('FabricCreateCtrl',
                 $scope.addFabricForm["config_profile"+index].$setValidity('required',true);
                 $scope.addFabricForm["feature_profile"+index].$setValidity('required',true);
                 $('.profile-note').removeClass('noteHighlight');
+            }
+            if((0 == $scope.submitData.switches[1].feature_profile && 0 == $scope.submitData.switches[2].feature_profile) || (0 != $scope.submitData.switches[1].feature_profile && 0 != $scope.submitData.switches[2].feature_profile)) {
+                $scope.addFabricForm["feature_profile1"].$setValidity('required',true);
+                $scope.addFabricForm["feature_profile2"].$setValidity('required',true);
+            } else {
+                $scope.addFabricForm["feature_profile1"].$setValidity('required',false);
+                $scope.addFabricForm["feature_profile2"].$setValidity('required',false);
             }
         };
 

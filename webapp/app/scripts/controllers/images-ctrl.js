@@ -183,6 +183,11 @@ angular.module('PoapServer').controller('ImagesModalCtrl', function($scope, $mod
     $scope.action = dataToModal.action;
     $scope.error = "";
     $scope.formIncomplete = true;
+    $scope.readonly = false;
+
+    if(dataToModal.source != undefined) {
+        $scope.readonly = true;
+    }
 
     $scope.access_protocol_list = {
         "sftp": "sftp",

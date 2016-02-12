@@ -22,8 +22,9 @@ import sys
 sys.path.append('/home/dev/ignite')
 import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ignite.prod")
-from pool.pool import generate_pool_value
 '''
+from pool.pool import allocate_pool_entry
+
 
 
 class CiscoCompiler(PlatformCompiler):
@@ -146,21 +147,22 @@ class CiscoCompiler(PlatformCompiler):
         else:
             log.debug("Not allocating VIRL management interfaces")
 
+	pc_only_config = False
         vxlan_global_config = None
         if g_phy.data.vxlan_global_config is not None:
             vxlan_global_config = g_phy.data.vxlan_global_config
-
+        if g_phy.data.pc_only is not None:
+            pc_only_config = g_phy.data.pc_only
         use_ignite_pool = False
-        if g_phy.data.ignite is not None:
-            use_ignite_pool = True
-            mgmt_ip_pool = g_phy.data.ignite['pool_dict']
-            fab_id = g_phy.data.ignite['fab_id']
-            fab = g_phy.data.ignite['fab']
-        elif g_phy.data.mgmt_block is not None:
+        if g_phy.data.mgmt_block is not None:
             mgmt_address_block = netaddr.IPNetwork(g_phy.data.mgmt_block).iter_hosts()
             mgmt_address_mask = (netaddr.IPNetwork(g_phy.data.mgmt_block)).netmask
-
-
+        else:
+            pool = g_phy.data.ignite
+            if pool is not None:
+                if 'mgmt_pool_id' in pool and pool['mgmt_pool_id'] is not None:
+                    mgmt_pool_id = pool['mgmt_pool_id']
+                    use_ignite_pool = True
 
         if g_phy.data.vpcid_block is not None:
             vpc_re = "([0-9]+)(-)([0-9]+)"
@@ -209,15 +211,19 @@ class CiscoCompiler(PlatformCompiler):
 
 
             DmNode.add_stanza("syslog")
-
+            DmNode.add_stanza('mgmt')
             if use_ignite_pool == True:
-                DmNode.add_stanza('mgmt')
-                pool_id = fab + '_' + phy_node.id
-                node_mgmt_pool = mgmt_ip_pool[pool_id]
-                DmNode.mgmt.ip = generate_pool_value(int(node_mgmt_pool),fab_id,phy_node.id)
-                DmNode.mgmt.mask = '255.255.255.0'
+                mgmt_ip = allocate_pool_entry(mgmt_pool_id,phy_node.name, None)
+                pos_mask = mgmt_ip.find('/')
+                if pos_mask != -1:
+                    network = mgmt_ip[:pos_mask]
+                    mask = int(mgmt_ip[pos_mask+1:])
+                else:
+                    network = mgmt_ip[:pos_mask]
+                    mask = 32
+                DmNode.mgmt.ip = network +  '/' + str(mask)
+                DmNode.mgmt.mask = ""
             elif g_phy.data.mgmt_block is not None:
-                DmNode.add_stanza('mgmt')
                 DmNode.mgmt.ip = mgmt_address_block.next()
                 DmNode.mgmt.mask = mgmt_address_mask
 
@@ -259,10 +265,13 @@ class CiscoCompiler(PlatformCompiler):
                         po_interface_int = po_interface._interface
                         if po_interface_int.has_key('subcat_prot'):
                             if po_interface.subcat_prot == "vpc":
-                                po_mem_int.member_port_vpc = True# is a member port of VPC peer link
+                                po_mem_int.keepalive_port_vpc = True# is a member port of VPC peer link
                                 interface.virt_port_channel = True# is a VPC interface
                                 DmNode.add_stanza('vpc')
-
+                            if po_interface.subcat_prot == "vpc-member":
+                                po_mem_int.member_port_vpc = True
+                                interface.vpc_member_id = interface.numeric_id 
+                                interface.member_vpc = True
 
         ##adding rp's
         if vxlan_global_config is not None and 'rendezvous_point' in vxlan_global_config:
@@ -416,7 +425,10 @@ class CiscoCompiler(PlatformCompiler):
                 continue
             DmNode = self.nidb.node(phy_node)
             DmNode.add_stanza("render")
-            DmNode.render.template = os.path.join("templates", "nexus_os.mako")
+            if pc_only_config == True:
+                DmNode.render.template = os.path.join("templates", "nexus_os_pc_only.mako")
+	    else:
+                DmNode.render.template = os.path.join("templates", "nexus_os.mako")
             #if to_memory:
             #    DmNode.render.to_memory = True
             #else:

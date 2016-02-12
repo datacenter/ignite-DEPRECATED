@@ -374,17 +374,6 @@ app.config(function($routeProvider) {
             activemenu: 'admin',
             activetab: 'backup'
         })
-        .otherwise({
-            redirectTo: '/'
-        });
-
-        /*
-        .when('/rma',{
-            templateUrl: 'pages/views/rma.html',
-            controller: 'RMA_Ctrl',
-            activemenu: 'fabric',
-            activetab: 'rma'
-        })
         .when('/group',{
             templateUrl: 'pages/views/groups.html',
             controller: 'GroupsCtrl',
@@ -402,7 +391,37 @@ app.config(function($routeProvider) {
             controller: 'GrpCtrl',
             activemenu:'manage',
             activetab: 'group'
-        })*/
+        })
+        .when('/jobs', {
+            templateUrl: 'pages/views/jobList.html',
+            controller: 'JobsCtrl',
+            activemenu:'manage',
+            activetab: 'job'
+        })
+        .when('/job/:mode', {
+            templateUrl: 'pages/views/job.html',
+            controller: 'Job_Ctrl',
+            activemenu:'manage',
+            activetab: 'job'
+        })
+        .when('/job/:mode/:id', {
+            templateUrl: 'pages/views/job.html',
+            controller: 'Job_Ctrl',
+            activemenu:'manage',
+            activetab: 'job'
+        })
+        .when('/rma',{
+            templateUrl: 'pages/views/rma.html',
+            controller: 'RMA_Ctrl',
+            activemenu: 'fabric',
+            activetab: 'rma'
+        })
+        .otherwise({
+            redirectTo: '/'
+        });
+
+        /*
+        */
 });
 
 

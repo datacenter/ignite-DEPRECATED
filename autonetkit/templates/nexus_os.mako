@@ -5,93 +5,63 @@
 hostname ${node}
 !
 % if node.include_csr:
+!
 license accept end user agreement
 license boot level premium
-!
-!
 % endif
-!
-!
 % if node.global_custom_config:
 !
 ${node.global_custom_config}
-!
 % endif
-!
-!
 no password strength-check
 !
-!
 feature telnet
-!
 feature bash-shell
 no service unsupported-transceiver
-!
-!
 % if node.ipv4_cef:
+!
 ip cef
 % endif
-!
-!
 % if node.ipv6_cef:
+!
 ipv6 cef
 % endif
-!
-!
 % if node.mpls_te:
+!
 mpls traffic-eng tunnels
 % endif
-!
-!
-!
 % if node.enable_secret:
+!
 enable secret 4 ${node.enable_secret}
 % endif
-##ip classless
-##ip subnet-zero
-##no ip domain lookup
-##line vty 0 4
-!
-!
 % if node.transport_input_ssh_telnet:
+!
 transport input ssh telnet
 % endif
-## exec-timeout 720 0
-## password cisco
-## login
-##line con 0
-## password cisco
-!
 % if node.use_cdp:
 !
 cdp run
-!
 % endif
-##mgmt ip
-!
-!
 % if node.mgmt:
+!
 interface mgmt0
  vrf member management
  ip address ${node.mgmt.ip}  ${node.mgmt.mask}
 % endif
 !
+!
 % if node.ospf:
 feature ospf
 % endif
-!
 % if node.bgp:
 feature bgp
 % endif
-!
 % if node.eigrp:
 feature eigrp
 % endif
-!
 % if node.pim:
 feature pim
 % endif
-!
 % if node.vxlan:
 nv overlay evpn
     % if node.vxlan.vtep:
@@ -104,36 +74,29 @@ fabric forwarding anycast-gateway-mac ${node.vxlan.anycast_gateway_mac}
     % endif
 % endif
 ##NTP
-!
 % if node.ntp:
   % if node.ntp.enabled == 1:
 feature ntp
 ntp server ${node.ntp.server_ip}
   % endif
 % endif
-!
-
 ##syslog
 % if node.syslog:
 syslog
   enabled ${node.syslog.enabled}
   severity ${node.syslog.severity}
 % endif
-!
-!
-
 ##SNMP
 % if node.snmp:
+!
   % if node.snmp.enabled == True:
 snmp-server protocol enable
     % for user in node.snmp.users:
 snmp-server user ${user.user} auth ${user.auth} ${user.pwd} priv ${user.priv_passphrase}
     % endfor
-
     % for server in node.snmp.server:
 snmp-server host ${server.ip} traps version ${server.version} ${server.community} udp-port ${server.udp_port}
     % endfor
-!
 !
     % for trap in node.snmp.traps:
       % if trap.enabled == True:
@@ -145,16 +108,13 @@ snmp-server enable traps ${trap.id}
     % endfor
   % endif
 % endif
-!
-!
 % if node.vpc:
+!
 feature lacp
 feature vpc
 vpc domain ${node.vpc.domain_id}
  peer-keepalive destination ${node.vpc.dest} source ${node.mgmt.ip} vrf management
 % endif
-!
-!
 % if node.use_onepk:
 !
 username cisco privilege 15 password 0 cisco
@@ -165,10 +125,9 @@ username cisco privilege 15 password 0 cisco
  service set vty
 !
 % endif
-!
-!
 ## VRF
 % for vrf in node.vrf.vrfs:
+!
 vrf definition ${vrf.vrf}
 rd ${vrf.rd}
 !
@@ -180,7 +139,6 @@ exit
   % endif
 % endfor
 !
-!
 ## L2TP Classes
 % for l2tp_class in node.l2tp_classes:
   % if loop.first:
@@ -188,7 +146,6 @@ exit
   % endif
 l2tp-class ${l2tp_class}
 % endfor
-!
 !
 ## PseudoWire Classes
 % for pwc in node.pseudowire_classes:
@@ -225,7 +182,11 @@ hardware qos ns-buffer-profile burst
 ## Physical Interfaces
 % for interface in node.interfaces:
 interface ${interface.id}
+  % if interface.member_vpc != True:
+    % if interface.member_port_vpc != True:
   description ${interface.description}
+    % endif
+  % endif
   % if interface.comment:
   ! ${interface.comment}
   % endif
@@ -379,7 +340,6 @@ ip pim rp-address ${rp.ip} group-list ${rp.mcastgrp}
 ip pim log-neighbor-changes
     % endif
 !
-!
     % if node.vxlan.vtep:
 ###configure nve interface. currently only 1 supported.
 interface nve1
@@ -403,7 +363,6 @@ interface nve1
         % endif
   exit
 !
-!
 evpn
         % for config in node.vxlan.vlan_vni_l2:
   vni ${config.vni} l2
@@ -413,7 +372,6 @@ evpn
         % endfor
 !
     % endif
-!
 !
 !SVI CONFIG
 !
@@ -453,10 +411,9 @@ exit
     % endif
  !
 % endif
-!
-!
 ## OSPF
 % if node.ospf:
+!
   % if node.ospf.use_ipv4:
 feature ospf
 router ospf ${node.ospf.process_id}
@@ -469,13 +426,7 @@ router-id ${node.loopback}
   mpls traffic-eng area ${node.ospf.loopback_area}
     % endif
 ## Loopback
-  #network ${node.loopback} 0.0.0.0 area ${node.ospf.loopback_area}
   log-adjacency-changes
-  ##passive-interface ${node.ospf.lo_interface}
-  ##passive-interface default
-    % for ospf_link in node.ospf.ospf_links:
-  #network ${ospf_link.network.network} ${ospf_link.network.hostmask} area ${ospf_link.area}
-    % endfor
   % endif
   % if node.ospf.use_ipv6:
 feature ospfv3
@@ -521,7 +472,6 @@ router isis ${node.isis.process_id}
 % endif
 ####
 !
-!
 % if node.eigrp:
 router eigrp ${node.eigrp.process_id}
  !
@@ -548,16 +498,14 @@ router eigrp ${node.eigrp.process_id}
 !
   % endif
 % endif
-!
 % if node.mpls.enabled:
 mpls ldp router-id ${node.mpls.router_id}
 % endif
-!
 ## BGP
 % if node.bgp:
+!
 router bgp ${node.asn}
   router-id ${node.router_id}
-  ##no synchronization
   % if node.bgp.custom_config:
   ${node.bgp.custom_config}
   % endif
@@ -643,21 +591,12 @@ router bgp ${node.asn}
 ## ********
   % if node.bgp.use_ipv4:
  !
- #address-family ipv4 unicast
-    % for subnet in node.bgp.ipv4_advertise_subnets:
-  #network ${subnet.network} mask ${subnet.netmask}
-    % endfor
     % for peer in node.bgp.ipv4_peers:
-  ##neighbor ${peer.remote_ip} activate
       % if peer.is_ebgp:
-  ##neighbor ${peer.remote_ip} send-community
       % endif
       % if peer.next_hop_self:
-  ## iBGP on an eBGP-speaker
-      #next-hop-self
       % endif
       % if peer.rr_client:
-      #route-reflector-client
       % endif
     % endfor
  exit

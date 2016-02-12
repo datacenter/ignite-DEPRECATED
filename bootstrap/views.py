@@ -15,7 +15,8 @@ from utils.exception import IgniteException
 from serializers import IgniteRequestPostSerializer
 from serializers import SwitchBootStatusPostSerializer
 from serializers import BootstrapSwitchSerializer
-
+from serializers import RmaSerializer
+from serializers import UpdateRmaSerializer
 
 ERR_CFG_NOT_FOUND = "Config file not found!!"
 ERR_SWITCH_NOT_BOOTED = "Switch has not yet booted"
@@ -87,3 +88,27 @@ class BootstrapLogView(BaseView):
         to get logs for switches
         """
         return Response(bootstrap.get_logs(id))
+
+
+class RmaSerialSearchView(BaseView):
+
+    def get(self, request, id, format=None):
+        """
+        to get rma details
+        ---
+  response_serializer: "RmaSerializer"
+
+        """
+        return Response(services.get_rma_detail(id))
+
+
+class RmaSerialUpdateView(BaseView):
+
+    def post(self, request, format=None):
+        """
+        to update rma details
+        ---
+  request_serializer: "UpdateRmaSerializer"
+
+        """
+        return Response(services.update_rma_detail(request.data))

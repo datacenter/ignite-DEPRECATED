@@ -33,10 +33,22 @@
                     </div>
                     <div class="col-xs-6">
                         <div class="form-group">
+                            <label for="protocol">Protocol</label>
+                            <select class="form-control"
+                             data-ng-model="submitData.protocol"
+                             data-ng-options="v.value as v.label for (k,v) in appSettings.fieldValues.aaa.protocols" required
+                             data-ng-change="serverProtocolCh()"
+                             data-ng-disabled="action == 'view'">
+                             <option value="">--Select--</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="form-group">
                             <label for="port">Port</label>
-                            <input type="number" class="form-control" 
+                            <input type="number" class="form-control noSpinners" 
                             placeholder="Port"
-                            required maxlength="4" minlength="4"
+                            required
                             data-ng-disabled="action == 'view'"
                             ng-model="submitData.port">
                         </div>
@@ -49,17 +61,6 @@
                             required
                             data-ng-disabled="action == 'view'"
                             ng-model="submitData.secret">
-                        </div>
-                    </div>
-                    <div class="col-xs-6">
-                        <div class="form-group">
-                            <label for="protocol">Protocol</label>
-                            <select class="form-control"
-                             data-ng-model="submitData.protocol"
-                             data-ng-options="v.value as v.label for (k,v) in appSettings.fieldValues.aaa.protocols" required
-                             data-ng-disabled="action == 'view'">
-                             <option value="">--Select--</option>
-                            </select>
                         </div>
                     </div>
                 </div>

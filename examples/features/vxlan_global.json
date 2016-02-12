@@ -2,10 +2,8 @@
 "vxlan" :
 {
 	"vxlan_global_config":{
-		"igp": "$$IGP$$",
-		"overlay": "$$OVERLAY_TO_USE$$",
-		"multicast": "$$MULTICAST_ENABLED$$",
-		"ingress_replication": "$$INGRESS_REPLICATION_ENABLED$$",
+		"multicast": $$MULTICAST_ENABLED$$,
+		"ingress_replication": $$INGRESS_REPLICATION_ENABLED$$,
 		"anycast_gateway_mac": "$$ANYCAST_GATEWAY_MAC$$",
 		"rendezvous_point":[
 			{
@@ -21,7 +19,7 @@
 				   		"vni": "$$L2_VNI$$",
 				   		"vlan": "$$VLAN_ID$$",
 				   		"anycast_gateway": "$$ANYCAST_GATEWAY$$",
-				   		"mcast_group": "MCAST_GROUP"
+				   		"mcast_group": "$$MCAST_GROUP$$"
 					}
 			   ],
 			   "vrf_context": "$$VRF_CONTEXT$$",

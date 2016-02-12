@@ -4,7 +4,7 @@ from rest_framework.response import Response
 
 import image_profile
 from constants import *
-from serializers import ImageProfileSerializer, ImageProfilePutSerializer
+from serializers import ImageProfileSerializer, ImageProfilePutSerializer, ImageProfileListSerializer
 from utils.exception import IgniteException
 from utils.baseview import BaseView
 
@@ -20,7 +20,7 @@ class ImageProfileListView(BaseView):
         """
         state = request.GET.get(STATE)
         profiles = image_profile.get_all_profiles(state)
-        serializer = ImageProfilePutSerializer(profiles, many=True)
+        serializer = ImageProfileListSerializer(profiles, many=True)
         return Response(serializer.data)
 
     def post(self, request, format=None):
@@ -37,7 +37,7 @@ class ImageProfileListView(BaseView):
             raise IgniteException(serializer.errors)
 
         profile = image_profile.add_profile(serializer.data, user=self.username)
-        serializer = ImageProfilePutSerializer(profile)
+        serializer = ImageProfileListSerializer(profile)
         return Response(serializer.data)
 
 
@@ -68,7 +68,7 @@ class ImageProfileDetailView(BaseView):
             raise IgniteException(serializer.errors)
 
         profile = image_profile.add_profile(serializer.data, user=self.username, id=int(id))
-        serializer = ImageProfilePutSerializer(profile)
+        serializer = ImageProfileListSerializer(profile)
         return Response(serializer.data)
 
     def delete(self, request, id, format=None):

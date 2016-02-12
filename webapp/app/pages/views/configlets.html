@@ -45,6 +45,12 @@
                         'sort-desc': tableParams.isSortBy('group', 'desc')
                     }"
                     ng-click="tableParams.sorting({'group' : tableParams.isSortBy('group', 'asc') ? 'desc' : 'asc'})">Group</th>
+                    <th class="sortable" 
+                    ng-class="{
+                        'sort-asc': tableParams.isSortBy('type', 'asc'),
+                        'sort-desc': tableParams.isSortBy('type', 'desc')
+                    }"
+                    ng-click="tableParams.sorting({'type' : tableParams.isSortBy('type', 'asc') ? 'desc' : 'asc'})">Type</th>
                     <!-- <th class="sortable" 
                     ng-class="{
                         'sort-asc': tableParams.isSortBy('config_type', 'asc'),
@@ -80,7 +86,9 @@
                     <td><a href="javascript:void(0);" ng-click="viewConfiglet(configlet.id)">{{configlet.name}}</a>
                     </td>
                     <td>{{configlet.group}}</td>
-                    <!-- <td>{{configlet.config_type}}</td> -->
+                    <td class="text-capitalize">
+                        {{configlet.type == "configlet" ? "Template" : configlet.type}}
+                    </td>
                     <td>
                         <ul class="parameter_list">
                             <li ng-repeat="parameter in configlet.parameters">

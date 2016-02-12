@@ -68,60 +68,6 @@
         return false;
     }
 
-    var createElementVpcMember = function(s1, s2, hovertext, link_index) {
-        var s1_pos = 0;
-        var s2_pos = 0;
-        for(var i = 0; i < leaf_switches.length; i++) {
-            if(leaf_switches[i].id == s1) {
-                s1_pos = i;
-            }
-            if(leaf_switches[i].id == s2) {
-                s2_pos = i;
-            }
-        }
-        g[switchCount] = paper.g();
-        var gx = parseInt((xpos.leaf[s1_pos]+xpos.leaf[s2_pos])/2);
-        var gy = parseInt(switchDetails[2].leaf.y+100);
-        var img = "images/vpc-keep.svg";
-        g[switchCount].attr({
-            "x": gx,
-            "y": gy,
-            "id": '0',
-            "title": hovertext,
-            "data-toggle": "tooltip",
-            "cursor":"pointer"
-        });
-
-        $("svg g").tooltip({
-        'container': 'body',
-        'placement': 'right'
-        });
-
-        var objs = paper.image(img, gx, gy, 50, 50);
-
-        objs.click(function(){
-           PopEditLink(link_index);
-        });
-
-        objs.addClass('objs');
-
-
-        g[switchCount].add(objs);
-
-
-        /*g[switchCount].click(function(){
-            PopEdit(switches.id);
-        });*/
-
-       // console.log('*******************');
-       // console.log(g[switchCount].getBBox());
-
-        g[switchCount].drag(dragMove,startDrag,stopDrag);
-
-        switchCount ++;
-
-    }
-
      var createTierElement = function(count, switches, item, obj,pos) {
 
         //Create a group
@@ -302,7 +248,6 @@
         "border":[],
      };
 
-     debugger;
 
      var svgWidth = $('#topology_svg').width();
 
@@ -357,7 +302,6 @@
 
             c1 = {};
             c2 = {};
-            c3 = {};
 
             for (j = 0; j < g.length; j++) {
                 var gp = g[j].attr("id");
@@ -394,80 +338,25 @@
             if (p1 != undefined && p2 != undefined) {
 
                 var hovertext = "Link Type="+link+",  Local Port ("+s1_name+") ="+p1+", Remote Port ("+s2_name+") ="+p2;
-                
-                if(link == 'VPC-Member') {
-                    createElementVpcMember(s1,s2,hovertext,i);
-                    c3 = g[switchCount-1];
-                    var connObj1 = paper.connection(c1, c3, linkcolor, i , hovertext);
-                    var connObj2 = paper.connection(c3, c2, linkcolor, i , hovertext);
+                var connObj = paper.connection(c1, c2, linkcolor, i , hovertext);
 
-                    console.log('connObj1');
-                    console.log(connObj1);
-                    var path1 = connObj1.line.node.attributes.d.nodeValue;
+                console.log('connObj');
+                console.log(connObj);
 
-                    console.log('connObj2');
-                    console.log(connObj2);
-                    var path2 = connObj2.line.node.attributes.d.nodeValue;
-
-                    connections.push(connObj1);
-                    connections.push(connObj2);
-
-                    addContentToVpcMember(path1,linkcolor,p1,link,s1);
-                    addContentToVpcMember(path2,linkcolor,p2,link,s2);
-                } else {
-                    var connObj = paper.connection(c1, c2, linkcolor, i , hovertext);
-
-                    console.log('connObj');
-                    console.log(connObj);
-
-                    connections.push(connObj);
-
-                    var x1 = connObj.line.node.attributes.x1.nodeValue;
-                    var y1 = connObj.line.node.attributes.y1.nodeValue;
-                    var x4 = connObj.line.node.attributes.x4.nodeValue;
-                    var y4 = connObj.line.node.attributes.y4.nodeValue;
-                    var path = connObj.line.node.attributes.d.nodeValue;
-                    debugger;
-                    addContentToPath(x1,y1,x4,y4,path,linkcolor,p1, p2,link,i,s1,s2,hovertext);
-                }
+                connections.push(connObj);
 
                 //Get path start and end points
 
-                
+                var x1 = connObj.line.node.attributes.x1.nodeValue;
+                var y1 = connObj.line.node.attributes.y1.nodeValue;
+                var x4 = connObj.line.node.attributes.x4.nodeValue;
+                var y4 = connObj.line.node.attributes.y4.nodeValue;
+                var path = connObj.line.node.attributes.d.nodeValue;
+                addContentToPath(x1,y1,x4,y4,path,linkcolor,p1, p2,link,i,s1,s2,hovertext);
              }
 
 
         }
-    }
-
-    var addContentToVpcMember = function(path,linkcolor,p1,link,s1){
-        var portText1 = paper.text(10, 0, p1.toString());
-        portText1.attr({
-            fill:linkcolor,
-            textpath:path,
-            id:"port-"+s1
-        });
-        portText1.addClass('port');
-
-        /*var portText2 = paper.text(0, 0, p2.toString());
-        portText2.attr({
-            fill:linkcolor,
-            textpath:path,
-            id:"port-"+s2
-        });*/
-
-        // console.log('-------------------------------------------');
-        // console.log(portText2.node);
-        // console.log('*******************************************');
-        // console.log(portText2.node.getBoundingClientRect());
-
-        // portText2.textPath.attr({'startOffset':pathLength - (portText2.node.clientWidth/1.25)}); //80
-        // portText2.textPath.attr({'startOffset':pathLength - 70}); //80
-        // portText2.addClass('port');
-
-        var g = paper.g();
-        g.add(portText1);
-
     }
 
 
@@ -587,7 +476,7 @@
         // console.log(portText2.node.getBoundingClientRect());
 
         // portText2.textPath.attr({'startOffset':pathLength - (portText2.node.clientWidth/1.25)}); //80
-        portText2.textPath.attr({'startOffset':pathLength - 70}); //80
+        portText2.textPath.attr({'startOffset':pathLength - 20}); //80
         portText2.addClass('port');
 
         var g = paper.g();

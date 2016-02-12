@@ -16,58 +16,149 @@
         <div class="col-sm-6">
             <div class="search-cont table-header-cont">
                 <input type="text" class="form-control" title="Search"
+                    data-ng-change="newSearch()"
                     data-ng-model="switch.reqData.old_serial_num" placeholder="Switch Serial Number">
-                <i class="glyphicon glyphicon-search"></i>
+                <!-- <i class="glyphicon glyphicon-search"></i> -->
             </div>
             <button class="btn btn-raised btn-primary"
                 style="margin-top: 8px; margin-left: 80px;"
-                ng-hide="action == 'view'" data-ng-disabled="setupForm.$invalid"
+                data-ng-disabled="!switch.reqData.old_serial_num"
                 data-ng-click="searchSwitch()">
                 Search Switch
             </button>
         </div>
-        <div class="col-sm-6" data-ng-if="switch.availableData.serial_number">
+        <div class="row"></div>
+        <div class="row" data-ng-if="showDetails">
+            <div class="col-xs-5">
+                <div class="form-group">
+                    <label for="name" class="col-xs-4" style="float:none">Boot Status</label>:
+                    <label for="name" class="col-xs-6 info-label" style="float:none"
+                        data-ng-if="switch.availableData.switch_detail.boot_detail.boot_status">
+                        {{switch.availableData.switch_detail.boot_detail.boot_status}}
+                    </label>
+                    <label for="name" class="col-xs-6 info-label" style="float:none"
+                        data-ng-if="!switch.availableData.switch_detail.boot_detail.boot_status">
+                        --
+                    </label>
+                </div>
+            </div>
+            <div class="col-xs-5">
+                <div class="form-group">
+                    <label for="name" class="col-xs-4" style="float:none">Boot Time</label>:
+                    <label for="name" class="col-xs-6 info-label" style="float:none"
+                        data-ng-if="switch.availableData.switch_detail.boot_detail.boot_time">
+                        {{switch.availableData.switch_detail.boot_detail.boot_time | date : appSettings.dateFormat}}
+                    </label>
+                    <label for="name" class="col-xs-6 info-label" style="float:none"
+                        data-ng-if="!switch.availableData.switch_detail.boot_detail.boot_time">--</label>
+                </div>
+            </div>
+            <div class="col-xs-5">
+                <div class="form-group">
+                    <label for="name" class="col-xs-4" style="float:none">Switch Name</label>:
+                    <label for="name" class="col-xs-6 info-label" style="float:none"
+                        data-ng-if="showSwitchDetails && switch.availableData.switch_detail.name">
+                        {{switch.availableData.switch_detail.name}}
+                    </label>
+                    <label for="name" class="col-xs-6 info-label" style="float:none"
+                        data-ng-if="!showSwitchDetails || !switch.availableData.switch_detail.name">--</label>
+                </div>
+            </div>
+            <div class="col-xs-5">
+                <div class="form-group">
+                    <label for="name" class="col-xs-4" style="float:none">Fabric Name</label>:
+                    <label for="name" class="col-xs-6 info-label" style="float:none"
+                        data-ng-if="switch.availableData.switch_detail.topology.name">{{switch.availableData.switch_detail.topology.name}}</label>
+                    <label for="name" class="col-xs-6 info-label" style="float:none"
+                    data-ng-if="!switch.availableData.switch_detail.topology.name">
+                    --</label>
+
+                </div>
+            </div>
+            <div class="col-xs-5">
+                <div class="form-group">
+                    <label for="name" class="col-xs-4" style="float:none">Discovery Rule</label>:
+                    <label for="name" class="col-xs-6 info-label" style="float:none"
+                                ng-if="!showSwitchDetails && switch.availableData.rule_name != '--'">
+                        <a href="javascript:void(0)"
+                                ng-click="openRuleModal(switch.availableData.rule)">
+                            {{switch.availableData.rule_name}}
+                        </a>
+                    </label>
+                    <label for="name" class="col-xs-6 info-label" style="float:none"
+                                ng-if="showSwitchDetails && switch.availableData.rule_name != '--'">
+                        <a href="javascript:void(0)"
+                                ng-click="openRuleModal(switch.availableData.switch_detail.boot_detail.discovery_rule)">
+                            {{switch.availableData.rule_name}}
+                        </a>
+                    </label>
+                    <label for="name" class="col-xs-6 info-label" style="float:none"
+                                ng-if="switch.availableData.rule_name == '--'">
+                            {{switch.availableData.rule_name}}
+                    </label>
+                </div>
+            </div>
+            <div class="col-xs-5">
+                <div class="form-group">
+                    <label for="name" class="col-xs-4" style="float:none">Match Type</label>:
+                    <label for="name" class="col-xs-6 info-label" style="float:none"
+                        data-ng-if="switch.availableData.switch_detail.boot_detail.match_type">
+                        {{switch.availableData.switch_detail.boot_detail.match_type}}
+                    </label>
+                    <label for="name" class="col-xs-6 info-label" style="float:none"
+                        data-ng-if="!switch.availableData.switch_detail.boot_detail.match_type">--</label>
+                </div>
+            </div>
+        </div>
+        <hr/>
+        <br/>
+        <div class="col-sm-6" data-ng-if="showDetails">
             <div class="search-cont table-header-cont">
-                <input type="text" class="form-control" title="Search"
+                <input type="text" class="form-control"
                     data-ng-model="switch.reqData.new_serial_num" placeholder="New Serial Number">
-                <i class="glyphicon glyphicon-search"></i>
+                <!-- <i class="glyphicon glyphicon-search"></i> -->
             </div>
             <button class="btn btn-raised btn-primary"
                 style="margin-top: 8px; margin-left: 80px;"
-                ng-hide="action == 'view'" data-ng-disabled="setupForm.$invalid"
+                data-ng-disabled="!switch.reqData.new_serial_num"
                 data-ng-click="warnReplace()">
                 Replace Switch
             </button>
         </div>
-        <div class="table-responsive">
+        <div class="col-sm-6" data-ng-if="!showDetails && msg">
+            <div class="alert alert-info" ng-if="job.tasks.length == 0">
+                  No groups found.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- <div class="table-responsive">
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <!-- <th width="2%" class="hide">
-                            <input type="checkbox" class="form-control chk chk-trans">
-                        </th> -->
-                        <th data-ng-if="switch.availableData.switch_name">Switch Name</th>
-                        <th data-ng-if="switch.availableData.boot_status">Boot Status</th>
-                        <th data-ng-if="switch.availableData.serial_number">Serial Number</th>
-                        <th data-ng-if="switch.availableData.fabric_name">Fabric Name</th>
-                        <th data-ng-if="switch.availableData.discovery_rule">Discovery Rule</th>
-                        <th data-ng-if="switch.availableData.match_type">Match Type</th>
-                        <th data-ng-if="switch.availableData.rule_id">Rule ID</th>
+                       
+                        <th>Switch Name</th>
+                        <th>Fabric Name</th>
+                        <th>Serial Number</th>
+                        <th>Boot Status</th>
+                        <th>Discovery Rule</th>
+                        <th>Match Type</th>
+                        <th>Rule ID</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td data-ng-if="switch.availableData.switch_name">{{switch.availableData.switch_name}}</td>
+                        <td data-ng-if="switch.availableData.switch_detail">{{switch.availableData.switch_detail.name}}</td>
+                        <td data-ng-if="!switch.availableData.switch_detail">--</td>
+                        <td data-ng-if="switch.availableData.switch_detail && switch.availableData.switch_detail.topology">{{switch.availableData.switch_detail.topology.name}}</td>
+                        <td data-ng-if="!(switch.availableData.switch_detail && switch.availableData.switch_detail.topology)">--</td>
+                        <td data-ng-if="switch.availableData.switch_detail && switch.availableData.switch_detail.boot_detail && ">{{switch.availableData.serial_number}}</td>
                         <td data-ng-if="switch.availableData.boot_status">{{switch.availableData.boot_status}}</td>
-                        <td data-ng-if="switch.availableData.serial_number">{{switch.availableData.serial_number}}</td>
-                        <td data-ng-if="switch.availableData.fabric_name">{{switch.availableData.fabric_name}}</td>
                         <td data-ng-if="switch.availableData.discovery_rule">{{switch.availableData.discovery_rule}}</td>
                         <td data-ng-if="switch.availableData.match_type">{{switch.availableData.match_type}}</td>
                         <td data-ng-if="switch.availableData.rule_id">{{switch.availableData.rule_id}}</td>
                     </tr>
                 </tbody>
             </table>
-        </div>
-
-    </div>
-</div>
+        </div> -->

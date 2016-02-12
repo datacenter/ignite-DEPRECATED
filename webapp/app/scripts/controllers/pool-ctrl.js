@@ -388,6 +388,7 @@ angular.module('PoapServer').controller('PoolsModalCtrl', function($scope, $moda
         "name":"",
         "type": "",
         "scope": appSettings.defaultData.pools.scope,
+        "role": "",
         "blocks": [{
             "start" : "",
             "end" : ""
@@ -477,20 +478,3 @@ angular.module('PoapServer').controller('ViewPoolCtrl', function($scope, $modalI
         $modalInstance.dismiss('cancel');
     };
 });
-/*
-angular.module('PoapServer').controller('PoolsDeleteModalCtrl',
-    function($scope, $modalInstance, appSettings, appServices, dataToModal) {
-
-    $scope.ok = function() {
-        $modalInstance.close({
-            action : 'delete',
-            id : dataToModal.id,
-            index : dataToModal.index
-        });
-    };
-
-    $scope.cancel = function() {
-        $modalInstance.dismiss('cancel');
-    };
-
-});*/

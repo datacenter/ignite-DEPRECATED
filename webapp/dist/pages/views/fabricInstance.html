@@ -45,7 +45,7 @@
                         'sort-desc': tableParams.isSortBy('updated', 'desc')
                     }"
                     ng-click="tableParams.sorting({'updated' : tableParams.isSortBy('updated', 'asc') ? 'desc' : 'asc'})">Last Modified on</th>
-                    <th></th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -57,7 +57,7 @@
                     <td><a ng-href="#/fabricInstance/edit/{{fabricInstance.id}}">{{fabricInstance.name}}</a>
                     </td>
                     <td>
-                        <span class="glyphicon glyphicon-ok success-color"  ng-if="fabricInstance.submit">
+                        <span class="glyphicon glyphicon-ok success_color"  ng-if="fabricInstance.submit">
                         </span>
                     </td>
                     <td>{{fabricInstance.updated_by}}</td>
