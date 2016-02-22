@@ -251,7 +251,8 @@ def allocate_pool_entry(pool_id, switch_id, switch):
     logger.debug("value = %s", entry.value)
 
     if pool.role == MGMT:
-        bootstrap.bootstrap.update_boot_detail(switch, mgmt_ip=entry.value)
+        switch.mgmt_ip = entry.value
+        switch.save()
 
     return entry.value
 

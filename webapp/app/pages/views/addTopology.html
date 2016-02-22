@@ -17,8 +17,11 @@
                         ng-model="topologyData.name">
                     <a href="javascript:void(0);" tooltip="Edit" tooltip-placement="bottom"
                         data-ng-if="!nameEdit">
-                        <span class="glyphicon glyphicon-pencil" ng-click="editName()" aria-hidden="true">
-                        </span>
+                        <span class="glyphicon glyphicon-pencil" ng-click="editName()" aria-hidden="true"></span>
+                    </a>
+                    <a href="javascript:void(0);" tooltip="Clone" tooltip-placement="bottom"
+                        data-ng-if="!nameEdit">
+                        <span class="icon_clone" ng-click="cloneTopo()" aria-hidden="true"></span>
                     </a>
                     
                     <button class="topo-btn btn-xs" style="" data-ng-if="nameEdit" data-ng-click="saveName()">
@@ -111,7 +114,7 @@
                             </div>
                         </div>
                     </div> -->
-                    <div style="width: 455px;height: 28px; border: 1px solid #337ab7;/*-webkit-border-radius: 56px;-moz-border-radius: 56px;border-radius: 56px;-webkit-box-shadow: #B3B3B3 5px 5px 5px;-moz-box-shadow: #B3B3B3 5px 5px 5px; box-shadow: #B3B3B3 5px 5px 5px;*/margin-left: 40%; float: left; font-size: 12px; border-radius: 3px; text-align: center;background-color: white;">
+                    <div style="width: 490px;height: 28px; border: 1px solid #337ab7;/*-webkit-border-radius: 56px;-moz-border-radius: 56px;border-radius: 56px;-webkit-box-shadow: #B3B3B3 5px 5px 5px;-moz-box-shadow: #B3B3B3 5px 5px 5px; box-shadow: #B3B3B3 5px 5px 5px;*/margin-left: 40%; float: left; font-size: 12px; border-radius: 3px; text-align: center;background-color: white;" class="hidden-sm hidden-xs">
                         <div style="/*-webkit-box-shadow: inset 0px -1px 52px -9px rgba(0,0,0,0.54);
 -moz-box-shadow: inset 0px -1px 52px -9px rgba(0,0,0,0.54); box-shadow: inset 0px -1px 52px -9px rgba(0,0,0,0.54); height: 100%; border-right: 1px solid #337ab7; border-radius: 56px;*/padding-top: 5px;" class="col-sm-4">
                             Core Router : {{switchDetails.count.Core}}
@@ -167,7 +170,7 @@
                                         <span ng-bind="link.dst_ports.toString()"></span>
                                     </td>
                                     <td>
-                                      <i class="glyphicon glyphicon-eye-open" ng-click="PopEditLink($index);"  data-toggle="tooltip" title="Edit Link"></i>
+                                      <i class="glyphicon glyphicon-eye-open" ng-click="PopEditLink(link.index);"  data-toggle="tooltip" title="Edit Link"></i>
                                     </td>
                                 </tr>
                             </tbody>
@@ -204,7 +207,10 @@
         <div class="modal-dialog  modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close" ng-click="closeAddLink()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                     <h4 class="modal-title" id="myModalLabel">Add Link</h4>
                 </div>
                 <div class="modal-body" id="modalContent">
@@ -256,10 +262,17 @@
                     <div class="alert alert-danger" id="alertLinkSame" style="display:none">
                         Cannot add a link between the same switches.
                     </div>
+                    <div class="alert alert-danger" id="vpcLinkNotAllowed" style="display:none">
+                        Only one vpc-peer link per switch is allowed.
+                    </div>
+                    <div class="alert alert-danger" id="memLinkNotAllowed" style="display:none">
+                        VPC-member link is allowed only if the pair contains vpc-peer link.
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="createLink(addLink);" ng-if="checkLinkExists(addLink);">Add</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal"
+                        ng-click="closeAddLink()">Close</button>
                 </div>
             </div>
         </div>
@@ -271,13 +284,13 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title red" id="myModalLabel">Confirm Deletion</h4>
+                    <h4 class="modal-title red" id="confirmDelLabel"></h4>
                 </div>
                 <div class="modal-body">
                     <p id="modalDeleteContent"></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger"  data-dismiss="modal" ng-click="deleteItem()">Delete</button>
+                    <button type="button" class="btn btn-danger text-capitalize" data-dismiss="modal" ng-click="deleteItem()">{{delAction}}</button>
                     <button type="button" class="btn btn-default"  data-dismiss="modal" ng-click="cancelDelete()">Cancel</button>
                 </div>
             </div>
@@ -420,7 +433,12 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button class="btn btn-danger" ng-click="deleteSwitch(switch.id)">Delete</button>
+                        <button class="btn btn-danger" ng-click="deleteSwitch(switch.id,'delete')"
+                            data-ng-if="!switch.boot_detail || (switch.boot_detail != null && !switch.boot_detail.boot_status)">Delete
+                        </button>
+                        <button class="btn btn-danger" ng-click="deleteSwitch(switch.id,'decommission')"
+                            data-ng-if="!(!switch.boot_detail || (switch.boot_detail != null && !switch.boot_detail.boot_status))">Decommission
+                        </button>
                         <button type="button" class="btn btn-primary" ng-if="editSwitchFlag" data-dismiss="modal" ng-click="saveSwitchEdit(switch.id, $index)">Save</button>
                         <button type="button" class="btn btn-default" ng-click="closeSwitchEdit()" data-dismiss="modal">Cancel</button>
                     </div>

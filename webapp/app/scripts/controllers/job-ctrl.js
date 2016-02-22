@@ -24,13 +24,12 @@ angular.module('PoapServer')
       "tasks": []
     };
 
-    $scope.viewImage = function(id) {
+    /*$scope.viewImage = function(data) {
         $scope.action = "view";
-        $scope.imageId = id;
-        $scope.openImageModal();
-    };
+        $scope.openImageModal(data);
+    };*/
 
-    $scope.openImageModal = function() {
+    $scope.viewImage = function(data,imgId) {
         $scope.modalInstance = $modal.open({
             animation: $scope.animationsEnabled,
             templateUrl: 'pages/template/modal/imagesModal.html',
@@ -40,9 +39,10 @@ angular.module('PoapServer')
             resolve: {
                 dataToModal : function() {
                     return {
-                        action : $scope.action,
+                        action : "view",
                         callerScope : $scope,
-                        id : $scope.imageId,
+                        id : imgId,
+                        image : data,
                         source : 'jobs'
                     }
                 }
@@ -55,7 +55,7 @@ angular.module('PoapServer')
         });
     };
 
-    $scope.viewGroup = function(id, status) {
+    $scope.viewGroup = function(group_detail, grpId) {
         $scope.modalInstance = $modal.open({
             animation: $scope.animationsEnabled,
             templateUrl: 'pages/template/modal/jobGrpStatus.html',
@@ -67,9 +67,11 @@ angular.module('PoapServer')
                     return {
                         action : $scope.action,
                         callerScope : $scope,
-                        id : $scope.imageId,
-                        grpId : id,
-                        grpStatus : status
+                        groupName : group_detail.group_name,
+                        /*id : $scope.imageId,*/
+                        grpId : grpId,
+                        new_item : group_detail.new_item,
+                        grpStatus : group_detail.switches
                     }
                 }
              }
@@ -101,7 +103,7 @@ angular.module('PoapServer')
 
     $scope.getGroupStatus = function() {
         $scope.job.tasks = $scope.job.tasks.filter(function(a) {
-            if(a.status == undefined && 'SCHEDULED' == $scope.job.status) {
+            /*if(a.status == undefined && 'SCHEDULED' == $scope.job.status) {
                 a.status = {
                     status : $scope.job.status
                 };
@@ -109,7 +111,7 @@ angular.module('PoapServer')
                 a.status = {
                     status : '--'
                 };
-            }
+            }*/
             debugger;
             if(a.type != undefined) {
                 a.type_display = appSettings.fieldValues.jobs.upgrade_type.filter(function(b){
@@ -117,6 +119,9 @@ angular.module('PoapServer')
                         return b;
                     }
                 })[0].label;
+            }
+            if('' == a.status || null == a.status) {
+                a.status = '--';
             }
             return a;
         });
@@ -401,11 +406,19 @@ angular.module('PoapServer').controller('AddTaskToJobCtrl', function($scope, $mo
         "retry_count": 0,
         "type": "",
         "type_display": "--",
-        "status": {
-            "status": "--"
-        },
+        "status": "--",
         "failure_action_ind":appSettings.defaultData.jobs.failure_action,
-        "failure_action_grp":appSettings.defaultData.jobs.failure_action
+        "failure_action_grp":appSettings.defaultData.jobs.failure_action,
+        "group" : {
+            "group_name" : "",
+            "new_item": true
+        },
+        "params" : {
+            "image" : {
+                "new_item": true
+            }
+            
+        }
     };
 
     $scope.init = function() {
@@ -432,7 +445,7 @@ angular.module('PoapServer').controller('AddTaskToJobCtrl', function($scope, $mo
         });
         $scope.selectList.groups.filter(function(a){
             if(a.id == $scope.task.group_id) {
-                $scope.task.group_name = a.name;
+                $scope.task.group.group_name = a.name;
             }
         });
         $scope.appSettings.fieldValues.jobs.upgrade_type.filter(function(a){
@@ -464,13 +477,15 @@ angular.module('PoapServer').controller('AddTaskToJobCtrl', function($scope, $mo
 
 });
 angular.module('PoapServer').controller('JobGrpStatusCtrl', function($scope, $modalInstance, $modal, appServices, appSettings, dataToModal) {
+    $scope.grpSwitches = dataToModal.grpStatus;
+    $scope.groupName = dataToModal.groupName;
     $scope.appSettings = appSettings;
-    $scope.grpStatus = dataToModal.grpStatus.status;
+    /*$scope.grpStatus = dataToModal.grpStatus.status;
     $scope.grp_switch_status=dataToModal.grpStatus.switches;
     $scope.statusEmptyFlag = false;
     if($scope.grp_switch_status == undefined || $scope.grp_switch_status.length < 1) {
         $scope.statusEmptyFlag = true;
-    }
+    }*/
 
     $scope.mapDetails = function() {
         if($scope.statusEmptyFlag && ($scope.grpStatus == 'SCHEDULED' || $scope.grpStatus == '--')) {
@@ -525,16 +540,39 @@ angular.module('PoapServer').controller('JobGrpStatusCtrl', function($scope, $mo
     };
 
     $scope.init = function() {
-        var requestHeader = {
-            appendToURL: true,
-            value: dataToModal.grpId,
-            noTrailingSlash: true
-        };
-        appServices.doAPIRequest(appSettings.appAPI.group.getById, null, requestHeader).then(function(data) {
-            $scope.grpSwitches = data.switch_list;
-            $scope.groupName = data.name;
-            $scope.mapDetails();
-        });
+        if(dataToModal.new_item) {
+            var requestHeader = {
+                appendToURL: true,
+                value: dataToModal.grpId,
+                noTrailingSlash: true
+            };
+            appServices.doAPIRequest(appSettings.appAPI.group.getById, null, requestHeader).then(function(data) {
+                $scope.grpSwitches = data.switch_list;
+                $scope.grpSwitches.filter(function(swtch){
+                    if('' == swtch.status || null == swtch.status) {
+                        swtch.status = '--'
+                    }
+                    if('' == swtch.ctime || null == swtch.ctime) {
+                        swtch.ctime = '--'
+                    }
+                });
+                /*$scope.groupName = data.name;
+                $scope.mapDetails();*/
+            });
+        } else {
+            $scope.grpSwitches.filter(function(swtch){
+                if('' == swtch.status || null == swtch.status) {
+                    swtch.status = '--'
+                }
+                if('' == swtch.ctime || null == swtch.ctime) {
+                    swtch.ctime = '--'
+                }
+            });
+        }
+
+        
+        /**/
+        
     };
 
     $scope.cancel = function() {

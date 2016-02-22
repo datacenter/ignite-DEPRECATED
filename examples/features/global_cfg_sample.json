@@ -4,7 +4,7 @@
         "igp_enabled":true,
         "bgp_enabled":false,
         "enable_routing":true,
-        "infra_block":10.0.0.0/8,
-        "loopback_block":192.168.0.0/8
+        "infra_block":"10.0.0.0/8",
+        "loopback_block":"192.168.0.0/8"
 }
 

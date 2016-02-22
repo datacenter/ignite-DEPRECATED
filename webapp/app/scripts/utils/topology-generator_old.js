@@ -52,7 +52,7 @@
             "y": 650,
             "w": 75,
             "h": 75,
-            "img": "images/network-core.svg"
+            "img": "images/network-border.svg"
         }
     }];
 

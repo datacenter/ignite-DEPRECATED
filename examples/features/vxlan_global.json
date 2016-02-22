@@ -19,7 +19,7 @@
 				   		"vni": "$$L2_VNI$$",
 				   		"vlan": "$$VLAN_ID$$",
 				   		"anycast_gateway": "$$ANYCAST_GATEWAY$$",
-				   		"mcast_group": "$$MCAST_GROUP$$"
+				   		"mcast_group": "$$MCAST_GROUP_VNI$$"
 					}
 			   ],
 			   "vrf_context": "$$VRF_CONTEXT$$",

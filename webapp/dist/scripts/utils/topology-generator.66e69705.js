@@ -64,7 +64,7 @@
             "y": 650,
             "w": 75,
             "h": 75,
-            "img": "images/network-core.svg"
+            "img": "images/network-border.svg"
         }
     }];
 
@@ -83,7 +83,7 @@
     var createElementVpcMember = function(count, switches, item, obj,pos) {
 
         //Create a group
-        debugger;
+        
         g[switchCount] = paper.g();
 
         //Set the groups coordinates
@@ -93,26 +93,9 @@
         var titleClass = 'title';
         var blockClass = 'block';
 
-        var hovertext = "VPC-Member Link";
-
-        /*if(switches.boot_detail !== undefined && !isObjectEmpty(switches.boot_detail) && switches.boot_detail.boot_status == 'Success') {
-            hovertext = hovertext+", Boot Status="+switches.boot_detail.boot_status;
-            img = obj[item].img_booted;
-            titleClass = 'success-title';
-            blockClass = 'success-block';
-        } else if(switches.boot_detail !== undefined && !isObjectEmpty(switches.boot_detail) && switches.boot_detail.boot_status == 'In progress') {
-            hovertext = hovertext+", Boot Status="+switches.boot_detail.boot_status;
-            img = obj[item].img_booted;
-            titleClass = 'progress-title';
-            blockClass = 'progress-block';
-        } else if(switches.boot_detail !== undefined && !isObjectEmpty(switches.boot_detail) && switches.boot_detail.boot_status == 'Failed') {
-            hovertext = hovertext+", Boot Status="+switches.boot_detail.boot_status;
-            img = obj[item].img_booted;
-            titleClass = 'failed-title';
-            blockClass = 'failed-block';
-        } else if (switches.boot_detail !== undefined){
-            hovertext = hovertext+", Boot Status=Not Initiated";
-        }*/
+        // var hovertext = "VPC-Member Link";
+        debugger;
+        var hovertext = "Link Type="+switches.link_type+",  Local Port ("+switches.src_switch_name+") ="+switches.src_ports+", Remote Port ("+switches.dst_switch_name+") ="+switches.dst_ports;
 
         g[switchCount].attr({
             "x": gx,
@@ -129,7 +112,7 @@
         });
 
         //add a text title and place it in the rectangle
-        var switchDisplayName = "VPC-Member";
+        var switchDisplayName = "Host";
         
         var name = paper.text(gx + 38, gy - 6, switchDisplayName);
         name.attr({"text-anchor":"middle"})
@@ -163,7 +146,7 @@
 
 
         g[switchCount].click(function(){
-            //PopEdit(switches.id);
+            PopEditLink(switches.index);
         });
 
        // console.log('*******************');
@@ -172,61 +155,9 @@
         g[switchCount].drag(dragMove,startDrag,stopDrag);
 
         switchCount ++;
-
-
-
-
-
-
-
-
-        /*var s1_pos = 0;
-        var s2_pos = 0;
-        for(var i = 0; i < leaf_switches.length; i++) {
-            if(leaf_switches[i].id == s1) {
-                s1_pos = i;
-            }
-            if(leaf_switches[i].id == s2) {
-                s2_pos = i;
-            }
-        }
-        g[switchCount] = paper.g();
-        var gx = parseInt((xpos.leaf[s1_pos]+xpos.leaf[s2_pos])/2);
-        var gy = parseInt(switchDetails[2].leaf.y+100);
-        var img = "images/vpc-member.svg";
-        g[switchCount].attr({
-            "x": gx,
-            "y": gy,
-            "id": '0',
-            "title": hovertext,
-            "data-toggle": "tooltip",
-            "cursor":"pointer"
-        });
-
-        $("svg g").tooltip({
-        'container': 'body',
-        'placement': 'right'
-        });
-
-        var objs = paper.image(img, gx, gy, 50, 50);
-
-        objs.click(function(){
-           PopEditLink(link_index);
-        });
-
-        objs.addClass('objs');
-
-
-        g[switchCount].add(objs);
-
-
-        g[switchCount].drag(dragMove,startDrag,stopDrag);
-
-        switchCount ++;*/
-
     }
 
-     var createTierElement = function(count, switches, item, obj,pos) {
+    var createTierElement = function(count, switches, item, obj,pos) {
 
         //Create a group
         g[switchCount] = paper.g();
@@ -416,8 +347,6 @@
         "vpcMem":[]
      };
 
-     debugger;
-
      var svgWidth = $('#topology_svg').width();
 
         if(!isObjectEmpty(core_switches)){
@@ -439,22 +368,99 @@
             }
         }
 
-        if(!isObjectEmpty(border_switches)){
+        if(!isObjectEmpty(border_switches) || !isObjectEmpty(vpcMemLinks)){
 
             for(var i=1; i<border_switches.length+vpcMemLinks.length+1;i++){
                 xpos.border.push(parseInt(svgWidth)/(border_switches.length+vpcMemLinks.length +1)*i);
             }
         }
-        debugger;
-
-        fetchVpcServerPos(vpcMemLinks);
+        fetchVpcServerPos();
 
         console.log('xPos');
         console.log(xpos);
 
     }
 
-    var fetchVpcServerPos = function(vpcMemLinks) {
+    var fetchVpcServerPos = function() {
+        var position = [];
+        var found = false;
+        var newVPCMemLinks = [];
+        var border_pos = [];
+        var borders = border_switches;
+        border_switches = [];
+        for(var i = 0; i < leaf_switches.length - 1; i++) {
+            s1 = leaf_switches[i].id;
+            s2 = leaf_switches[i+1].id;
+            var track = -1;
+            position = [];
+            vpcMemLinks.filter(function(link){
+                if((link.src_switch == s1 && link.dst_switch == s2) || (link.dst_switch == s1 && link.src_switch == s2)) {
+                    xpos.vpcMem.push(xpos.border.shift());
+                    newVPCMemLinks.push(link);
+                    position.push(vpcMemLinks.indexOf(link));
+                    /*if(position > -1) {
+                        vpcMemLinks.splice(position,1);
+                    }
+                    position = vpcMemLinks.indexOf(link);*/
+                    // newVPCMemLinks.push((vpcMemLinks.splice(vpcMemLinks.indexOf(link),1))[0]);
+                }
+            });
+            position.filter(function(pos){
+                vpcMemLinks.splice(pos-(++track),1);
+            });
+            track = -1;
+            position = [];
+            linksToBorder.filter(function(link){
+                found = false;
+                if((link.src_switch == s1 || link.dst_switch == s1) && !isObjectEmpty(borders)) {
+                    borders.filter(function(router){
+                        if(router.id == link.src_switch || router.id == link.dst_switch) {
+                            border_switches.push((borders.splice(borders.indexOf(router),1))[0]);
+                            found = true;
+                            position.push(linksToBorder.indexOf(link));
+                        }
+                    });
+                    if(found) {
+                        border_pos.push(xpos.border.shift());
+                        // linksToBorder.splice(linksToBorder.indexOf(link),1);
+                    }
+                }
+            });
+            position.filter(function(pos){
+                linksToBorder.splice(pos-(++track),1);
+            });
+            track = -1;
+            position = [];
+            linksToBorder.filter(function(link){
+                found = false;
+                if((link.src_switch == s2 || link.dst_switch == s2) && !isObjectEmpty(borders)) {
+                    borders.filter(function(router){
+                        if(router.id == link.src_switch || router.id == link.dst_switch) {
+                            border_switches.push((borders.splice(borders.indexOf(router),1))[0]);
+                            found = true;
+                        }
+                    });
+                    if(found) {
+                        border_pos.push(xpos.border.shift());
+                        // linksToBorder.splice(linksToBorder.indexOf(link),1);
+                    }
+                }
+            });
+            position.filter(function(pos){
+                linksToBorder.splice(pos-(++track),1);
+            });
+            track = -1;
+            position = [];
+        }
+        while(!isObjectEmpty(borders)) {
+            border_switches.push(borders.shift());
+            border_pos.push(xpos.border.shift());
+        }
+        vpcMemLinks = newVPCMemLinks;
+        xpos.border = border_pos;
+    }
+
+    /*var fetchVpcServerPos = function(vpcMemLinks) {
         vpcMemLinks.filter(function(link){
             var s1_pos = 0;
             var s2_pos = 0;
@@ -481,7 +487,7 @@
             xpos.border.splice(min_pos,1);
         });
         
-    }
+    }*/
 
      /****************************************** createConnections **************************************************************/
     var createConnections = function(topology) {
@@ -563,8 +569,8 @@
                     connections.push(connObj1);
                     connections.push(connObj2);
 
-                    addContentToVpcMember(path1,linkcolor,p1,link,s1);
-                    addContentToVpcMember(path2,linkcolor,p2,link,s2);
+                    addContentToVpcMember(path1,linkcolor,p1,link,s1,1);
+                    addContentToVpcMember(path2,linkcolor,p2,link,s2,2);
                 } else {
                     var connObj = paper.connection(c1, c2, linkcolor, i , hovertext);
 
@@ -578,7 +584,6 @@
                     var x4 = connObj.line.node.attributes.x4.nodeValue;
                     var y4 = connObj.line.node.attributes.y4.nodeValue;
                     var path = connObj.line.node.attributes.d.nodeValue;
-                    debugger;
                     addContentToPath(x1,y1,x4,y4,path,linkcolor,p1, p2,link,i,s1,s2,hovertext);
                 }
 
@@ -591,7 +596,7 @@
         }
     }
 
-    var addContentToVpcMember = function(path,linkcolor,p1,link,s1){
+    var addContentToVpcMember = function(path,linkcolor,p1,link,s1,flag){
         var portText1 = paper.text(10, 0, p1.toString());
         portText1.attr({
             fill:linkcolor,
@@ -601,21 +606,11 @@
         portText1.addClass('port');
         var pathLength = Snap.path.getTotalLength(path);
 
-        /*var portText2 = paper.text(0, 0, p2.toString());
-        portText2.attr({
-            fill:linkcolor,
-            textpath:path,
-            id:"port-"+s2
-        });*/
-
-        // console.log('-------------------------------------------');
-        // console.log(portText2.node);
-        // console.log('*******************************************');
-        // console.log(portText2.node.getBoundingClientRect());
-
-        // portText2.textPath.attr({'startOffset':pathLength - (portText2.node.clientWidth/1.25)}); //80
-        portText1.textPath.attr({'startOffset':pathLength - 70}); //80
-        // portText2.addClass('port');
+        if(2 == flag) {
+            // portText1.textPath.attr({'startOffset':pathLength - 40}); //80
+        } else {
+            // portText1.textPath.attr({'startOffset':pathLength - 95}); //80
+        }
 
         var g = paper.g();
         g.add(portText1);
@@ -754,13 +749,25 @@
 
     var panTopology = null;
     var setTopologyData = function(topology){
-
+        var trackIndex = -1;
         /*topology = topology.topology_json;*/
         core_switches = topology.switches.filter(function(a) {return a.tier === 'Core'});
         spine_switches = topology.switches.filter(function(a) {return a.tier === 'Spine'});
         leaf_switches = topology.switches.filter(function(a) {return a.tier === 'Leaf'});
         border_switches = topology.switches.filter(function(a) {return a.tier === 'Border'});
-        vpcMemLinks = topology.links.filter(function(a) {return a.link_type == 'VPC-Member'});
+        linksToBorder = [];
+        vpcMemLinks = topology.links.filter(function(a) {
+            trackIndex++;
+            a.index = trackIndex;
+            if(!(a.link_type == 'VPC-Member' || a.link_type == 'VPC-Peer')) {
+                for(var i = 0;i<border_switches.length;i++) {
+                    if(a.src_switch == border_switches[i].id || a.dst_switch == border_switches[i].id) {
+                        linksToBorder.push(a);
+                    }
+                }
+            }
+            return a.link_type == 'VPC-Member';
+        });
 
         var sWidth = $('#topology_svg').width();
 

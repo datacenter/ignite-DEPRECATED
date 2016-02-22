@@ -21,6 +21,7 @@ class Topology(models.Model):
                                        on_delete=models.PROTECT)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    build_time = models.DateTimeField(null=True, blank=True)
     updated_by = models.TextField(default="")
 
 
@@ -37,6 +38,7 @@ class Switch(models.Model):
     name = models.TextField()
     tier = models.TextField()
     serial_num = models.TextField(default="")
+    mgmt_ip = models.TextField(blank=True, default="")
     model = models.ForeignKey(SwitchModel, null=True, default=None,
                               on_delete=models.PROTECT)
     image_profile = models.ForeignKey(ImageProfile, null=True, default=None,

@@ -25,22 +25,6 @@ angular.module('PoapServer')
 
     };
 
-    $scope.switchDetails = {
-      'defaults_switch_name':[],
-      'default_switches':[],
-      'selectList':{},
-      'vpc_connected':[],
-      'curLink':{},
-      'count' : {
-        'Core' : 0,
-        'Spine': 0,
-        'Leaf' : 0,
-        'Border': 0,
-      }
-    };
-
-    $scope.addLink = {};
-
     $scope.editSwitch = function() {
       $scope.editSwitchFlag = true;
     };
@@ -72,11 +56,6 @@ angular.module('PoapServer')
       $scope.editLinkFlag = false;
       $scope.editSwitchFlag = false;
       $scope.topologyData = angular.copy($scope.topology);
-    };
-
-    $scope.cloneTopo = function() {
-      $scope.action = "clone";
-      $scope.openCloneModal();
     };
 
     $scope.saveName = function() {
@@ -114,31 +93,6 @@ angular.module('PoapServer')
         });
     };
 
-    $scope.openCloneModal = function(size) {
-        var modalInstance = $modal.open({
-            animation: $scope.animationsEnabled,
-            templateUrl: 'pages/template/modal/cloneModal.html',
-            controller: 'TopologyCloneModalCtrl',
-            size: 'sm',
-            resolve: {
-                dataToModal : function() {
-                    return {
-                        action : $scope.action,
-                        id : $scope.selectedId,
-                        source : $scope.source
-                    }
-                }
-             }
-        });
-
-        modalInstance.result.then(function(modalData) {
-            $scope.submitData(modalData);
-        }, function() {
-            $log.info('Modal dismissed at: ' + new Date());
-        });
-
-    };
-
     $scope.goBackToList = function() {
       var path = '/topology';
       if('fabric' == $scope.source) {
@@ -146,6 +100,20 @@ angular.module('PoapServer')
       }
       this.goBack(path);
     };
+
+    $scope.switchDetails = {
+      'defaults_switch_name':[],
+      'default_switches':[],
+      'selectList':{},
+      'count' : {
+        'Core' : 0,
+        'Spine': 0,
+        'Leaf' : 0,
+        'Border': 0,
+      }
+    };
+
+    $scope.addLink = {};
 
     /**./Popover**/
     $scope.select = function(item) {
@@ -318,21 +286,14 @@ angular.module('PoapServer')
     /*********************** Delete Item ***********************/
     $scope.toDeleteItem = 0;
     $scope.itemType = "";
-    $scope.delAction = 'delete';
 
-    $scope.deleteSwitch = function(id, action) {
+    $scope.deleteSwitch = function(id) {
 
-      $('#confirmDelLabel').html('Confirm '+action);
       $('#popEdit_Item_'+id).modal('toggle');
-      if(action == 'delete') {
-        $('#modalDeleteContent').html('Are you sure you want to delete this switch?'); 
-      } else {
-        $('#modalDeleteContent').html('Are you sure you want to decommission this switch and delete any generated config files?'); 
-      }
+      $('#modalDeleteContent').html('Are you sure you want to delete this switch?');
+      $('#myModalDelete').modal('toggle');   
       $scope.toDeleteItem = id;
       $scope.itemType = 'switch';
-      $scope.delAction = action;
-      $('#myModalDelete').modal('toggle');
     };
 
     $scope.removeItemLinkType = function(id, index) {
@@ -346,14 +307,11 @@ angular.module('PoapServer')
 
     $scope.deleteItem = function() {
       var valToAppend = $scope.selectedId+"/"+$scope.itemType+"/"+$scope.toDeleteItem;
-      if($scope.itemType == 'switch' && $scope.delAction == 'decommission') {
-        valToAppend = valToAppend+"/decommission"
-      }
-      var reqHeader = {
-        appendToURL: true,
-        value: valToAppend,
-        noTrailingSlash: true
-      };
+       var reqHeader = {
+          appendToURL: true,
+          value: valToAppend,
+          noTrailingSlash: true
+        };
 
         var deleteSwitchRequest = appSettings.appAPI.topology.delete;
         if($scope.source == 'fabric') {
@@ -371,17 +329,7 @@ angular.module('PoapServer')
 
     /**************Add Link ******************************/
 
-    $scope.closeAddLink = function(){
-      $('#alertLinkExists').hide();
-      $('#vpcLinkNotAllowed').hide();
-      $('#memLinkNotAllowed').hide();
-      $('#alertLinkSame').hide();
-      $scope.addLink.src_switch="";
-      $scope.addLink.dst_switch="";
-    };
-
     $scope.addLinkModal = function(linkFor) {
-      $scope.switchDetails.curLink = {};
       $scope.linkFor = linkFor;
       $scope.topologyData.src_switch = [];
       $scope.topologyData.dst_switch = [];
@@ -427,9 +375,9 @@ angular.module('PoapServer')
     }
 
     $scope.checkLinkExists = function(linkObj) {
-      var foundFlag = false;
+
+
       $log.debug('src_switch and dst_switch');
-      $scope.switchDetails.curLink = linkObj;
       var src_switch = linkObj.src_switch;
       var dst_switch = linkObj.dst_switch;
       var link_type = linkObj.link_type;
@@ -437,53 +385,25 @@ angular.module('PoapServer')
       console.log(linkObj.dst_switch);
       console.log(linkObj.link_type);
 
-      if (!(src_switch == undefined || src_switch == "") && !(dst_switch == undefined || dst_switch == "") && linkObj.link_type != undefined && linkObj.num_links > 0 && linkObj.num_links < 9) {
+      if (src_switch != undefined && dst_switch != undefined && linkObj.link_type != undefined && linkObj.num_links > 0 && linkObj.num_links < 9) {
 
-      if (src_switch == dst_switch) {
-        $('#alertLinkSame').show();
-        return false;
-      } else {
-        $('#alertLinkSame').hide();
-      }
-      $('#vpcLinkNotAllowed').hide();
-      $('#alertLinkExists').hide();
-      $('#memLinkNotAllowed').hide();
-      if(link_type == 'VPC-Peer') {
-        $scope.switchDetails.vpc_connected.filter(function(a){
-          if(a.id == src_switch || a.id == dst_switch) {
-            $('#vpcLinkNotAllowed').show();
-            foundFlag = true;
-          }
-        });
-        debugger;
-        if(foundFlag) {
-          return false;
-        }
-      } else if(link_type == 'VPC-Member') {
-        $('#vpcLinkNotAllowed').hide();
-        for (var i = 0; i < $scope.topology.links.length; i++) {
-          if (($scope.topology.links[i].src_switch == src_switch && $scope.topology.links[i].dst_switch == dst_switch) || ($scope.topology.links[i].src_switch == dst_switch && $scope.topology.links[i].dst_switch == src_switch)) {
-            foundFlag = true;
-          }
-        }
-        if(!foundFlag) {
-          $('#memLinkNotAllowed').show();
-          return false;
+        if (src_switch == dst_switch) {
+          $('#alertLinkSame').show()
         } else {
-          $('#memLinkNotAllowed').hide();
+          $('#alertLinkSame').hide()
         }
-      } else {
-        $('#vpcLinkNotAllowed').hide();
+
+        debugger;
+
         for (var i = 0; i < $scope.topology.links.length; i++) {
-          if (($scope.topology.links[i].src_switch == src_switch && $scope.topology.links[i].dst_switch == dst_switch) || ($scope.topology.links[i].src_switch == dst_switch && $scope.topology.links[i].dst_switch == src_switch)) {
+
+          if ((link_type != 'VPC-Member') && ((($scope.topology.links[i].link_type == link_type) || $scope.linkFor != 'leaf2leaf')  && ($scope.topology.links[i].src_switch == src_switch && $scope.topology.links[i].dst_switch == dst_switch) || ($scope.topology.links[i].src_switch == dst_switch && $scope.topology.links[i].dst_switch == src_switch))) {
             $('#alertLinkExists').show();
             return false;
           } else {
             $('#alertLinkExists').hide();
           }
         }
-      }
-
       } else {
         $('#alertLinkExists').hide();
         return false;
@@ -492,31 +412,30 @@ angular.module('PoapServer')
       return true;
     };
 
+
+
     $scope.createLink = function(linkObj) {
      
       $('#myModalLink').modal('toggle');
 
-      var valToAppend = $scope.selectedId+"/link";
-      var reqHeader = {
-        appendToURL: true,
-        value: valToAppend,
-        noTrailingSlash: true
-      };
+        var valToAppend = $scope.selectedId+"/link";
+        var reqHeader = {
+          appendToURL: true,
+          value: valToAppend,
+          noTrailingSlash: true
+        };
 
-      var addLinkData = appSettings.appAPI.topology.add_switch_Link;
-      if($scope.source == 'fabric') {
-        addLinkData = appSettings.appAPI.fabricInstance.add_switch_Link;
-      }
-
-      appServices.doAPIRequest(addLinkData, linkObj, reqHeader).then(function(data) {
-        $scope.topology = data;
-        $scope.topologyData = angular.copy($scope.topology);
-        $scope.viewAddedSwitches(data);
-        if('VPC-Peer' == $scope.switchDetails.curLink.link_type) {
-          $scope.switchDetails.vpc_connected.push({id:$scope.switchDetails.curLink.src_switch},{id:$scope.switchDetails.curLink.dst_switch});
+        var addLinkData = appSettings.appAPI.topology.add_switch_Link;
+        if($scope.source == 'fabric') {
+          addLinkData = appSettings.appAPI.fabricInstance.add_switch_Link;
         }
-        $scope.switchDetails.curLink = {};
-      });
+
+        appServices.doAPIRequest(addLinkData, linkObj, reqHeader).then(function(data) {
+          /* TODO after delete success */
+          $scope.topology = data;
+          $scope.topologyData = angular.copy($scope.topology);
+          $scope.viewAddedSwitches(data);
+        });
     }
 
     /************************* Remove Item Link by removing its type if both are leaf *********************/
@@ -545,7 +464,7 @@ angular.module('PoapServer')
 
     $scope.openConfigModal = function() {
       var action = $scope.action;
-      if('edit' == action || 'add_switch' == action || 'clone' == action) {
+      if('edit' == action || 'add_switch' == action) {
         action = 'editConfig';
       }
         $scope.modalInstance = $modal.open({
@@ -578,7 +497,7 @@ angular.module('PoapServer')
 
     $scope.openDefaultsModal = function() {
       var action = $scope.action;
-      if('edit' == action || 'add_switch' == action || 'clone' == action) {
+      if('edit' == action || 'add_switch' == action) {
         action = 'editDefault';
       }
       if('fabric' == $scope.source) {
@@ -834,11 +753,6 @@ angular.module('PoapServer')
 
         value.src_switch_name = src_switch[0].name;
         value.dst_switch_name = dst_switch[0].name;
-
-        if('VPC-Peer' == value.link_type) {
-          $scope.switchDetails.vpc_connected.push({id:value.src_switch},{id:value.dst_switch});
-        }
-
       });
     };
 
@@ -922,21 +836,20 @@ angular.module('PoapServer')
     };
 
     $scope.submitData = function(modalData) {
-      var reqHeader = {
+      if(modalData.action === 'add_switch') {
+        var valToAppend = $scope.selectedId+"/switch";
+        var reqHeader = {
           appendToURL: true,
-          value: $scope.selectedId,
+          value: valToAppend,
           noTrailingSlash: true
         };
-      if(modalData.action === 'add_switch') {
-        var requestHeader = angular.copy(reqHeader);
-        requestHeader.value = requestHeader.value+"/switch";
 
         var addSwitchData = appSettings.appAPI.topology.add_switch_Link;
         if($scope.source == 'fabric') {
           addSwitchData = appSettings.appAPI.fabricInstance.add_switch_Link;
         }
 
-        appServices.doAPIRequest(addSwitchData, modalData.submitData, requestHeader).then(function(data) {
+        appServices.doAPIRequest(addSwitchData, modalData.submitData, reqHeader).then(function(data) {
           /* TODO after delete success */
           /*$scope.goBack('/topology');*/
           $scope.topology = data;
@@ -949,13 +862,42 @@ angular.module('PoapServer')
           if('topology' == $scope.source) {
             this.modify();
           }
-      } else if (modalData.action == 'delete') {
+      } /*else if (modalData.action == 'editDefault') {
+        var reqHeader = {
+          appendToURL: true,
+          value: $scope.selectedId+"/defaults",
+          noTrailingSlash: true
+        };
+        var defaultsEditReq = appSettings.appAPI.topology.edit;
         if('fabric' == $scope.source) {
+          defaultsEditReq = appSettings.appAPI.fabricInstance.edit;
+        }
+        appServices.doAPIRequest(defaultsEditReq, modalData.submitData.defaults, reqHeader).then(function(data) {
+          $scope.topology = data;
+          $scope.tierCounter = 0;
+          $scope.getLinkDetails();
+          $scope.getSwitchDetails('reloadTopology');
+        });
+        
+      } */else if (modalData.action == 'delete') {
+        if('fabric' == $scope.source) {
+          var reqHeader = {
+            appendToURL: true,
+            value: $scope.selectedId,
+            noTrailingSlash: true
+          };
+
           appServices.doAPIRequest(appSettings.appAPI.fabricInstance.delete, null, reqHeader).then(function(data) {
             /* TODO after delete success */
             $scope.goBack('/fabricInstance');
           });
         } else {
+          var reqHeader = {
+            appendToURL: true,
+            value: $scope.selectedId,
+            noTrailingSlash: true
+          };
+
           appServices.doAPIRequest(appSettings.appAPI.topology.delete, null, reqHeader).then(function(data) {
             /* TODO after delete success */
             $scope.goBack('/topology');
@@ -963,10 +905,13 @@ angular.module('PoapServer')
         }
         
       } else if (modalData.action == 'submit') {
-        var requestHeader = angular.copy(reqHeader);
-        requestHeader.value = requestHeader.value+"/submit";
+        var reqHeader = {
+          appendToURL: true,
+          value: $scope.selectedId+'/submit',
+          noTrailingSlash: true
+        };
         if('fabric' == $scope.source) {
-          appServices.doAPIRequest(appSettings.appAPI.fabricInstance.edit, modalData.submitData, requestHeader).then(function(data) {
+          appServices.doAPIRequest(appSettings.appAPI.fabricInstance.edit, modalData.submitData, reqHeader).then(function(data) {
             $scope.topology.submit = $scope.topologyData.submit = true;
             $log.debug('Fabric Submitted.');
             ngToast.create({
@@ -975,7 +920,7 @@ angular.module('PoapServer')
             });
           });
         } else if('topology' == $scope.source) {
-          appServices.doAPIRequest(appSettings.appAPI.topology.edit, modalData.submitData, requestHeader).then(function(data) {
+          appServices.doAPIRequest(appSettings.appAPI.topology.edit, modalData.submitData, reqHeader).then(function(data) {
             $log.debug('Topology Submitted.');
             ngToast.create({
               className: 'success',
@@ -985,42 +930,36 @@ angular.module('PoapServer')
           });
         }
       } else if (modalData.action == 'clear') {
-        var requestHeader = angular.copy(reqHeader);
-        requestHeader.value = requestHeader.value+"/clear";
-        appServices.doAPIRequest(appSettings.appAPI.topology.edit, modalData.submitData, requestHeader).then(function(data) {
+        var reqHeader = {
+          appendToURL: true,
+          value: $scope.selectedId+'/clear',
+          noTrailingSlash: true
+        };
+        appServices.doAPIRequest(appSettings.appAPI.topology.edit, modalData.submitData, reqHeader).then(function(data) {
           $log.debug('Topology cleared.');
           ngToast.create({
             className: 'success',
             content: 'Topology cleared.'
           });
-          $scope.topology = data;
-          $scope.topologyData = angular.copy(data);
-          $scope.viewAddedSwitches(data);
           $scope.getTierCount();
+          $scope.viewAddedSwitches(data);
         });
       } else if (modalData.action == 'editConfig') {
-        var requestHeader = angular.copy(reqHeader);
-        requestHeader.value = requestHeader.value+"/profiles";
         
-        appServices.doAPIRequest(appSettings.appAPI.fabricInstance.edit, modalData.submitData, requestHeader).then(function(data) {
+        var reqHeader = {
+          appendToURL: true,
+          value: $scope.selectedId+"/profiles",
+          noTrailingSlash: true
+        };
+
+        appServices.doAPIRequest(appSettings.appAPI.fabricInstance.edit, modalData.submitData, reqHeader).then(function(data) {
+          debugger;
           $scope.topology = data;
           $scope.topologyData = angular.copy($scope.topology);
           $scope.tierCounter = 0;
           $scope.getLinkDetails();
           $scope.getSwitchDetails('reloadTopology');
         });
-      } else if (modalData.action == 'clone') {
-        var requestHeader = angular.copy(reqHeader);
-        requestHeader.value = requestHeader.value+"/clone";
-        if('fabric' == $scope.source) {
-          appServices.doAPIRequest(appSettings.appAPI.fabricInstance.clone, modalData.submitData, requestHeader).then(function(data) {
-            $location.path('/fabricInstance/edit/'+data.id);
-          });
-        } else {
-          appServices.doAPIRequest(appSettings.appAPI.topology.clone, modalData.submitData, requestHeader).then(function(data) {
-            $location.path('/topology/edit/'+data.id);
-          });
-        }
       }
     };
 
@@ -1172,6 +1111,7 @@ angular.module('PoapServer').controller('AddSwitchModalCtrl',
   });
 angular.module('PoapServer').controller('FabricConfigCtrl',
       function($scope, $modalInstance, appSettings, appServices, dataToModal){
+        debugger;
         $scope.action = dataToModal.action;
         $scope.configEdit = dataToModal.configEdit;
         $scope.source = dataToModal.source;

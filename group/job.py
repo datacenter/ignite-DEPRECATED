@@ -13,7 +13,6 @@ import pytz
 import string
 from utils.exception import IgniteException
 from utils.utils import parse_file
-
 import logging
 logger = logging.getLogger(__name__)
 
@@ -34,6 +33,7 @@ def ref_count_add(grp):
 
 
 def tasks_validation(data, options, job):
+    from celery_tasks import get_all_switches
     tsk = []
     if len(data) == 0:
         raise IgniteException("Job cannot have empty task sequence")
@@ -43,13 +43,28 @@ def tasks_validation(data, options, job):
         try:
             grp = group.get_group(task["group_id"])
             img = image_profile.get_profile(task["image_id"])
-            if task["type"] == "switch_upgrade":
-		if not img.system_image:
-		    raise IgniteException("No system image found in " + img.profile_name)
-	    if task["type"] != "switch_upgrade":
-                raise IgniteException("Only switch upgrade is supported")
+            if options!= 'get' and img.system_image == None:
+                raise IgniteException("No system image is found in the image profile: "+ img.profile_name)
+            if options!= 'get' and task['type'] == 'epld_upgrade' and img.epld_image == None:
+                raise IgniteException("No epld image is found in the image profile: "+ img.profile_name)
+            if options!='get' and img.access_protocol != 'scp':
+                raise IgniteException("Only scp protocol is supported for image profile: "+ img.profile_name)
             task["switch_count"] = len(grp.switch_list)
-            task["group_name"] = grp.name
+            switches = get_all_switches(task)
+            task['group']['switches'] = switches
+            task['params']={} 
+            task['params']['image'] = {}
+            image = {}
+            image['profile_name'] = img.profile_name
+            image['system_image'] = img.system_image
+            image['id'] = img.id
+            image['image_server_ip'] = img.image_server_ip
+            image['image_server_username'] = img.image_server_username
+            image['image_server_password'] = img.image_server_password
+            image['access_protocol'] = img.access_protocol
+            if task['type'] == 'epld_upgrade':
+                image['epld_image'] = img.epld_image
+            task['params']['image'] = image
             task["image_name"] = img.profile_name
             tsk.append(task)
             if options != "get":
@@ -84,8 +99,9 @@ def add_job(data, user):
 
 def get_job(id):
     jb = Job.objects.get(pk=id)
-    tsk = tasks_validation(jb.tasks, "get", 0)
-    jb.tasks = tsk
+    if jb.status in ['SCHEDULED', 'RUNNING']:
+        tsk = tasks_validation(jb.tasks, "get", 0)
+        jb.tasks = tsk
     return jb
 
 

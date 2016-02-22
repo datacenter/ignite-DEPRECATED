@@ -29,7 +29,6 @@ class BootstrapSwitchSerializer(serializers.Serializer):
 
             name = serializers.CharField()
 
-        serial_number = serializers.CharField()
         boot_status = serializers.CharField()
         boot_time = serializers.DateTimeField()
         match_type = serializers.ChoiceField(MATCH_TYPES, required=False)

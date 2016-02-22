@@ -1,5 +1,6 @@
 import json
 import os
+from django.db import IntegrityError
 from django.utils import timezone
 import glob
 import gzip
@@ -8,9 +9,9 @@ import yaml
 from config.profile import build_config_profile
 from constants import *
 import discovery.discoveryrule as discoveryrule
-from fabric.constants import SERIAL_NUM, SERIAL_NUMBER, NEIGHBOR
-from fabric.build import build_switch_config
-from fabric.fabric import search_fabric, get_switch_workflow, get_switch_image
+from fabric.constants import SERIAL_NUM, SERIAL_NUMBER, NEIGHBOR, ERR_SERIAL_NUM_IN_USE
+from fabric.build import build_config, build_switch_config
+from fabric.fabric import search_fabric, get_switch_workflow, get_switch_image, get_switch_feature_profile
 from fabric.models import Switch
 from ignite.conf import IGNITE_IP, IGNITE_USER, IGNITE_PASSWORD
 from ignite.conf import REMOTE_SYSLOG_PATH, LOG_LINE_COUNT
@@ -31,7 +32,17 @@ def ignite_request(request):
 
     if switch:
 
-        if not switch.boot_detail:
+        if (switch.topology.feature_profile or
+            get_switch_feature_profile(switch)):
+            logger.debug("Switch have feture profiles applied")
+            build_config(switch.topology.id)
+        else:
+            # delete cfg file
+            try:
+                os.remove(os.path.join(REPO_PATH + str(switch.id) + '.cfg'))
+            except OSError as e:
+                pass
+            # build new cfg
             build_switch_config(switch)
 
         # fetch switch workflow
@@ -51,9 +62,25 @@ def ignite_request(request):
                                                           serial_number),
                                            default_flow_style=False))
 
-        update_boot_detail(switch, serial_number=serial_number,
-                           match_type=match_type, boot_status=BOOT_PROGRESS,
+        update_boot_detail(switch,
+                           match_type=match_type,
+                           boot_status=BOOT_PROGRESS,
                            boot_time=timezone.now())
+
+        #update switch serial number
+        if switch.serial_num != serial_number:
+            logger.debug("Received serial number % s\
+                         configured serial number % s"
+                         % (serial_number, switch.serial_num))
+            try:
+                discoveryrule.find_duplicate([serial_number])
+            except IgniteException:
+                logger.debug(ERR_SERIAL_NUM_IN_USE)
+                return _get_server_response(False,
+                                            err_msg=ERR_SERIAL_NUM_IN_USE)
+
+            switch.serial_num = serial_number
+            switch.save()
 
         return _get_server_response(True, wf_file)
 
@@ -81,6 +108,12 @@ def ignite_request(request):
         logger.debug("Discovery rule match- workflow: %s, config: %s"
                      % (wf.name, rule.config.name))
 
+        # delete cfg file
+        try:
+            os.remove(os.path.join(REPO_PATH + str(switch.id) + '.cfg'))
+        except OSError as e:
+            pass
+        # build new cfg
         build_switch_config(switch, switch_cfg=rule.config)
 
         if rule.match == SERIAL_NUM:
@@ -88,9 +121,11 @@ def ignite_request(request):
         else:
             match_type = NEIGHBOR
 
-        update_boot_detail(switch, serial_number=serial_number,
-                           match_type=match_type, discovery_rule=rule,
-                           boot_time=timezone.now(), boot_status=BOOT_PROGRESS)
+        update_boot_detail(switch,
+                           match_type=match_type,
+                           discovery_rule=rule,
+                           boot_time=timezone.now(),
+                           boot_status=BOOT_PROGRESS)
 
         logger.debug("Build workflow")
         cfg_file = os.path.join(REPO_PATH + str(switch.id) + CFG_FILE_EXT)
@@ -111,14 +146,9 @@ def ignite_request(request):
 def update_boot_detail(switch, boot_status="",
                        match_type="",
                        discovery_rule=None,
-                       serial_number="",
-                       boot_time="",
-                       build_time="",
-                       mgmt_ip=""):
+                       boot_time=""):
 
     if not switch.boot_detail:
-        if not build_time:
-            raise IgniteException(ERR_CREATE_BOOT_STATUS)
         boot_detail = SwitchBootDetail()
     else:
         boot_detail = switch.boot_detail
@@ -132,17 +162,8 @@ def update_boot_detail(switch, boot_status="",
     if discovery_rule:
         boot_detail.discovery_rule = discovery_rule.id
 
-    if serial_number:
-        boot_detail.serial_number = serial_number
-
     if boot_time:
         boot_detail.boot_time = boot_time
-
-    if build_time:
-        boot_detail.build_time = build_time
-
-    if mgmt_ip:
-        boot_detail.mgmt_ip = mgmt_ip
 
     boot_detail.save()
     switch.boot_detail = boot_detail
@@ -172,14 +193,14 @@ def _get_server_response(status, yaml_file=None, err_msg=""):
 
 
 def get_all_booted_switches():
-    return Switch.objects.filter(boot_detail__boot_status__isnull=False)
+    return Switch.objects.filter(boot_detail__isnull=False)
 
 
 def update_boot_status(data):
     serial_num = data[SERIAL_NUM]
     status = data[STATUS]
     try:
-        switch = Switch.objects.get(boot_detail__serial_number=serial_num)
+        switch = Switch.objects.get(serial_num=serial_num)
         if status:
             update_boot_detail(switch, boot_status=BOOT_SUCCESS)
         else:
@@ -238,7 +259,7 @@ def get_logs(id):
     switch = Switch.objects.get(id=id)
     serial_num = str(switch.boot_detail.serial_number)
     file_name_list = getfile_list(syslog_path)
-    if not switch.boot_detail or not switch.boot_detail.boot_status:
+    if not switch.boot_detail:
         raise IgniteException(ERR_SWITCH_NOT_BOOTED)
 
     file_with_switch = [REMOTE_SYSLOG_PATH + serial_num + '.log']

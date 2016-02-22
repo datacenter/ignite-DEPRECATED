@@ -1,6 +1,6 @@
 "ntp" :
 {
         "enabled" : true,
-        "server_ip" : 10.11.0.1
+        "server_ip" : "10.11.0.1"
 }
 

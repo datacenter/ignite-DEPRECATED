@@ -4,16 +4,7 @@ from rest_framework.response import Response
 
 import services
 from utils.baseview import BaseView
-from serializers import TopologyBriefSerializer, TopologyPostSerializer
-from serializers import TopologySerializer
-from serializers import NameSerializer, SwitchPostSerializer
-from serializers import LinkPutSerializer, LinkPostSerializer
-from serializers import TopologySwitchPutSerializer
-from serializers import TopologyPostDefaultsSerializer
-from serializers import FabricBriefSerializer, FabricPostSerializer
-from serializers import FabricSerializer
-from serializers import FabricSerializer, FabricSwitchPutSerializer
-from serializers import FabricProfilesPutSerializer
+from serializers import *
 
 
 class TopologyListView(BaseView):
@@ -165,6 +156,18 @@ class TopologyDefaultsView(BaseView):
         return Response(services.update_topology_defaults(int(id),
                                                           request.data,
                                                           self.username))
+
+
+class TopologyCloneView(BaseView):
+    def post(self, request, id, format=None):
+        """
+        To clone a topology
+        ---
+  request_serializer: "CloneTopoSerializer"
+  response_serializer: "TopologySerializer"
+        """
+        return Response(services.clone_topology(id, request.data,
+                                                self.username))
 
 
 class FabricListView(BaseView):
@@ -341,3 +344,23 @@ class FabricBuildView(BaseView):
         to build a config for fabric
         """
         return Response(services.build_fabric_config(int(id)))
+
+
+class FabricCloneView(BaseView):
+    def post(self, request, id, format=None):
+        """
+        To clone a fabric
+        ---
+  request_serializer: "CloneFabricSerializer"
+  response_serializer: "FabricSerializer"
+        """
+        return Response(services.clone_fabric(id, request.data, self.username))
+
+
+class FabricSwtichDecommissionView(BaseView):
+    def delete(self, request, fid, sid, format=None):
+        """
+        To delete a booted swithc in a fabric
+        """
+        return Response(services.decommission_fabric_switch(int(fid), int(sid),
+                                                           self.username))

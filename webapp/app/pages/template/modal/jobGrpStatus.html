@@ -34,8 +34,11 @@
                     <td data-ng-if="switch.name">{{switch.name}}</td>
                     <td>{{switch.status}}</td>
                     <td>{{switch.ctime | date : appSettings.dateFormat}}</td>
-                    <td><a href="javascript:void(0)" data-ng-if="switch.log"
+                    <td data-ng-if="switch.log"><a href="javascript:void(0)"
                         ng-click="openLog(switch.log)">Logs</a>
+                    </td>
+                    <td data-ng-if="!switch.log">
+                        <a href="javascript:void(0)">--</a>
                     </td>
                 </tr>
             </tbody>

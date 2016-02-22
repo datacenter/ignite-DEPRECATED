@@ -129,13 +129,14 @@ angular.module('PoapServer')
         var modalInstance = $modal.open({
             animation: $scope.animationsEnabled,
             templateUrl: 'pages/template/modal/cloneModal.html',
-            controller: 'FabricInstanceCloneModalCtrl',
+            controller: 'TopologyCloneModalCtrl',
             size: 'sm',
             resolve: {
                 dataToModal : function() {
                     return {
                         action : $scope.action,
-                        id : $scope.selectedId
+                        id : $scope.selectedId,
+                        source : 'fabric'
                     }
                 }
              }
@@ -150,67 +151,37 @@ angular.module('PoapServer')
     };
 
     $scope.submitData = function(modalData) {
+        var reqHeader = {
+            appendToURL : true,
+            value : $scope.selectedId,
+            noTrailingSlash : true
+        };
         if(modalData.action == 'add') {
             appServices.doAPIRequest(appSettings.appAPI.fabricInstance.add,modalData.submitData,null).then(function(data){
-                /*localStorage.fabricId = JSON.stringify(data.id);
-                localStorage.source = 'fabric';*/
                 $location.path('/fabricInstance/edit/'+data.id);
             });
         } else if(modalData.action == 'delete') {
-
-            var reqHeader = {
-                appendToURL : true,
-                value : $scope.selectedId,
-                noTrailingSlash : true
-            };
-
             appServices.doAPIRequest(appSettings.appAPI.fabricInstance.delete, null, reqHeader).then(function(data) {
-                /* TODO after delete success */
                 ngToast.create({
-                  className: 'success',
-                  content: 'Fabric Instance Deleted Successfully.'
+                    className: 'success',
+                    content: 'Fabric Instance Deleted Successfully.'
                 });
                 $scope.init('delete');
             });
         }
         else if (modalData.action == 'clone') {
-          var dataToSubmit = modalData.submitData;
-          var requestHeader = {
-            appendToURL: true,
-            /* TODO - change to true in server */
-            value: $scope.selectedId,
-            noTrailingSlash: true
-          };
-          appServices.doAPIRequest(appSettings.appAPI.fabricInstance.getById, null, requestHeader).then(function(data) {
-            $log.debug('Data Fetched for FabricInstance Id : ' + $scope.selectedId);
-            $log.debug(data);
-            var newFabricInstance = angular.copy(data);$log.debug('DATA::');$log.debug(data);
-            newFabricInstance.id = '';
-            newFabricInstance.name = modalData.submitData.NewCloneName;console.log('New FI');console.log(newFabricInstance);
-            newFabricInstance.submit = "false";
-            newFabricInstance.topology_id = newFabricInstance.topology.topology_id;
-
-            newFabricInstance.image_details.switch_image_profile=[];
-            newFabricInstance.system_id = [];
-            newFabricInstance.config_json.switch_config_id=[];
-
-            appServices.doAPIRequest(appSettings.appAPI.fabricInstance.add, newFabricInstance, null).then(function(data) {
-                /* TODO after delete success */
-                ngToast.create({
-                  className: 'success',
-                  content: 'FabricInstance Cloned Successfully.'
-                });
-                $scope.init('cloned');
+            reqHeader.value = reqHeader.value+"/clone";
+            appServices.doAPIRequest(appSettings.appAPI.fabricInstance.clone, modalData.submitData, reqHeader).then(function(data) {
+                $location.path('/fabricInstance/edit/'+data.id);
             });
-          });
         }
     };
 
-        $scope.init = function() {
-          $scope.getFabricInstanceList();
-        }
+    $scope.init = function() {
+      $scope.getFabricInstanceList();
+    }
 
-        $scope.init();
+    $scope.init();
 
 });
 

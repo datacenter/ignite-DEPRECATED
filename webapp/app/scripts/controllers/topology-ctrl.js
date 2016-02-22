@@ -133,7 +133,7 @@ angular.module('PoapServer')
             });
         };
 
-    $scope.openCloneModal = function(size) {console.log('Inside Open Clone');
+    $scope.openCloneModal = function(size) {
         var modalInstance = $modal.open({
             animation: $scope.animationsEnabled,
             templateUrl: 'pages/template/modal/cloneModal.html',
@@ -143,7 +143,8 @@ angular.module('PoapServer')
                 dataToModal : function() {
                     return {
                         action : $scope.action,
-                        id : $scope.selectedId
+                        id : $scope.selectedId,
+                        source : 'topology'
                     }
                 }
              }
@@ -158,56 +159,31 @@ angular.module('PoapServer')
     };
 
     $scope.submitData = function(modalData) {
-        if(modalData.action == 'create'){
-          var dataToSubmit = modalData.submitData;
-          appServices.doAPIRequest(appSettings.appAPI.topology.create, dataToSubmit, null).then(function(data) {
-                /*localStorage.topologyId = JSON.stringify(data.id);
-                localStorage.source = 'topology';*/
-                $location.path('/topology/edit/'+data.id);
-                /*$location.path('/topology/add/new');*/
-            });
-        } else if(modalData.action == 'delete') {
-
-            var reqHeader = {
-                appendToURL : true,
-                value : $scope.selectedId,
-                noTrailingSlash : true
-            };
-
-            appServices.doAPIRequest(appSettings.appAPI.topology.delete, null, reqHeader).then(function(data) {
-                /* TODO after delete success */
-                ngToast.create({
-                  className: 'success',
-                  content: 'Topology Deleted Successfully.'
-                });
-                $scope.init('delete');
-            });
-        }
-        else if (modalData.action == 'clone') {
-          var dataToSubmit = modalData.submitData;
-          var requestHeader = {
-            appendToURL: true,
-            /* TODO - change to true in server */
-            value: $scope.selectedId,
-            noTrailingSlash: true
-          };
-          appServices.doAPIRequest(appSettings.appAPI.topology.getById, null, requestHeader).then(function(data) {
-            $log.debug('Data Fetched for Topology Id : ' + $scope.selectedId);
-            $log.debug(data);
-            var newTopology = angular.copy(data);$log.debug('DATA::');$log.debug(data);
-            newTopology.id = '';
-            newTopology.name = modalData.submitData.NewCloneName;$log.debug('New To[po]');$log.debug(newTopology);
-            newTopology.submit = "false";
-            appServices.doAPIRequest(appSettings.appAPI.topology.add, newTopology, null).then(function(data) {
-                /* TODO after delete success */
-                ngToast.create({
-                  className: 'success',
-                  content: 'Topology Cloned Successfully.'
-                });
-                $scope.init('cloned');
-            });
+      var reqHeader = {
+          appendToURL : true,
+          value : $scope.selectedId,
+          noTrailingSlash : true
+      };
+      if(modalData.action == 'create'){
+        var dataToSubmit = modalData.submitData;
+        appServices.doAPIRequest(appSettings.appAPI.topology.create, dataToSubmit, null).then(function(data) {
+              $location.path('/topology/edit/'+data.id);
           });
-        }
+      } else if(modalData.action == 'delete') {
+          appServices.doAPIRequest(appSettings.appAPI.topology.delete, null, reqHeader).then(function(data) {
+              ngToast.create({
+                className: 'success',
+                content: 'Topology Deleted Successfully.'
+              });
+              $scope.init('delete');
+          });
+      }
+      else if (modalData.action == 'clone') {
+        reqHeader.value = reqHeader.value+"/clone";
+        appServices.doAPIRequest(appSettings.appAPI.topology.clone, modalData.submitData, reqHeader).then(function(data) {
+          $location.path('/topology/edit/'+data.id);
+        });
+      }
     };
 
     $scope.init = function() {
@@ -219,11 +195,12 @@ angular.module('PoapServer')
   });
 
   angular.module('PoapServer').controller('TopologyCloneModalCtrl', function($scope, $modalInstance, appSettings, appServices, dataToModal) {
-
+    $scope.source = dataToModal.source;
     $scope.action = dataToModal.action;
     $scope.id = dataToModal.id;
     $scope.submitData = {
-      "NewCloneName" : ""
+      "name" : "",
+      "name_operation" : "replace"
     }
 
     $scope.ok = function() {

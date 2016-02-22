@@ -167,7 +167,7 @@ def update_switch(fab_id, switch_id, data, user):
     switch = Switch.objects.get(pk=switch_id)
 
     # check if switch is already booted
-    if switch.boot_detail and switch.boot_detail.boot_status:
+    if switch.boot_detail:
         raise IgniteException(ERR_NO_NAME_CHANGE)
 
     # check if switch already exists with new name
@@ -215,6 +215,10 @@ def update_switch(fab_id, switch_id, data, user):
 
 def delete_switch(fab_id, switch_id, user):
     BaseTopology.get_object(fab_id, user).delete_switch(switch_id)
+
+
+def decommission_switch(fab_id, switch_id, user):
+    BaseTopology.get_object(fab_id, user).decommission_switch(switch_id)
 
 
 def add_link(fab_id, data, user):
@@ -384,3 +388,87 @@ def search_fabric(request):
                                   topology__isnull=False), SERIAL_NUMBER
     except Switch.DoesNotExist:
         return None, None
+
+
+def clone_fabric(fab_id, data, user=""):
+
+    old_fabric = Topology.objects.get(pk=fab_id)
+
+    # create new fabric
+    new_fabric = Fabric()
+    new_fabric.name = data[NAME]
+    new_fabric.model_name = old_fabric.model_name
+    new_fabric.is_fabric = True
+
+    if old_fabric.config_profile:
+        new_fabric.config_profile = old_fabric.config_profile
+    if old_fabric.feature_profile:
+        new_fabric.feature_profile = old_fabric.feature_profile
+
+    new_fabric.updated_by = user
+    new_fabric.save()
+
+    # fabric defaults, switches & links objects
+    new_fabric.defaults = dict()
+    new_fabric.defaults[SWITCHES] = list()
+    new_fabric.defaults[LINKS] = list()
+    new_fabric.switches = list()
+    new_fabric.links = list()
+
+    switch_dict = dict()
+
+    for switch in Switch.objects.filter(topology_id=old_fabric.id
+                                        ).order_by(ID):
+        # save id for later
+        switch_id = switch.id
+
+        switch.id = None
+        switch.topology = new_fabric
+        switch.serial_num = ""
+        switch.boot_detail = None
+
+        if not switch.dummy:
+            # append fabric name to switch name
+            if data[NAME_OPERATION] == REPLACE:
+                name = switch.name.replace(old_fabric.name, new_fabric.name)
+                if Switch.objects.filter(name=name):
+                    raise IgniteException(ERR_CLONE_FABRIC)
+                switch.name = name
+            elif data[NAME_OPERATION] == PREPEND:
+                name = new_fabric.name + "_" + switch.name
+                if Switch.objects.filter(name=name):
+                    raise IgniteException(ERR_CLONE_FABRIC)
+                switch.name = name
+
+        switch.save()
+
+        # store fabric switch id to switch mapping
+        switch_dict[switch_id] = switch
+
+        if switch.dummy:
+            new_fabric.defaults[SWITCHES].append(switch)
+        else:
+            new_fabric.switches.append(switch)
+
+    for link in Link.objects.filter(topology_id=old_fabric.id):
+        link.id = None
+        link.topology = new_fabric
+
+        if link.src_switch:
+            link.src_switch = switch_dict[link.src_switch.id]
+            link.dst_switch = switch_dict[link.dst_switch.id]
+        else:
+            link.src_switch = None
+            link.dst_switch = None
+
+        link.save()
+
+        if not link.dummy:
+            new_fabric.links.append(link)
+        elif link.dummy and not link.src_switch:
+            link.src_tier = link.src_ports
+            link.dst_tier = link.dst_ports
+            new_fabric.defaults[LINKS].append(link)
+    new_fabric.save()
+
+    return new_fabric

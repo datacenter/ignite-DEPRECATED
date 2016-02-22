@@ -184,8 +184,9 @@ angular.module('PoapServer').controller('ImagesModalCtrl', function($scope, $mod
     $scope.error = "";
     $scope.formIncomplete = true;
     $scope.readonly = false;
+    $scope.source = dataToModal.source;
 
-    if(dataToModal.source != undefined) {
+    if($scope.source != undefined) {
         $scope.readonly = true;
     }
 
@@ -251,7 +252,11 @@ angular.module('PoapServer').controller('ImagesModalCtrl', function($scope, $mod
     };
 
     $scope.init = function() {
-        $scope.getData();
+        if('jobs' == $scope.source && !dataToModal.image.new_item) {
+            $scope.submitData = dataToModal.image;
+        } else {
+            $scope.getData();
+        }
     };
 
     $scope.changeAction = function(newAction) {

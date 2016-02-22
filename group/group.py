@@ -1,6 +1,7 @@
 from django.db.models import Q
 
 import datetime
+from bootstrap.constants import BOOT_SUCCESS
 from fabric.models import Switch
 from models import *
 from pool.models import PoolEntry
@@ -59,7 +60,9 @@ def add_switch(gid, data, user):
     error = []
     for switch in data:
         mes = {}
-        if (Switch.objects.filter(boot_detail__boot_status__isnull=False, id=switch["switch_id"]).count() == 0):
+        if not Switch.objects.filter(id=switch["switch_id"],
+                                     boot_detail__isnull=False,
+                                     boot_detail__boot_status__icontains=BOOT_SUCCESS):
             mes[switch["switch_id"]] = "switch is not booted"
             count = count+1
         else:
@@ -73,8 +76,7 @@ def add_switch(gid, data, user):
         sw = GroupSwitch()
         grp = Group.objects.get(pk=gid)
         sw.group = grp
-        fsw = Switch.objects.get(boot_detail__boot_status__isnull=False,
-                                 id=switch["switch_id"])
+        fsw = Switch.objects.get(id=switch["switch_id"])
         sw.grp_switch = fsw
         sw.save()
 

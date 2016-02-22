@@ -73,9 +73,22 @@ angular.module('PoapServer')
 
 });
 
+angular.module('PoapServer').controller('AlertModalCtrl',
+    function($scope, $modalInstance, appSettings, appServices, dataToModal) {
 
+    $scope.heading = dataToModal.action;
+    $scope.message = dataToModal.message;
 
+    $scope.ok = function() {
+        $modalInstance.close({
+            action: dataToModal.action,
+            id: dataToModal.id,
+            index: dataToModal.index
+        });
+    };
 
+    $scope.cancel = function() {
+        $modalInstance.dismiss('cancel');
+    };
 
-
-
+});

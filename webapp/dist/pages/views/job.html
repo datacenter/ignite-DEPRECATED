@@ -154,9 +154,9 @@
                     <td>{{$index + 1}}</td>
                     <!-- <td><a href="javascript:void(0);" ng-click="groupDialog('view',null, $index)">{{construct.construct_type}}</a>
                     </td> -->
-                    <td><a href="javascript:void(0);" ng-click="viewGroup(task.group_id, task.status)">{{task.group_name}}</a></td>
+                    <td><a href="javascript:void(0);" ng-click="viewGroup(task.group,task.group_id)">{{task.group.group_name}}</a></td>
                     <td>
-                        <a href="javascript:void(0);" ng-click="viewImage(task.image_id)">
+                        <a href="javascript:void(0);" ng-click="viewImage(task.params.image, task.image_id)">
                             {{task.image_name}}
                         </a>
                     </td>
@@ -165,7 +165,7 @@
                     <td>{{task.retry_count}}</td>
                     <td class="text-capitalize">{{task.failure_action_ind}}</td>
                     <td class="text-capitalize">{{task.failure_action_grp}}</td>
-                    <td>{{task.status.status}}</td> 
+                    <td>{{task.status}}</td> 
                     <td data-ng-if="task.ctime">{{task.ctime | date : appSettings.dateFormat}}</td>
                     <td data-ng-if="!task.ctime">--</td>
                     <td>

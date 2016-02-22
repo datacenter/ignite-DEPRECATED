@@ -27,9 +27,9 @@ class GroupDetailSerializer(serializers.Serializer):
     class GroupSwitchSerializer(serializers.ModelSerializer):
         switch_id = serializers.IntegerField(source='grp_switch.id', read_only=True)
         switch_name = serializers.CharField(source='grp_switch.name', read_only=True)
-        serial_num = serializers.CharField(source='grp_switch.boot_detail.serial_number', read_only=True)
+        serial_num = serializers.CharField(source='grp_switch.serial_num', read_only=True)
         fabric_name = serializers.CharField(source='grp_switch.topology.name', read_only=True)
-        switch_ip = serializers.CharField(source='grp_switch.boot_detail.mgmt_ip', read_only=True)
+        switch_ip = serializers.CharField(source='grp_switch.mgmt_ip', read_only=True)
 
         class Meta:
             model = GroupSwitch
@@ -75,27 +75,30 @@ class JobBriefSerializer(serializers.Serializer):
 
 class JobDetailSerializer(serializers.Serializer):
     class TaskSerializer(serializers.Serializer):
-        class StatusSerializer(serializers.Serializer):
+        class GroupSerializer(serializers.Serializer):
             class SwitchSerializer(serializers.Serializer):
                 id = serializers.IntegerField()
                 name = serializers.CharField()
-                status = serializers.CharField()
+                status = serializers.CharField(required=False)
                 log = serializers.CharField(required=False)
                 ctime = serializers.CharField(required=False)
+            group_name = serializers.CharField()
+            username = serializers.CharField()
+            password = serializers.CharField()
             switches = SwitchSerializer(many=True)
-            status = serializers.CharField()
+        status = serializers.CharField(required=False)
         group_id = serializers.IntegerField()
         image_id = serializers.IntegerField()
-        group_name = serializers.CharField()
         switch_count = serializers.IntegerField()
         image_name = serializers.CharField()
+        params = JSONSerializerField(required=False)
         type = serializers.ChoiceField(choices=['switch_upgrade', 'epld_upgrade'])
         failure_action_grp = serializers.CharField(required=False)
         failure_action_ind = serializers.CharField(required=False)
         ctime = serializers.CharField(required=False)
         run_size = serializers.IntegerField(min_value=1, max_value=5)
         retry_count = serializers.IntegerField(min_value=0, max_value=3)
-        status = StatusSerializer(read_only=True)
+        group = GroupSerializer(read_only=True)
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField()
     schedule = serializers.DateTimeField()

@@ -3,27 +3,27 @@
         "vxlan_global_config":{
                 "multicast": false,
                 "ingress_replication": true,
-                "anycast_gateway_mac": 2222.3333.4444,
+                "anycast_gateway_mac": "2222.3333.4444",
                 "rendezvous_point":[
                         {
-                       "node_id": leaf1,
-                           "mcast_group": 225.0.0.0/8
+                       "node_id": "leaf1",
+                           "mcast_group": "225.0.0.0/8"
                         }
                 ],
         "tenant_info":[
                         {
-			   "id": 10,
+			   "id": "10",
                            "l2_vni_list":[
                                         {
-                                                "vni": 50,
-                                                "vlan": 100,
-                                                "anycast_gateway": 10.1.1.100/32,
-                                                "mcast_group": 225.10.1.1
+                                                "vni": "50",
+                                                "vlan": "100",
+                                                "anycast_gateway": "10.1.1.100/32",
+                                                "mcast_group": "225.10.1.1"
                                         }
                            ],
-                           "vrf_context": vrf_test,
-                   "l3_vni": 9000,
-               "control_vlan" : 100
+                           "vrf_context": "vrf_test",
+                   "l3_vni": "9000",
+               "control_vlan" : "100"
                         }
                 ]
        }

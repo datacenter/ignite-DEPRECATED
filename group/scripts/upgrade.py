@@ -2,6 +2,7 @@ from __future__ import absolute_import
 import os
 import requests
 import json
+import time
 
 
 def build_nxapi_url(switch_ip):
@@ -27,29 +28,28 @@ def get_nxapi_template():
     return d
 
 
-def handle_nxapi_error(swicth, image, command, timeout):
-    if command[2] == 'install':
+def handle_nxapi_error(command):
+    if command[2] in [ 'system-install' , 'epld-install' ]:
         return 'FAILUREE'
     else:
         return 'CONTINUE'
 
 
-def update_os_image_single_switch(switch, task):
-    image = task["image"]
-    url = build_nxapi_url(switch["ip"].split('/')[0])
-    scp_string = build_scp_string(image["user"], image["ip"], image["path"])
-    image_name = image["path"].split(r'/')[-1]
+def update_os_image_single_switch(switch, image):
+    url = build_nxapi_url(switch["ip"])
+    scp_string = build_scp_string(image["image_server_username"], image["image_server_ip"], image["system_image"])
+    image_name = image["system_image"].split(r'/')[-1]
     myheaders = {'content-type': 'application/json-rpc'}
     commands = []
-    commands.append(['terminal dont-ask', 7, 'set'])
-    commands.append(['terminal password ' + image["pwd"], 7, ''])
-    commands.append(['del bootflash:' + image_name + 'no-prompt', 70, ''])
-    commands.append(['copy ' + scp_string + ' bootflash:' + image_name + ' vrf management', 300, 'scp'])
-    commands.append(['no terminal password', 7, 'set'])
-    commands.append(['copy running-config startup-config', 7, 'copy-config'])
-    commands.append(['install all nxos bootflash:' + image_name, 500, 'install'])
     #commands.append(['terminal dont-ask', 7, 'set'])
-    #commands.append(['sh run', 7, 'set'])
+    #commands.append(['terminal password ' + image["image_server_password"], 7, ''])
+    #commands.append(['del bootflash:' + image_name + ' no-prompt', 70, ''])
+    #commands.append(['copy ' + scp_string + ' bootflash:' + image_name + ' vrf management', 300, 'scp'])
+    #commands.append(['no terminal password', 7, 'set'])
+    #commands.append(['copy running-config startup-config', 7, 'copy-config'])
+    #commands.append(['install all nxos bootflash:' + image_name, 500, 'system-install'])
+    #commands.append(['terminal dont-ask', 7, 'set'])
+    commands.append(['sh run', 7, 'set'])
     #commands.append(['no terminal dont-ask', 7, 'set'])
     payload = []
     payload_temp = []
@@ -69,25 +69,101 @@ def update_os_image_single_switch(switch, task):
             if 'error' in response:
                 #handle errors here
                 print 'error occured while running ', command
-                ret = handle_nxapi_error(switch, image, command, timeout=0)
+                ret = handle_nxapi_error(command)
                 if ret == 'FAILURE':
-                    status["status"]=ret
-                    status["log"]=response["error"]
+                    status['status'] = ret
+                    status["log"] = response["error"]
                     return status
         except requests.exceptions.Timeout:
             print 'timeout occured while running', command
-            #return handle_nxapi_error(switch, image, command, timeout=1)
+            #return handle_nxapi_error(command)
+            status["status"] = 'FAILURE'
+            status["log"] = "Timed Out"
+            return status
+            break
+        except Exception as e:
+            print e, ' while running ', command
+            status['status'] = 'FAILURE'
+            status["log"] = str(e)
+            return status
+            #return handle_nxapi_error(command)
+            break
+        payload.pop()
+    status['status'] = 'SUCCESS'
+    return status
+
+def update_epld_image_single_switch(switch, image):
+    url = build_nxapi_url(switch["ip"])
+    scp_string = build_scp_string(image["image_server_username"], image["image_server_ip"], image["system_image"])
+    ecp_string = build_scp_string(image["image_server_username"], image["image_server_ip"], image["epld_image"])
+    system_image_name = image["system_image"].split(r'/')[-1]
+    epld_image_name = image["epld_image"].split(r'/')[-1]
+    myheaders = {'content-type': 'application/json-rpc'}
+    commands = []
+    #commands.append(['show run', 7, 'set'])
+    commands.append(['terminal dont-ask', 7, 'set'])
+    
+    commands.append(['terminal password ' + image["image_server_password"], 7, ''])
+    commands.append(['del bootflash:' + system_image_name + ' no-prompt', 70, ''])
+    commands.append(['copy ' + scp_string + ' bootflash:' + system_image_name + ' vrf management', 300, 'scp'])
+    commands.append(['no terminal password', 7, 'set'])
+    
+    commands.append(['terminal password ' + image["image_server_password"], 7, ''])
+    commands.append(['del bootflash:' + epld_image_name + ' no-prompt', 70, ''])
+    commands.append(['copy ' + ecp_string + ' bootflash:' + epld_image_name + ' vrf management', 300, 'scp'])
+    commands.append(['no terminal password', 7, 'set'])
+    
+    commands.append(['boot nxos bootflash:'+system_image_name, 70, ''])
+    commands.append(['copy running-config startup-config', 7, 'copy-config'])
+    commands.append(['del ignite-config-bkp', 7, 'copy-config'])   
+    commands.append(['copy running-config ignite-config-bkp', 7, 'copy-config']) 
+    
+    commands.append(['write erase', 70, ''])
+    
+    commands.append(['install all nxos bootflash:' + system_image_name, 500, 'system-install'])
+    commands.append(['terminal dont-ask', 7, 'set'])
+    commands.append(['install epld bootflash:' + epld_image_name + ' module all', 500, 'epld-install'])
+	
+	
+    commands.append(['copy ignite-config-bkp startup-config', 7, 'copy-config'])
+    payload = []
+    payload_temp = []
+    status = {"status":"","log":""}
+    print url
+    template = get_nxapi_template()
+    for command in commands:
+        template['params']['cmd'] = command[0]
+        print command[0]
+        time_out = command[1]
+        payload.append(template)
+        try:
+            response = requests.post(url, data=json.dumps(payload),
+                                     headers=myheaders,
+                                     auth=(switch["user"], switch["pwd"]),
+                                     timeout=time_out).json()
+            print response
+            if 'error' in response:
+                #handle errors here
+                print 'error occured while running ', command
+                ret = handle_nxapi_error(command)
+                if ret == 'FAILURE':
+                    status["status"]=ret
+                    status["log"]=response["error"]
+                    return status['status']
+                elif command[2]=='system-install':
+                    print 'going to wait 300 seconds'
+                    time.sleep(300)
+        except requests.exceptions.Timeout:
+            print 'timeout occured while running', command
             status["status"]='FAILURE'
             status["log"]="Timed Out"
             return status
-            break
         except Exception as e:
             print e, ' while running ', command
             status["status"]='FAILURE'
             status["log"]=str(e)
             return status
-            #return handle_nxapi_error(switch, image, command, timeout = 0)
-            break
         payload.pop()
     status["status"]='SUCCESS'
     return status
+

@@ -99,7 +99,7 @@
                   "login" : {
                    //"url" : "/data/login.json",
                     "url" : "/auth/login/",
-                    "method" : "POST",
+                    "method" : "POST"
                    // "method" : "GET", // just for test
                   },
                   "logout" : {
@@ -180,6 +180,11 @@
                       "auth": "true"
                     },
                     "add_switch_Link" : {
+                      "url": "/api/fabric/topology/",
+                      "method": "POST",
+                      "auth": "true"
+                    },
+                    "clone" : {
                       "url": "/api/fabric/topology/",
                       "method": "POST",
                       "auth": "true"
@@ -270,6 +275,11 @@
                         "url": "/api/fabric/fabric",
                         "method": "POST",
                         "auth": "true"
+                    },
+                    "clone" : {
+                      "url": "/api/fabric/fabric/",
+                      "method": "POST",
+                      "auth": "true"
                     },
                     "edit": {
                         "url": "/api/fabric/fabric/",

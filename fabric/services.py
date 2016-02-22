@@ -3,6 +3,7 @@ from django.db import transaction
 import build
 from constants import MODEL_NAME
 import fabric
+import topology
 from serializers import *
 from topology import BaseTopology
 from utils.exception import IgniteException
@@ -116,6 +117,17 @@ def update_topology_defaults(top_id, data, user=""):
     return serializer.data
 
 
+@transaction.atomic
+def clone_topology(top_id, data, user=""):
+    serializer = CloneTopoSerializer(data=data)
+    if not serializer.is_valid():
+        raise IgniteException(serializer.errors)
+
+    new_top = topology.clone_topology(top_id, data, user)
+    serializer = TopologySerializer(new_top)
+    return serializer.data
+
+
 def get_all_fabrics():
     fabric_list = fabric.get_all_fabrics()
     serializer = FabricBriefSerializer(fabric_list, many=True)
@@ -184,6 +196,13 @@ def delete_fabric_switch(fab_id, switch_id, user=""):
 
 
 @transaction.atomic
+def decommission_fabric_switch(fab_id, switch_id, user=""):
+    fabric.decommission_switch(fab_id, switch_id, user)
+    serializer = FabricSerializer(fabric.get_fabric(fab_id))
+    return serializer.data
+
+
+@transaction.atomic
 def add_fabric_link(fab_id, data, user):
     serializer = LinkPostSerializer(data=data)
     if not serializer.is_valid():
@@ -243,4 +262,15 @@ def update_fabric_profiles(fab_id, data, user=""):
 def build_fabric_config(fab_id):
     build.build_config(fab_id)
     serializer = FabricSerializer(fabric.get_fabric(fab_id))
+    return serializer.data
+
+
+@transaction.atomic
+def clone_fabric(fab_id, data, user=""):
+    serializer = CloneFabricSerializer(data=data)
+    if not serializer.is_valid():
+        raise IgniteException(serializer.errors)
+
+    new_fab = fabric.clone_fabric(fab_id, data, user)
+    serializer = FabricSerializer(new_fab)
     return serializer.data

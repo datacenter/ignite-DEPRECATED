@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from constants import LINK_TYPES, MATCH_TYPES, TIER_NAMES
+from constants import FAB_CLONE_NAME
 from models import Topology
 
 
@@ -137,6 +138,7 @@ class FabricBriefSerializer(serializers.Serializer):
     name = serializers.CharField()
     model_name = serializers.CharField()
     submit = serializers.BooleanField()
+    build_time = serializers.DateTimeField(read_only=True)
     updated = serializers.DateTimeField()
     updated_by = serializers.CharField()
     site = serializers.CharField()
@@ -223,3 +225,12 @@ class FabricProfilesPutSerializer(serializers.Serializer):
     config_profile = serializers.IntegerField(allow_null=True)
     feature_profile = serializers.IntegerField(allow_null=True)
     profiles = FabricProfilesSerializer(many=True)
+
+
+class CloneTopoSerializer(serializers.Serializer):
+    name = serializers.CharField()
+
+
+class CloneFabricSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    name_operation = serializers.ChoiceField(FAB_CLONE_NAME)

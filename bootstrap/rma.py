@@ -1,5 +1,6 @@
 from models import SwitchBootDetail
 from fabric.models import Switch
+from group.models import Group, GroupSwitch
 from constants import *
 from discovery.discoveryrule import find_dup_serial_discovery
 from discovery.models import DiscoveryRule
@@ -31,6 +32,14 @@ def get_rma_detail(old_serial_num):
             if switch.boot_detail.boot_status == BOOT_PROGRESS:
                 logger.debug(ERR_SWITCH_BOOT_IN_PROGRESS)
                 raise IgniteException(ERR_SWITCH_BOOT_IN_PROGRESS)
+            try:
+                group_switches = GroupSwitch.objects.filter(grp_switch_id=switch.id).values_list('group_id', flat=True).distinct()
+                for group_switch in group_switches:
+                      group = Group.objects.get(pk=group_switch)
+                      if group.ref_count>0:
+                          raise IgniteException(ERR_SWITCH_IN_USE_JOB_SCHEDULE)
+            except GroupSwitch.DoesNotExist:
+                pass
         else:
             rule = find_dup_serial_discovery([old_serial_num], rma_case=True)
             if rule:
@@ -65,24 +74,19 @@ def update_rma_detail(data):
                 logger.debug(ERR_SWITCH_BOOT_IN_PROGRESS)
                 raise IgniteException(ERR_SWITCH_BOOT_IN_PROGRESS)
             else:
+                boot_detail = switch.boot_detail
+                switch.boot_detail = None
+
                 if switch.topology:
-                    switch.boot_detail.match_type = ""
-                    switch.boot_detail.boot_status = None
-                    switch.boot_detail.discovery_rule = 0
-                    switch.boot_detail.serial_number = ""
-                    switch.boot_detail.boot_time = None
-                    switch.boot_detail.save()
-                    switch.save()
                     logger.debug("switch is booted by matching into fabric")
                 else:
+                    logger.debug("switch is booted by matching into discovery_rule")
                     if switch.boot_detail.match_type == SERIAL_NUMBER:
                         updated = update_rma_rule(old_serial_num, new_serial_num, id=switch.boot_detail.discovery_rule)
-                    boot_detail = switch.boot_detail
-                    switch.boot_detail = None
                     switch.name = new_serial_num
-                    switch.save()
-                    boot_detail.delete()
-                    logger.debug("switch is booted by matching into discovery_rule")
+
+                switch.save()
+                boot_detail.delete()
                 updated = True
 
         else:

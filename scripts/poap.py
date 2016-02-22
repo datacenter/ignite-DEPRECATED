@@ -492,6 +492,8 @@ def run_process(task):
     proc = task[PROC_HANDLE]
     proc.start()
     proc.join()
+    if proc.exitcode:
+        abort_cleanup_exit()
 
 
 def exec_task(task_list):

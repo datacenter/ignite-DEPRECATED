@@ -49,10 +49,26 @@ CELERYD_GROUP_CMD = "sed -i 's/^CELERYD_GROUP=\".*\"/CELERYD_GROUP=\"" \
              + CELERYD_GROUP + "\"/' " + CELERYD_FILE
 
 
+CMD_LIST_SYSTEM_DEP = (
+    ("Install Python 2.7 (may take a while)",
+     "apt-get install python2.7"),
+    ("Install Python dev (may take a while)",
+     "apt-get install python-dev"),
+    ("Install Python libpq dev (may take a while)",
+     "apt-get install libpq-dev"),
+    ("Install Python pip (may take a while)",
+     "apt-get install python-pip"),
+    ("Install Postgresql(may take a while)",
+     "apt-get install postgresql-9.3 postgresql-common"),
+    ("Install RabbitMQ (may take a while)",
+     "apt-get install rabbitmq-server"),
+)
 
-CMD_LIST = (
+CMD_LIST_PYTHON_DEP = (
     ("Install Python Packages (may take a while)",
      "pip install -r requirements.txt",),
+)
+CMD_LIST_SETUP = (
     ("Create Database (ignore error if database already exists)",
      "export PGPASSWORD=" + DB_PASSWORD + "\ncreatedb " + DB_NAME + " -U " + DB_USER,),
     ("Database Migrate",
@@ -72,8 +88,6 @@ CMD_LIST = (
     ("Bootstrap Config Syslog Port Setting", CFG_PORT_CMD,),
     ("Bootstrap Image Syslog IP Setting", IMG_IP_CMD,),
     ("Bootstrap Image Syslog Port Setting", IMG_PORT_CMD,),
-    ("Install RabbitMQ (may take a while)",
-     "apt-get install rabbitmq-server"),
     ("RabbitMQ Username/Password Setting (ignore error if user already exists)",
      "rabbitmqctl add_user " + RMQ_USERNAME + " " + RMQ_PASSWORD,),
     ("RabbitMQ VHost Setting (ignore error if vhost already exists)",
@@ -92,25 +106,39 @@ CMD_LIST = (
      "/etc/init.d/celeryd restart",),
 )
 
+def exec_cmds(CMD_LIST, dep_type=""):
+    for (name, cmd) in CMD_LIST:
+        sys.stdout.write(name + " - ")
+        sys.stdout.flush()
+
+        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+        out, err = proc.communicate()
+
+        if not err:
+            sys.stdout.write("[OK]\n")
+            sys.stdout.flush()
+        else:
+            sys.stdout.write("[ERROR]\n")
+            sys.stdout.write(err)
+            sys.stdout.flush()
+            # break
+
 inp = raw_input("Have you modified Ignite settings in ignite/conf.py? [y/n] ")
 
 if inp != "y" and inp != "Y":
     exit()
 
+inp = raw_input("\nInstall system dependencies? [y/n] ")
 
-for (name, cmd) in CMD_LIST:
-    sys.stdout.write(name + " - ")
-    sys.stdout.flush()
+if inp == "y" or inp == "Y":
+    exec_cmds(CMD_LIST_SYSTEM_DEP)
 
-    proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE)
-    out, err = proc.communicate()
+inp = raw_input("\nInstall python dependencies? [y/n] ")
+if inp == "y" or inp == "Y":
+    exec_cmds(CMD_LIST_PYTHON_DEP)
 
-    if not proc.returncode:
-        sys.stdout.write("[OK]\n")
-        sys.stdout.flush()
-    else:
-        sys.stdout.write("[ERROR]\n")
-        sys.stdout.write(err)
-        sys.stdout.flush()
-        # break
+sys.stdout.write("\nSetting up Ignite server\n")
+sys.stdout.flush()
+
+exec_cmds(CMD_LIST_SETUP)

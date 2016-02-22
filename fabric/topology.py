@@ -1,3 +1,6 @@
+from django.db.models import ProtectedError
+
+from bootstrap.constants import BOOT_PROGRESS
 from django.db.models import Q
 import os
 import re
@@ -277,8 +280,15 @@ class BaseTopology(object):
 
     def delete_switch(self, switch_id):
         switch = Switch.objects.get(pk=switch_id)
-        if switch.boot_detail and switch.boot_detail.boot_status:
-            raise IgniteException(ERR_CANT_DEL_BOOTED_SWITCH)
+        if switch.boot_detail:
+            raise IgniteException(ERR_CANT_DEL_PROGRESS_SWITCH)
+
+        BaseTopology._delete_switch(switch)
+
+    def decommission_switch(self, switch_id):
+        switch = Switch.objects.get(pk=switch_id)
+        if switch.boot_detail and switch.boot_detail.boot_status == BOOT_PROGRESS:
+            raise IgniteException(ERR_CANT_DEL_PROGRESS_SWITCH)
 
         BaseTopology._delete_switch(switch)
 
@@ -287,18 +297,24 @@ class BaseTopology(object):
         # delete switch and boot detail if any
         boot_detail = switch.boot_detail
         switch_id = switch.id
-        switch.delete()
+
+        try:
+            switch.delete()
+        except ProtectedError:
+            raise IgniteException(ERR_SW_IN_USE)
+
         if boot_detail:
-            # delete build files if any
-            try:
-                os.remove(os.path.join(REPO_PATH, str(switch_id) + '.cfg'))
-            except OSError:
-                pass
-            try:
-                os.remove(os.path.join(REPO_PATH, str(switch_id) + '.yml'))
-            except OSError:
-                pass
             boot_detail.delete()
+
+        # delete build files if any
+        try:
+            os.remove(os.path.join(REPO_PATH, str(switch_id) + '.cfg'))
+        except OSError:
+            pass
+        try:
+            os.remove(os.path.join(REPO_PATH, str(switch_id) + '.yml'))
+        except OSError:
+            pass
 
     def add_link(self, data):
         src_switch = Switch.objects.get(pk=data[SRC_SWITCH])
@@ -742,7 +758,6 @@ class LeafSpineTopology(BaseTopology):
         else:
             raise IgniteException(ERR_TIER_NOT_RECOGNIZED)
 
-
         logger.debug("Get downlink ports for topology-id % s, switch-id % s, target_tier % s"
                      % (switch.topology.id, switch.id, target_tier))
 
@@ -852,3 +867,67 @@ class LeafSpineTopology(BaseTopology):
                 logger.debug("%s- %s" % (ERR_NO_VPC_PEER_SWITCH, switch.name))
                 raise IgniteException("%s- %s" % (ERR_NO_VPC_PEER_SWITCH,
                                                   switch.name))
+
+
+def clone_topology(topo_id, data, user=""):
+    old_topology = Topology.objects.get(pk=topo_id)
+
+    # create new fabric
+    new_topology = Topology()
+    new_topology.name = data[NAME]
+    new_topology.model_name = old_topology.model_name
+    new_topology.updated_by = user
+    new_topology.is_fabric = False
+    new_topology.save()
+
+    # fabric defaults, switches & links objects
+    new_topology.defaults = dict()
+    new_topology.defaults[SWITCHES] = list()
+    new_topology.defaults[LINKS] = list()
+    new_topology.switches = list()
+    new_topology.links = list()
+
+    # map of topology switch id to fabric switch object
+    # needed when creating fabric links
+    switch_dict = dict()
+
+    # duplicate all topology switches into fabric
+    for switch in Switch.objects.filter(topology_id=old_topology.id).order_by(ID):
+        # save id for later
+        switch_id = switch.id
+
+        switch.id = None
+        switch.topology = new_topology
+
+        switch.save()
+
+        # store topology switch id to switch mapping
+        switch_dict[switch_id] = switch
+
+        if switch.dummy:
+            new_topology.defaults[SWITCHES].append(switch)
+        else:
+            new_topology.switches.append(switch)
+
+    # duplicate all topology links into fabric
+    for link in Link.objects.filter(topology_id=old_topology.id):
+        link.id = None
+        link.topology = new_topology
+
+        if link.src_switch:
+            link.src_switch = switch_dict[link.src_switch.id]
+            link.dst_switch = switch_dict[link.dst_switch.id]
+        else:
+            link.src_switch = None
+            link.dst_switch = None
+        link.save()
+
+        if not link.dummy:
+            new_topology.links.append(link)
+        elif link.dummy and not link.src_switch:
+            link.src_tier = link.src_ports
+            link.dst_tier = link.dst_ports
+            new_topology.defaults[LINKS].append(link)
+    new_topology.save()
+
+    return new_topology

@@ -10,9 +10,28 @@
       <div class="row">
         <div class="col-sm-12">
           <div class="form-group">
-            <label for="name">Please Enter Cloned Name:</label>
-            <input class="form-control" id="Name" ng-model="submitData.NewCloneName" placeholder="New Clone Name" type="text">
+            <label for="name">Clone Name:</label>
+            <input class="form-control" id="Name" ng-model="submitData.name" placeholder="Clone Name" type="text">
           </div>
+          <!-- <div class="col-md-4 col-sm-6"> -->
+              <div class="form-group form-inline form_inline_style" data-ng-if="source == 'fabric'">
+                  <label for="" class="">Switch Name Operation</label>
+                  <div class="radio mt_12">
+                      <label class="pt-13">
+                          <input type="radio" name="name_operaion" value="replace"
+                          ng-model="submitData.name_operation">
+                          Replace
+                      </label>
+                  </div>
+                  <div class="radio mt_12">
+                      <label class="pt-13">
+                          <input type="radio" name="name_operaion" value="prepend"
+                          ng-model="submitData.name_operation">
+                          Prepend
+                      </label>
+                  </div>
+              </div>
+          <!-- </div> -->
         </div>
       </div>
     </form>

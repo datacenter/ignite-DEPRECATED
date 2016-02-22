@@ -35,10 +35,10 @@
 
                     <th class="sortable" 
                     ng-class="{
-                        'sort-asc': tableParams.isSortBy('boot_detail.serial_number', 'asc'),
-                        'sort-desc': tableParams.isSortBy('boot_detail.serial_number', 'desc')
+                        'sort-asc': tableParams.isSortBy('serial_num', 'asc'),
+                        'sort-desc': tableParams.isSortBy('serial_num', 'desc')
                     }"
-                    ng-click="tableParams.sorting({'boot_detail.serial_number' : tableParams.isSortBy('boot_detail.serial_number', 'asc') ? 'desc' : 'asc'})"
+                    ng-click="tableParams.sorting({'serial_num' : tableParams.isSortBy('serial_num', 'asc') ? 'desc' : 'asc'})"
                     >
                     Serial Number</th>
                     <th class="sortable"
@@ -85,7 +85,7 @@
                     <td>{{appServices.generateSeq(tableParams.page(), tableParams.count(), $index)}}</td>
                     <td>{{switch.name}}</td>
                     <td>{{switch.topology.name}}</td>
-                    <td>{{switch.boot_detail.serial_number}}</td>
+                    <td>{{switch.serial_num}}</td>
                     <td>{{switch.boot_detail.boot_status}}</td>
                     <td>{{switch.boot_detail.boot_time | date : appSettings.dateFormat}}</td>
                     <td>{{switch.boot_detail.match_type}}</td>

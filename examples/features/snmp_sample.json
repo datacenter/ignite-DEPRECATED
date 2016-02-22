@@ -23,23 +23,23 @@
         }
   ],
   "servers":[
-        {  "ip": 10.11.0.2,
-        "udp_port": 161,
-        "version": 2,
-        "community":community
+        {  "ip": "10.11.0.2",
+        "udp_port": "161",
+        "version": "2",
+        "community":"community"
 	},
-        {  "ip": 10.11.0.3,
-        "udp_port": 161,
-        "version":3,
-        "community":community
+        {  "ip": "10.11.0.3",
+        "udp_port": "161",
+        "version":"3",
+        "community":"community"
         }
   ],
   "users":[
           {
-                "user":admin,
-                "auth":sha,
-                "pwd":cisco123,
-                "priv_passphrase":abcdefgh,
+                "user":"admin",
+                "auth":"sha",
+                "pwd":"cisco123",
+                "priv_passphrase":"abcdefgh",
                 "engineID":""
 	  }
   ]
