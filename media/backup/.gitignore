@@ -1,9 +1,3 @@
 # ignore everything except files/directories listed below
 *
-!backup
-!configlets
-!features
-!packages
-!repo
-!scripts
 !.gitignore
