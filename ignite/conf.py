@@ -24,6 +24,10 @@ REMOTE_SYSLOG_PATH = "/var/log/remote/ignite/system-"
 #scp : secure copy
 #sftp : ssh file transfer protcol
 #http : hypertext transfer protocol
+#***********************#
+#http not supported with apache2. 
+#Please run django server as standalone on port 80 if using http
+#***********************#
 ACCESS_PROTOCOL = "scp"
 
 # syslog port
