@@ -156,7 +156,7 @@ PKG_PATH = os.path.join(SCRIPT_PATH, "packages/")
 REPO_PATH = os.path.join(MEDIA_ROOT, "repo/")
 
 # External packages
-YAML_LIB = "PyYAML-3.11.tar"
+YAML_LIB = "PyYAML-3.11.tar.gz"
 
 # Logging
 
