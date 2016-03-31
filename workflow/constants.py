@@ -1,5 +1,10 @@
 #Access protocols
-ACCESS_PROTOCOLS = ["sftp", "tftp", "scp", "http"]
+PROTO_SCP = 'scp'
+PROTO_TFTP = 'tftp'
+PROTO_SFTP = 'sftp'
+PROTO_HTTP = 'http'
+ACCESS_PROTOCOLS = [PROTO_SCP, PROTO_TFTP, PROTO_SFTP, PROTO_HTTP]
+
 
 #task keys
 NAME = "name"

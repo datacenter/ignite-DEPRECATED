@@ -22,7 +22,7 @@ urlpatterns = patterns('',
 
     # Ignite URLs
     url(r'^api/admin', include('administration.urls')),
-    url(r'^api/bootstrap', include('bootstrap.urls')),
+    url(r'^/*api/bootstrap', include('bootstrap.urls')),
     url(r'^api/config', include('config.urls')),
     url(r'^api/discovery', include('discovery.urls')),
     url(r'^api/fabric', include('fabric.urls')),

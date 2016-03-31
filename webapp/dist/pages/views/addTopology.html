@@ -87,33 +87,6 @@
         <div class="col-sm-12 svgbox" id="svgBox">
             <div class="row">
                 <div class="col-sm-12 row" id="topology_container">
-                    <!-- <div class="text-center">
-                        <div class="col-sm-5"></div>
-                        <div class="col-sm-0.5">
-                            <label for="coreCount" style="float: left; color: black; font-weight: lighter">Core : </label>
-                            <div id="odometer" class="odometer" style="background-image: -webkit-linear-gradient(top, #eee0d3 0%, #eee0d3 40%, #bbaa9a 60%, #eee0d3 80%, #eee0d3 100%);">
-                                {{switchDetails.count.Core}}
-                            </div>
-                        </div>
-                        <div class="col-sm-0.5">
-                            <label for="spineCount" style="float: left; color: black; font-weight: lighter">Spine : </label>
-                            <div id="odometer" class="odometer" style="background-image: -webkit-linear-gradient(top, #eee0d3 0%, #eee0d3 40%, #bbaa9a 60%, #eee0d3 80%, #eee0d3 100%);">
-                                {{switchDetails.count.Spine}}
-                            </div>
-                        </div>
-                        <div class="col-sm-0.5">
-                            <label for="leafCount" style="float: left; color: black; font-weight: lighter">Leaf : </label>
-                            <div id="odometer" class="odometer" style="background-image: -webkit-linear-gradient(top, #eee0d3 0%, #eee0d3 40%, #bbaa9a 60%, #eee0d3 80%, #eee0d3 100%);">
-                                {{switchDetails.count.Leaf}}
-                            </div>
-                        </div>
-                        <div class="col-sm-0.5">
-                            <label for="borderCount" style="float: left; color: black; font-weight: lighter">Border : </label>
-                            <div id="odometer" class="odometer" style="background-image: -webkit-linear-gradient(top, #eee0d3 0%, #eee0d3 40%, #bbaa9a 60%, #eee0d3 80%, #eee0d3 100%);">
-                                {{switchDetails.count.Border}}
-                            </div>
-                        </div>
-                    </div> -->
                     <div style="width: 490px;height: 28px; border: 1px solid #337ab7;/*-webkit-border-radius: 56px;-moz-border-radius: 56px;border-radius: 56px;-webkit-box-shadow: #B3B3B3 5px 5px 5px;-moz-box-shadow: #B3B3B3 5px 5px 5px; box-shadow: #B3B3B3 5px 5px 5px;*/margin-left: 40%; float: left; font-size: 12px; border-radius: 3px; text-align: center;background-color: white;" class="hidden-sm hidden-xs">
                         <div style="/*-webkit-box-shadow: inset 0px -1px 52px -9px rgba(0,0,0,0.54);
 -moz-box-shadow: inset 0px -1px 52px -9px rgba(0,0,0,0.54); box-shadow: inset 0px -1px 52px -9px rgba(0,0,0,0.54); height: 100%; border-right: 1px solid #337ab7; border-radius: 56px;*/padding-top: 5px;" class="col-sm-4">
@@ -382,11 +355,11 @@
                                     data-ng-disabled="!editSwitchFlag" data-ng-model="switch.serial_num">
                             </div>
                         </div>
-                        <hr class="hr_fabSwitch" data-ng-if="source=='fabric' && (switch.boot_detail != null || switch.tier == 'Spine' || switch.tier == 'Leaf')">
-                        <div class="popBody" data-ng-if="source=='fabric' && (switch.boot_detail != null || switch.tier == 'Spine' || switch.tier == 'Leaf')">
+                        <hr class="hr_fabSwitch" data-ng-if="source=='fabric' && (switch.tier == 'Spine' || switch.tier == 'Leaf')">
+                        <div class="popBody" data-ng-if="source=='fabric' && (switch.tier == 'Spine' || switch.tier == 'Leaf')">
                             <div class="input-group input-group-sm">
                                 <span class="input-group-addon link_switch_modal_field"> Boot Status </span>
-                                <span ng-if="!switch.boot_detail"
+                                <span ng-if="!switch.boot_detail && !topologyData.build_time"
                                     class="input-group-addon" style="float: left">
                                     Config not yet built
                                 </span>
@@ -402,7 +375,7 @@
                                     class="input-group-addon" style="float: left">
                                     {{switch.boot_detail.boot_status}}
                                 </span> -->
-                                <span ng-if="switch.boot_detail != null && !switch.boot_detail.boot_status"
+                                <span ng-if="!switch.boot_detail && topologyData.build_time"
                                     class="input-group-addon" style="float: left">
                                     Not Initiated
                                 </span>
@@ -420,7 +393,7 @@
                                 <span class="input-group-addon" style="float: left">{{switch.boot_detail.boot_time | date : appSettings.timeFormat}}</span>
                             </div>
                             <div class="input-group input-group-sm"
-                                data-ng-if="switch.boot_detail">
+                                data-ng-if="switch.boot_detail || topologyData.build_time">
                                 <span class="input-group-addon link_switch_modal_field">  </span>
                                 <span class="input-group-addon pull-left">
                                     <a href="javascript:void(0)" ng-click="openDepSwitchConfigModal(switch.id)">Config</a>

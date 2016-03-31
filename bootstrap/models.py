@@ -8,3 +8,4 @@ class SwitchBootDetail(models.Model):
     match_type = models.TextField(default="")
     discovery_rule = models.IntegerField(default=0)
     boot_time = models.DateTimeField(null=True, default=None)
+    model_type = models.TextField(default="")

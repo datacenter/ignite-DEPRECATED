@@ -15,6 +15,7 @@ class IgniteRequestPostSerializer(serializers.Serializer):
 
     serial_num = serializers.CharField()
     neighbor_list = NeighborSerializer(many=True)
+    model_type = serializers.CharField()
 
 
 class BootstrapSwitchSerializer(serializers.Serializer):
@@ -45,6 +46,7 @@ class SwitchBootStatusPostSerializer(serializers.Serializer):
 
     serial_num = serializers.CharField()
     status = serializers.BooleanField()
+    model_type = serializers.CharField()
 
 
 class RmaSerializer(serializers.Serializer):

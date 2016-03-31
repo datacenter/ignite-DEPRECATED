@@ -5,7 +5,8 @@ import task
 from config.constants import TRUE, FALSE
 from constants import *
 from fabric.constants import SERIAL_NUM
-from ignite.conf import IGNITE_IP, IGNITE_USER, IGNITE_PASSWORD
+from bootstrap.constants import PKG_DIR, SCRIPT_DIR, ACCESS_METHOD, DOWNLOAD_URL
+from ignite.conf import IGNITE_IP, IGNITE_USER, IGNITE_PASSWORD, ACCESS_PROTOCOL
 from ignite.settings import SCRIPT_PATH
 from models import Task, Workflow
 from utils.exception import IgniteException
@@ -91,14 +92,16 @@ def build_workflow(wf, img, cfg_file, serial_number):
 
         if task_obj.id == BOOTSTRAP_CONFIG_ID:
             loc = _get_server_location()
-            task_data[HANDLER] = os.path.join(SCRIPT_PATH,
-                                              BOOTSTRAP_CONF_SCRIPT)
+
+            update_handler(task_data, BOOTSTRAP_CONF_SCRIPT)
+
             task_data[PARAMETERS] = _update_config_params(cfg_file,
                                                           serial_number)
         elif task_obj.id == BOOTSTRAP_IMAGE_ID:
             loc = _get_server_location()
-            task_data[HANDLER] = os.path.join(SCRIPT_PATH,
-                                              BOOTSTRAP_IMAGE_SCRIPT)
+
+            update_handler(task_data, BOOTSTRAP_IMAGE_SCRIPT)
+
             task_data[PARAMETERS] = _update_image_params(img,
                                                          serial_number)
         else:
@@ -127,6 +130,7 @@ def _update_config_params(cfg_file, serial_number):
     param = dict()
     param[SERIAL_NUM] = serial_number
     param[HOSTNAME] = IGNITE_IP
+    param[PROTOCOL] = ACCESS_PROTOCOL
     param[FILE_SRC] = cfg_file
     param[USERNAME] = IGNITE_USER
     param[PASSWORD] = IGNITE_PASSWORD
@@ -137,7 +141,7 @@ def _get_server_location(task_obj=None):
     location = {}
 
     if not task_obj:
-        location[PROTOCOL] = ACCESS_PROTOCOLS[2]
+        location[PROTOCOL] = ACCESS_PROTOCOL
         location[HOSTNAME] = IGNITE_IP
         location[USERNAME] = IGNITE_USER
         location[PASSWORD] = IGNITE_PASSWORD
@@ -148,6 +152,17 @@ def _get_server_location(task_obj=None):
     location[USERNAME] = task_obj.location_server_user
     location[PASSWORD] = task_obj.location_server_password
     return location
+
+
+def update_handler(task_data, bootstrap_script):
+
+    if ACCESS_PROTOCOL in [PROTO_SCP, PROTO_SFTP]:
+        task_data[HANDLER] = os.path.join(SCRIPT_PATH, bootstrap_script)
+    elif ACCESS_PROTOCOL == PROTO_HTTP:
+        task_data[HANDLER] = os.path.join(DOWNLOAD_URL, SCRIPT_DIR, bootstrap_script)
+    else:
+        task_data[HANDLER] = os.path.join(SCRIPT_DIR,
+                                            bootstrap_script)
 
 
 def _update_image_params(img, serial_number):

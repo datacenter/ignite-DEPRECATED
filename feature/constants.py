@@ -23,3 +23,4 @@ PROFILES = 'profiles'
 ERR_FEAT_IN_USE = 'Feature is in use'
 ERR_PROF_IN_USE = 'Profile is in use'
 ERR_PROF_IS_EMPTY = 'No feature is added'
+ERR_FEATURE_FILE_NOT_FOUND = "Feature  not found"

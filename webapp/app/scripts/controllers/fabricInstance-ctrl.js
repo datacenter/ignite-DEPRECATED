@@ -116,7 +116,6 @@ angular.module('PoapServer')
         }, function() {
             $log.info('Modal dismissed at: ' + new Date());
         });
-        $scope.init();
     };
 
     $scope.cloneFabricInstance = function(id) {

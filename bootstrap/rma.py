@@ -35,9 +35,9 @@ def get_rma_detail(old_serial_num):
             try:
                 group_switches = GroupSwitch.objects.filter(grp_switch_id=switch.id).values_list('group_id', flat=True).distinct()
                 for group_switch in group_switches:
-                      group = Group.objects.get(pk=group_switch)
-                      if group.ref_count>0:
-                          raise IgniteException(ERR_SWITCH_IN_USE_JOB_SCHEDULE)
+                    group = Group.objects.get(pk=group_switch)
+                    if group.ref_count>0:
+                        raise IgniteException(ERR_SWITCH_IN_USE_JOB_SCHEDULE)
             except GroupSwitch.DoesNotExist:
                 pass
         else:
@@ -82,7 +82,8 @@ def update_rma_detail(data):
                 else:
                     logger.debug("switch is booted by matching into discovery_rule")
                     if switch.boot_detail.match_type == SERIAL_NUMBER:
-                        updated = update_rma_rule(old_serial_num, new_serial_num, id=switch.boot_detail.discovery_rule)
+                        updated = update_rma_rule(old_serial_num, new_serial_num,
+                                                  id=switch.boot_detail.discovery_rule)
                     switch.name = new_serial_num
 
                 switch.save()

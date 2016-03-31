@@ -6,7 +6,7 @@ import sys
 from ignite.conf import DB_NAME, DB_USER, DB_PASSWORD, SYSLOG_PORT
 from ignite.conf import IGNITE_IP, IGNITE_PORT, IGNITE_USER, IGNITE_PASSWORD
 from ignite.conf import RMQ_USERNAME, RMQ_PASSWORD, RMQ_VHOST, CELERYD_USER,CELERYD_GROUP
-from ignite.settings import UI_ROOT, MEDIA_ROOT, SCRIPT_PATH 
+from ignite.settings import UI_ROOT, MEDIA_ROOT, SCRIPT_PATH
 
 CFG_FILE = os.path.join(SCRIPT_PATH, "bootstrap_config.py")
 IMG_FILE = os.path.join(SCRIPT_PATH, "bootstrap_image.py")
@@ -29,6 +29,7 @@ POAP_IP_CMD = "sed -i 's/^ignite_hostname = \".*\"/ignite_hostname = \"" \
               + IGNITE_IP + "\"/' " + POAP_FILE
 POAP_PORT_CMD = "sed -i 's/^ignite_port = \".*\"/ignite_port = \"" \
                 + IGNITE_PORT + "\"/' " + POAP_FILE
+POAP_MD5 = "python -c \"from scripts import ck_sum; ck_sum.get_ck_sum(\'" + POAP_FILE + "\')\""
 
 # sed commands to replace syslog variables in bootstrap_config.py
 CFG_IP_CMD = "sed -i 's/^SYSLOG_SERVER = \".*\"/SYSLOG_SERVER = \"" \
@@ -79,11 +80,14 @@ CMD_LIST_SETUP = (
      "python manage.py loaddata image/fixtures/initial_data.json",),
     ("Load workflow fixtures",
      "python manage.py loaddata workflow/fixtures/initial_data.json",),
+    ("Load switch fixtures",
+     "python manage.py loaddata switch/fixtures/initial_data.json",),
     ("Javascript IP+Port Setting", JS_SED_CMD,),
     ("POAP User Setting", POAP_USER_CMD,),
     ("POAP Password Setting", POAP_PWD_CMD,),
     ("POAP IP Setting", POAP_IP_CMD,),
     ("POAP Port Setting", POAP_PORT_CMD,),
+    ("POAP MD5", POAP_MD5,),
     ("Bootstrap Config Syslog IP Setting", CFG_IP_CMD,),
     ("Bootstrap Config Syslog Port Setting", CFG_PORT_CMD,),
     ("Bootstrap Image Syslog IP Setting", IMG_IP_CMD,),

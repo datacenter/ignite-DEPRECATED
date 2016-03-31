@@ -5,9 +5,11 @@ from rest_framework import status
 from administration.models import AAAServer
 from bootstrap.models import SwitchBootDetail
 from config.models import Profile as ConfigProfile
+from config.models import Configlet
 from discovery.models import DiscoveryRule
 from fabric.models import Link, Switch, Topology
 from feature.models import Profile as FeatureProfile
+from feature.models import Feature
 from image.models import ImageProfile
 from pool.models import Pool
 from switch.models import LineCard, SwitchModel
@@ -89,6 +91,13 @@ class ExceptionMiddleware(object):
         elif isinstance(exception, Task.DoesNotExist):
             msg = "Task does not exist "
             code = status.HTTP_404_NOT_FOUND
+        elif isinstance(exception, Feature.DoesNotExist):
+            msg = "Feature does not exist "
+            code = status.HTTP_404_NOT_FOUND
+        elif isinstance(exception, Configlet.DoesNotExist):
+            msg = "Configlet does not exist "
+            code = status.HTTP_404_NOT_FOUND
+
         # ignite exceptions
         elif isinstance(exception, IgniteException):
             msg = exception.message

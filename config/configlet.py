@@ -31,12 +31,12 @@ def get_configlet(id):
     cfg = Configlet.objects.get(pk=id)
 
     cfg.file = []
-
-    for line in cfg.path.file:
-        cfg.file.append(string.rstrip(line))
-
-    return cfg
-
+    try:
+        for line in cfg.path.file:
+            cfg.file.append(string.rstrip(line))
+        return cfg
+    except IOError:
+        raise IgniteException(ERR_CONFIGLET_FILE_NOT_FOUND+" : "+cfg.name)
 
 def update_configlet(id, data, user):
     cfg = Configlet.objects.get(pk=id)

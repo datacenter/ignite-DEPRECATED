@@ -26,6 +26,8 @@ IGNITE_REST_API_STATUS = '/api/bootstrap/status'
 IGNITE_URL_STATUS = "http://%s:%s%s" % (ignite_hostname, ignite_port, IGNITE_REST_API_STATUS)
 REQUEST_PARAMS = {'Content-Type': 'application/json'}
 
+#switch response parameter
+MODEL_TYPE = "model_type"
 
 #Ignite Response parameters
 RESP_USERNAME = 'ignite_user'
@@ -115,7 +117,7 @@ SYSLOG_PORT = 514
 LOG_FILE_HANDLE = ''
 
 
-def load_yaml():
+def load_yaml(access_protocol):
     try:
         import yaml
     except:
@@ -123,12 +125,12 @@ def load_yaml():
         status = False
         status = yaml_pkg_exist()
         if not status:
-            get_yaml_module()
+            get_yaml_module(access_protocol)
 
 
 def ignored_ext(file_name):
-    ext = file_name.split('.')[-1]
-    if ext == 'tar':
+    ext = file_name.split('.')[-2]+"."+file_name.split('.')[-1]
+    if ext == 'tar.gz':
         return True
     return False
 
@@ -176,10 +178,9 @@ def import_yaml_module(yaml_lib_path):
         abort_cleanup_exit()
 
 
-def get_yaml_module():
+def get_yaml_module(access_protocol):
     global yaml_lib_src
     poap_log("Downloading YAML lib from %s" % yaml_lib_src)
-    access_protocol = 'scp'
     hostname = ignite_hostname
     port = ''
     username = ignite_username
@@ -193,7 +194,8 @@ def get_yaml_module():
         pkg_name = os.path.basename(yaml_lib_src)
         file_src = "%s%s" % (file_dst_temp, pkg_name)
         untar(file_src, YAML_DOWNLOAD_LOC)
-        pkg_name = os.path.splitext(pkg_name)[0]
+        pkg_name = os.path.splitext(pkg_name)[0].split('.')
+        pkg_name = '.'.join(pkg_name[0:-1])
         yaml_lib_path = yaml_download_loc_u + pkg_name + '/lib'
         import_yaml_module(yaml_lib_path)
     else:
@@ -218,7 +220,7 @@ def setup_log_file():
     try:
         log_filename = "%s.%s" % (log_filename, now)
     except Exception as inst:
-        print inst
+        pass
     global LOG_FILE_HANDLE
     LOG_FILE_HANDLE = open(log_filename, "w+")
 
@@ -294,7 +296,6 @@ def get_file(access_protocol='', hostname='', port='', username='', password='',
         cmd += "copy %s://%s@%s%s %s vrf %s" % (access_protocol, username, hostname, file_src, file_dst, vrf)
 
     if access_protocol == PROTO_TFTP:
-        file_src = os.path.basename(file_src)
 
         if port:
             cmd = "copy %s://%s:%s/%s %s vrf %s" % (access_protocol, hostname, port, file_src, file_dst, vrf)
@@ -352,8 +353,9 @@ def send_switch_status(status):
     data = dict()
     data[SERIAL_NUM] = system_id
     data[RESP_STATUS] = status
-    poap_log("Status update request on %s: %s-%s"
-             % (IGNITE_URL_STATUS, system_id, status))
+    data[MODEL_TYPE] = chassis_id
+    poap_log("Status update request on %s: %s %s- %s "
+             % (IGNITE_URL_STATUS, system_id, status, chassis_id))
     req = urllib2.Request(IGNITE_URL_STATUS, json.dumps(data), REQUEST_PARAMS)
     urllib2.urlopen(req)
 
@@ -390,7 +392,7 @@ def get_cdp_neigh_info():
 
     req_data = {}
     req_data[SERIAL_NUM] = system_id
-    req_data[CHASSIS_ID] = chassis_id
+    req_data[MODEL_TYPE] = chassis_id
     req_data[NEIGHBOR_LIST] = neighbours
     return(json.dumps(req_data))
 
@@ -398,9 +400,8 @@ def get_cdp_neigh_info():
 def set_system_info():
     global system_id
     global chassis_id
-    system_info = json.loads(clid("show version"))
-    system_id = str(system_info['proc_board_id'])
-    chassis_id = str(system_info['chassis_id'])
+    system_id = str(json.loads(clid("show inv"))['TABLE_inv']['ROW_inv'][0]['serialnum'])
+    chassis_id = str(json.loads(clid("show inv"))['TABLE_inv']['ROW_inv'][0]['desc'])
 
 
 def fetch_task():
@@ -516,7 +517,7 @@ if __name__ == "__main__":
     req_data = get_cdp_neigh_info()
     ignite_response = send_cdp_neigh_info(req_data)
     get_yaml_file(ignite_response)
-    load_yaml()
+    load_yaml(ignite_response[RESP_ACCESS_METHOD])
     task_list = fetch_task()
     exec_task(task_list)
     send_switch_status(True)

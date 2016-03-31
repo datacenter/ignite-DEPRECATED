@@ -75,7 +75,6 @@ def do_copy(source="", dest=""):
                                                 hostname_g, source, dest, vrf_g)
 
     if protocol_g == PROTO_TFTP:
-        source = os.path.basename(source)
 
         if port_g:
             cmd = "copy %s://%s:%s/%s %s vrf %s" % (protocol_g, hostname_g,

@@ -201,6 +201,7 @@ class FabricSerializer(serializers.Serializer):
     name = serializers.CharField()
     model_name = serializers.CharField()
     submit = serializers.BooleanField()
+    build_time = serializers.DateTimeField(read_only=True)
     config_profile = serializers.PrimaryKeyRelatedField(read_only=True)
     feature_profile = serializers.PrimaryKeyRelatedField(read_only=True)
     site = serializers.CharField()

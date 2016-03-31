@@ -19,6 +19,13 @@ IGNITE_PASSWORD = "ignite"
 # logs path for switch specific logs file in Ignite server
 REMOTE_SYSLOG_PATH = "/var/log/remote/ignite/system-"
 
+#ACCESS_METHODS
+#tftp : trivial file transfer protocol
+#scp : secure copy
+#sftp : ssh file transfer protcol
+#http : hypertext transfer protocol
+ACCESS_PROTOCOL = "scp"
+
 # syslog port
 SYSLOG_PORT = 514
 
@@ -33,4 +40,3 @@ RMQ_VHOST = "vhost"
 #Celery Daemon Settings
 CELERYD_USER = "user"
 CELERYD_GROUP = "user"
-

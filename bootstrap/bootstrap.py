@@ -11,13 +11,16 @@ from constants import *
 import discovery.discoveryrule as discoveryrule
 from fabric.constants import SERIAL_NUM, SERIAL_NUMBER, NEIGHBOR, ERR_SERIAL_NUM_IN_USE
 from fabric.build import build_config, build_switch_config
-from fabric.fabric import search_fabric, get_switch_workflow, get_switch_image, get_switch_feature_profile
+from fabric.fabric import search_fabric, get_switch_workflow
+from fabric.fabric import get_switch_image, get_switch_feature_profile
 from fabric.models import Switch
+from switch.models import SwitchModel
 from ignite.conf import IGNITE_IP, IGNITE_USER, IGNITE_PASSWORD
-from ignite.conf import REMOTE_SYSLOG_PATH, LOG_LINE_COUNT
+from ignite.conf import REMOTE_SYSLOG_PATH, LOG_LINE_COUNT, ACCESS_PROTOCOL
 from ignite.settings import REPO_PATH, PKG_PATH, YAML_LIB
 from models import SwitchBootDetail
 from utils.exception import IgniteException
+from workflow.constants import PROTO_SCP, PROTO_TFTP, PROTO_HTTP, PROTO_SFTP
 from workflow.constants import ACCESS_PROTOCOLS, BOOTSTRAP_WORKFLOW_ID
 from workflow.workflow import build_workflow, get_workflow
 
@@ -27,9 +30,13 @@ logger = logging.getLogger(__name__)
 
 
 def ignite_request(request):
-    serial_number = request[SERIAL_NUM]
-    switch, match_type = search_fabric(request)
+    if ACCESS_PROTOCOL not in ACCESS_PROTOCOLS:
+        msg = ERR_PROTO_NOT_FOUND + "- " + ACCESS_PROTOCOL
+        return _get_server_response(False, err_msg=msg)
 
+    serial_number = request[SERIAL_NUM]
+    model_type = request[MODEL_TYPE]
+    switch, match_type = search_fabric(request)
     if switch:
 
         if (switch.topology.feature_profile or
@@ -51,21 +58,30 @@ def ignite_request(request):
         # fetch switch image
         image = get_switch_image(switch)
 
-        logger.debug("Build workflow")
-        cfg_file = os.path.join(REPO_PATH + str(switch.id) + CFG_FILE_EXT)
-        wf_file = os.path.join(REPO_PATH + str(switch.id) + YAML_FILE_EXT)
+        cfg_file = str(switch.id) + CFG_FILE_EXT
+        wf_file = str(switch.id) + YAML_FILE_EXT
 
-        with open(wf_file, 'w') as output_fh:
+        logger.debug("Build workflow")
+        if ACCESS_PROTOCOL in [PROTO_SCP, PROTO_SFTP]:
+            cfg_file = os.path.join(REPO_PATH, cfg_file)
+        elif ACCESS_PROTOCOL == PROTO_HTTP:
+            cfg_file = os.path.join(DOWNLOAD_URL, CONFIG, cfg_file)
+        else:
+            cfg_file = os.path.join(FILE_REPO_PATH, cfg_file)
+
+        with open(os.path.join(REPO_PATH, wf_file), 'w') as output_fh:
             output_fh.write(yaml.safe_dump(build_workflow(wf,
                                                           image,
                                                           cfg_file,
                                                           serial_number),
                                            default_flow_style=False))
-
         update_boot_detail(switch,
                            match_type=match_type,
                            boot_status=BOOT_PROGRESS,
-                           boot_time=timezone.now())
+                           boot_time=timezone.now(),
+                           model_type=model_type)
+
+        update_switch_model(switch, model_type)
 
         #update switch serial number
         if switch.serial_num != serial_number:
@@ -81,6 +97,13 @@ def ignite_request(request):
 
             switch.serial_num = serial_number
             switch.save()
+
+        if ACCESS_PROTOCOL in [PROTO_SCP, PROTO_SFTP]:
+            wf_file = os.path.join(REPO_PATH, wf_file)
+        elif ACCESS_PROTOCOL == PROTO_HTTP:
+            wf_file = os.path.join(DOWNLOAD_URL, YAML, wf_file)
+        else:
+            wf_file = os.path.join(FILE_REPO_PATH, wf_file)
 
         return _get_server_response(True, wf_file)
 
@@ -112,7 +135,8 @@ def ignite_request(request):
         try:
             os.remove(os.path.join(REPO_PATH + str(switch.id) + '.cfg'))
         except OSError as e:
-            pass
+                pass
+
         # build new cfg
         build_switch_config(switch, switch_cfg=rule.config)
 
@@ -125,18 +149,35 @@ def ignite_request(request):
                            match_type=match_type,
                            discovery_rule=rule,
                            boot_time=timezone.now(),
-                           boot_status=BOOT_PROGRESS)
+                           boot_status=BOOT_PROGRESS,
+                           model_type=model_type)
+
+        update_switch_model(switch, model_type)
+
+        cfg_file = str(switch.id) + CFG_FILE_EXT
+        wf_file = str(switch.id) + YAML_FILE_EXT
 
         logger.debug("Build workflow")
-        cfg_file = os.path.join(REPO_PATH + str(switch.id) + CFG_FILE_EXT)
-        wf_file = os.path.join(REPO_PATH + str(switch.id) + YAML_FILE_EXT)
+        if ACCESS_PROTOCOL in [PROTO_SCP, PROTO_SFTP]:
+            cfg_file = os.path.join(REPO_PATH, cfg_file)
+        elif ACCESS_PROTOCOL == PROTO_HTTP:
+            cfg_file = os.path.join(DOWNLOAD_URL, CONFIG, cfg_file)
+        else:
+            cfg_file = os.path.join(FILE_REPO_PATH, cfg_file)
 
-        with open(wf_file, 'w') as output_fh:
+        with open(os.path.join(REPO_PATH, wf_file), 'w') as output_fh:
             output_fh.write(yaml.safe_dump(build_workflow(wf,
                                                           rule.image,
                                                           cfg_file,
                                                           serial_number),
                                            default_flow_style=False))
+
+        if ACCESS_PROTOCOL in [PROTO_SCP, PROTO_SFTP]:
+            wf_file = os.path.join(REPO_PATH, wf_file)
+        elif ACCESS_PROTOCOL == PROTO_HTTP:
+            wf_file = os.path.join(DOWNLOAD_URL, YAML, wf_file)
+        else:
+            wf_file = os.path.join(FILE_REPO_PATH, wf_file)
 
         return _get_server_response(True, wf_file)
 
@@ -146,7 +187,8 @@ def ignite_request(request):
 def update_boot_detail(switch, boot_status="",
                        match_type="",
                        discovery_rule=None,
-                       boot_time=""):
+                       boot_time="",
+                       model_type=""):
 
     if not switch.boot_detail:
         boot_detail = SwitchBootDetail()
@@ -164,6 +206,9 @@ def update_boot_detail(switch, boot_status="",
 
     if boot_time:
         boot_detail.boot_time = boot_time
+
+    if model_type:
+        boot_detail.model_type = model_type
 
     boot_detail.save()
     switch.boot_detail = boot_detail
@@ -186,9 +231,15 @@ def _get_server_response(status, yaml_file=None, err_msg=""):
     response[SERVER_IP] = IGNITE_IP
     response[SERVER_USER] = IGNITE_USER
     response[SERVER_PASSWORD] = IGNITE_PASSWORD
+    response[ACCESS_METHOD] = ACCESS_PROTOCOL
     response[FILE] = yaml_file
-    response[ACCESS_METHOD] = ACCESS_PROTOCOLS[2]
-    response[YAML_PATH] = os.path.join(PKG_PATH, YAML_LIB)
+    if ACCESS_PROTOCOL in [PROTO_SCP, PROTO_SFTP]:
+        response[YAML_PATH] = os.path.join(PKG_PATH, YAML_LIB)
+    elif ACCESS_PROTOCOL == PROTO_HTTP:
+        response[YAML_PATH] = os.path.join(DOWNLOAD_URL, PKG_DIR, YAML_LIB)
+    else:
+        response[YAML_PATH] = os.path.join(SCRIPT_DIR,
+                                           PKG_DIR, YAML_LIB)
     return response
 
 
@@ -199,14 +250,44 @@ def get_all_booted_switches():
 def update_boot_status(data):
     serial_num = data[SERIAL_NUM]
     status = data[STATUS]
+    model_type = data[MODEL_TYPE]
     try:
         switch = Switch.objects.get(serial_num=serial_num)
         if status:
             update_boot_detail(switch, boot_status=BOOT_SUCCESS)
         else:
             update_boot_detail(switch, boot_status=BOOT_FAIL)
+
+        update_switch_model(switch, model_type)
+
     except Switch.DoesNotExist:
         raise IgniteException(ERR_SERIAL_NUM_MISMATCH)
+
+
+def update_switch_model(switch, model_type):
+    try:
+        switch_model = SwitchModel.objects.get(name=model_type)
+    except SwitchModel.DoesNotExist:
+        switch_model = SwitchModel.objects.get(pk=1)
+
+    update_switch_model_details(switch.boot_detail.boot_status, switch_model)
+
+
+def update_switch_model_details(boot_status, switch_model):
+    if boot_status == BOOT_PROGRESS:
+        switch_model.boot_in_progress += 1
+        switch_model.save()
+        return
+
+    switch_model.boot_in_progress -= 1
+
+    if boot_status == BOOT_SUCCESS:
+        switch_model.booted_with_success += 1
+
+    elif boot_status == BOOT_FAIL:
+        switch_model.booted_with_fail += 1
+
+    switch_model.save()
 
 
 def getfile_list(syslog_path):
@@ -257,7 +338,7 @@ def preparelogs(file_name_list,  key1, is_common_log):
 def get_logs(id):
     syslog_path = SYSLOG_PATH
     switch = Switch.objects.get(id=id)
-    serial_num = str(switch.boot_detail.serial_number)
+    serial_num = str(switch.serial_num)
     file_name_list = getfile_list(syslog_path)
     if not switch.boot_detail:
         raise IgniteException(ERR_SWITCH_NOT_BOOTED)

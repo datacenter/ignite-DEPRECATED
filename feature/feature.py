@@ -1,7 +1,6 @@
 from django.db.models import ProtectedError
 import json
 import string
-
 from constants import *
 from models import Feature, Profile
 from utils.exception import IgniteException
@@ -36,9 +35,12 @@ def add_feature(data, user):
 def get_feature(id):
     obj = Feature.objects.get(pk=id)
     obj.file = []
-    for line in obj.path.file:
-        obj.file.append(string.rstrip(line))
-    return obj
+    try:
+        for line in obj.path.file:
+            obj.file.append(string.rstrip(line))
+        return obj
+    except IOError:
+        raise IgniteException(ERR_FEATURE_FILE_NOT_FOUND+" : "+obj.name)
 
 
 def update_feature(id, data, user):
@@ -89,11 +91,11 @@ def _add_profile(data, user, id=0):
         update_ref_count(obj.construct_list, -1)
         obj.name = data[NAME]
 
-        if not data[CONSTRUCT_LIST]: 
+        if not data[CONSTRUCT_LIST]:
             raise IgniteException(ERR_PROF_IS_EMPTY)
         else:
             obj.construct_list = data[CONSTRUCT_LIST]
-        
+
         obj.submit = data[SUBMIT]
         obj.updated_by = user
         update_ref_count(data[CONSTRUCT_LIST], +1)
@@ -132,7 +134,6 @@ def build_feature_profile(feature_prof):
     for item in feature_prof.construct_list:
         configs = {}
         feat = get_feature(item[TEMPLATE_ID])
-
         for line in feat.path.file:
 
             for param_detail in item[PARAM_LIST]:

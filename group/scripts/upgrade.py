@@ -41,16 +41,13 @@ def update_os_image_single_switch(switch, image):
     image_name = image["system_image"].split(r'/')[-1]
     myheaders = {'content-type': 'application/json-rpc'}
     commands = []
-    #commands.append(['terminal dont-ask', 7, 'set'])
-    #commands.append(['terminal password ' + image["image_server_password"], 7, ''])
-    #commands.append(['del bootflash:' + image_name + ' no-prompt', 70, ''])
-    #commands.append(['copy ' + scp_string + ' bootflash:' + image_name + ' vrf management', 300, 'scp'])
-    #commands.append(['no terminal password', 7, 'set'])
-    #commands.append(['copy running-config startup-config', 7, 'copy-config'])
-    #commands.append(['install all nxos bootflash:' + image_name, 500, 'system-install'])
-    #commands.append(['terminal dont-ask', 7, 'set'])
-    commands.append(['sh run', 7, 'set'])
-    #commands.append(['no terminal dont-ask', 7, 'set'])
+    commands.append(['terminal dont-ask', 7, 'set'])
+    commands.append(['terminal password ' + image["image_server_password"], 7, ''])
+    commands.append(['del bootflash:' + image_name + ' no-prompt', 70, ''])
+    commands.append(['copy ' + scp_string + ' bootflash:' + image_name + ' vrf management', 300, 'scp'])
+    commands.append(['no terminal password', 7, 'set'])
+    commands.append(['copy running-config startup-config', 7, 'copy-config'])
+    commands.append(['install all nxos bootflash:' + image_name, 500, 'system-install'])
     payload = []
     payload_temp = []
     status = {"status":"","log":""}
@@ -76,7 +73,6 @@ def update_os_image_single_switch(switch, image):
                     return status
         except requests.exceptions.Timeout:
             print 'timeout occured while running', command
-            #return handle_nxapi_error(command)
             status["status"] = 'FAILURE'
             status["log"] = "Timed Out"
             return status
@@ -86,11 +82,11 @@ def update_os_image_single_switch(switch, image):
             status['status'] = 'FAILURE'
             status["log"] = str(e)
             return status
-            #return handle_nxapi_error(command)
             break
         payload.pop()
     status['status'] = 'SUCCESS'
     return status
+
 
 def update_epld_image_single_switch(switch, image):
     url = build_nxapi_url(switch["ip"])
@@ -100,7 +96,6 @@ def update_epld_image_single_switch(switch, image):
     epld_image_name = image["epld_image"].split(r'/')[-1]
     myheaders = {'content-type': 'application/json-rpc'}
     commands = []
-    #commands.append(['show run', 7, 'set'])
     commands.append(['terminal dont-ask', 7, 'set'])
     
     commands.append(['terminal password ' + image["image_server_password"], 7, ''])

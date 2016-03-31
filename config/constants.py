@@ -44,7 +44,7 @@ ERR_IN_PROCESSING_SCRIPT = "Failed to process script"
 ERR_PROF_IN_USE = "Profile is in use"
 ERR_VALUE_NOT_FOUND = "Value not found for parameter"
 ERR_PROF_IS_EMPTY = "No configlet is added"
-
+ERR_CONFIGLET_FILE_NOT_FOUND = "Configlet not found"
 #Instance dependent params
 HOST_NAME = 'HOST_NAME'
 VPC_PEER_SRC = 'VPC_PEER_SRC'

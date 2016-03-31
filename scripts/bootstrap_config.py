@@ -12,10 +12,17 @@ md5sum_ext_src = "md5"
 
 #copy parameters
 protocol_g = ""
+port_g = ""
 hostname_g = ""
 username_g = ""
 password_g = ""
 vrf_g = ""
+
+#Access protocols
+PROTO_SCP = 'scp'
+PROTO_TFTP = 'tftp'
+PROTO_SFTP = 'sftp'
+PROTO_HTTP = 'http'
 
 #serial number of switch
 serial_num_g = ""
@@ -54,18 +61,38 @@ def abort_cleanup_exit(exit_status):
     exit(exit_status)
 
 
-def do_copy(file_src, file_dst):
-    rm_rf(file_dst)
-    cmd = "terminal dont-ask ; terminal password %s ; " % password_g
-    cmd += "copy %s://%s@%s%s %s vrf %s" % (protocol_g, username_g,
-                                            hostname_g, file_src,
-                                            file_dst, vrf_g)
+def do_copy(source, dest):
+    rm_rf(dest)
+    syslog("INFO: Copy started")
+
+    if protocol_g == PROTO_SCP:
+        cmd = "terminal dont-ask ; terminal password %s ; " % password_g
+        cmd += "copy %s://%s@%s%s %s vrf %s" % (protocol_g, username_g,
+                                                hostname_g, source, dest, vrf_g)
+
+    if protocol_g == PROTO_TFTP:
+
+        if port_g:
+            cmd = "copy %s://%s:%s/%s %s vrf %s" % (protocol_g, hostname_g,
+                                                    port_g, source, dest, vrf_g)
+        else:
+            cmd = "copy %s://%s/%s %s vrf %s" % (protocol_g, hostname_g,
+                                                 source, dest, vrf_g)
+
+    if protocol_g == PROTO_SFTP:
+        cmd = "terminal dont-ask ; terminal password %s ; " % password_g
+        cmd += "copy %s://%s@%s%s %s vrf %s" % (protocol_g, username_g,
+                                                hostname_g, source, dest, vrf_g)
+
+    if protocol_g == PROTO_HTTP:
+        cmd = "copy %s://%s%s %s vrf %s" % (protocol_g, hostname_g,
+                                            source, dest, vrf_g)
 
     try:
         run_cli(cmd)
         return True
     except:
-        syslog("WARN: Copy Failed: %s" % str(sys.exc_value).strip('\n\r'))
+        syslog("Copy Failed: %s" % str(sys.exc_value).strip('\n\r'))
         return False
 
 
@@ -118,6 +145,8 @@ def get_config(protocol="scp", port="", hostname="", file_src="",
 
     global protocol_g
     protocol_g = protocol
+    global port_g
+    port_g = port
     global hostname_g
     hostname_g = hostname
     global username_g

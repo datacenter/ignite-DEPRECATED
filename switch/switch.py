@@ -12,9 +12,9 @@ logger = logging.getLogger(__name__)
 
 def get_all_switches(switch_type, tier):
     if switch_type == ALL:
-        switches = SwitchModel.objects.all().order_by(NAME)
+        switches = SwitchModel.objects.all().exclude(pk=1).order_by(NAME)
     else:
-        switches = (SwitchModel.objects.filter(switch_type=switch_type).
+        switches = (SwitchModel.objects.filter(switch_type=switch_type).exclude(pk=1).
                     order_by(NAME))
 
     switch_list = list()
