@@ -8,7 +8,7 @@ from models import Topology
 NUM_LINKS_MIN = 1
 NUM_LINKS_MAX = 4
 COUNT_MIN = 0
-COUNT_MAX = 16
+COUNT_MAX = 96
 
 
 class NameSerializer(serializers.Serializer):
