@@ -36,6 +36,9 @@ SYSLOG_PORT = 514
 # number of lines to display in logs
 LOG_LINE_COUNT = 500
 
+# log file name
+SYSLOG_PATH = "/var/log/syslog*"
+
 # RabbitMQ Settings
 RMQ_USERNAME = "admin"
 RMQ_PASSWORD = "admin"

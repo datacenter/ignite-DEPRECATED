@@ -29,7 +29,6 @@ NOT_BOOTED = 'Not Booted'
 
 #logs
 LOG_SEARCH_COL = 3
-SYSLOG_PATH = '/var/log/syslog*'
 
 #Error Messages
 ERR_NO_RESPONSE = "No match found for serial number or neighbor list"

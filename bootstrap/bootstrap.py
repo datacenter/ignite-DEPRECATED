@@ -16,7 +16,7 @@ from fabric.fabric import get_switch_image, get_switch_feature_profile
 from fabric.models import Switch
 from switch.models import SwitchModel
 from ignite.conf import IGNITE_IP, IGNITE_USER, IGNITE_PASSWORD
-from ignite.conf import REMOTE_SYSLOG_PATH, LOG_LINE_COUNT, ACCESS_PROTOCOL
+from ignite.conf import REMOTE_SYSLOG_PATH, LOG_LINE_COUNT, ACCESS_PROTOCOL, SYSLOG_PATH
 from ignite.settings import REPO_PATH, PKG_PATH, YAML_LIB
 from models import SwitchBootDetail
 from utils.exception import IgniteException
@@ -320,9 +320,12 @@ def preparelogs(file_name_list,  key1, is_common_log):
 
         if is_common_log:
             for line in lines:
-                words = line.split()
-                if key1 == words[LOG_SEARCH_COL]:
-                    partial_log_file.append(line)
+	        try:
+                    words = line.split()
+                    if key1 == words[LOG_SEARCH_COL]:
+                        partial_log_file.append(line)
+                except:
+		    pass
         else:
             partial_log_file = lines
 
