@@ -1,4 +1,5 @@
 #!/bin/env python
+#md5sum=<7521e0b0b04278c488d57dd022e8433b>
 
 from cli import *
 import imp
@@ -8,15 +9,16 @@ import os
 import signal
 import socket
 import sys
+import tarfile
 import time
 import urllib2
 
 
 #Ignite server access details - fill in from ignite/config.py
-ignite_username = "ignite"
-ignite_password = "ignite"
-ignite_hostname = "127.0.0.1"
-ignite_port = "8000"
+ignite_username = "admin"
+ignite_password = "cisco123"
+ignite_hostname = "172.31.219.250"
+ignite_port = "80"
 vrf = "management"
 
 #non editable
@@ -84,16 +86,20 @@ CHASSIS_ID = 'chassis_id'
 #get actual system/chassis id
 system_id = ''
 chassis_id = ''
+RETRY_COUNT = 5
 
 #File locations details
-YAML_RESP_FILE = 'volatile:ignite_resp.yml'
-TASK_FILE_LOC = 'volatile:'
 
-#YAML package download and import
-YAML_DOWNLOAD_LOC = 'bootflash:poap/'
-yaml_download_loc_u = '/bootflash/poap/'
-YAML_DOWNLOAD_LOC_TEMP = 'volatile:'
+VOLATILE = 'volatile:'
+VOLATILE_U = '/volatile'
+BOOTFLASH_U = "/bootflash"
+POAP_DIR = 'bootflash:poap'
+POAP_DIR_U = '/bootflash/poap'
 yaml_lib_src = ''
+yaml_response_file = ''
+
+#Replay file tag
+REPLAY_FILE_TAG = 'poap_replay'
 
 #Log levels and Facility
 FACILITY = {
@@ -128,45 +134,15 @@ def load_yaml(access_protocol):
             get_yaml_module(access_protocol)
 
 
-def ignored_ext(file_name):
-    ext = file_name.split('.')[-2]+"."+file_name.split('.')[-1]
-    if ext == 'tar.gz':
-        return True
-    return False
-
-
 def yaml_pkg_exist():
+    global yaml_lib_src
     yaml_lib_path = ''
-    pkg_name_exp = 'PyYAML'
-    dir_list = []
-    try:
-        dir_list = os.listdir(yaml_download_loc_u)
-    except OSError:
-        poap_log("Creating bootflash:poap directory")
-        cmd = "mkdir %s" % YAML_DOWNLOAD_LOC
-        run_cli(cmd)
-
-    for dir in dir_list:
-        if pkg_name_exp in dir:
-            if not ignored_ext(dir):
-                yaml_lib_path = "%s/%s/lib" % (yaml_download_loc_u, dir)
-                poap_log("YAML pkg found(1) at %s/%s" % (yaml_download_loc_u, dir))
-            else:
-                pkg_name = os.path.splitext(dir)[0]
-                if pkg_name in dir_list:
-                    yaml_lib_path = "%s/%s/lib" % (yaml_download_loc_u,
-                                                   pkg_name)
-                    poap_log("YAML pkg found(2) at %s/%s" % (yaml_download_loc_u, dir))
-                else:
-                    yaml_tar_path = '%s/%s' % (YAML_DOWNLOAD_LOC, dir)
-                    untar(yaml_tar_path, YAML_DOWNLOAD_LOC)
-                    yaml_lib_path = "%s/%s/lib" % (yaml_download_loc_u,
-                                                   pkg_name)
-
-            if yaml_lib_path:
-                import_yaml_module(yaml_lib_path)
-                return True
-
+    pkg_name = os.path.basename(yaml_lib_src)
+    yaml_lib_path = os.path.join(POAP_DIR_U, pkg_name, 'lib')
+    if os.path.isdir(yaml_lib_path):
+        poap_log("YAML pkg found(1)- at %s" %yaml_lib_path)
+        import_yaml_module(yaml_lib_path)
+        return True
     return False
 
 
@@ -175,7 +151,7 @@ def import_yaml_module(yaml_lib_path):
     try:
         sys.path.append(yaml_lib_path)
     except:
-        abort_cleanup_exit()
+        cleanup_exit(1)
 
 
 def get_yaml_module(access_protocol):
@@ -186,20 +162,20 @@ def get_yaml_module(access_protocol):
     username = ignite_username
     password = ignite_password
     file_src = yaml_lib_src
-    file_dst_temp = YAML_DOWNLOAD_LOC_TEMP
+    pkg_name = os.path.basename(file_src)
+    file_dst_temp = "%s%s" %(VOLATILE, pkg_name)
     copy_status = get_file(access_protocol, hostname, port,
                            username, password, file_src, file_dst_temp)
 
     if copy_status:
-        pkg_name = os.path.basename(yaml_lib_src)
-        file_src = "%s%s" % (file_dst_temp, pkg_name)
-        untar(file_src, YAML_DOWNLOAD_LOC)
+        file_dst_temp_u = os.path.join(VOLATILE_U, pkg_name)
+        untar(file_dst_temp_u, POAP_DIR_U)
         pkg_name = os.path.splitext(pkg_name)[0].split('.')
         pkg_name = '.'.join(pkg_name[0:-1])
-        yaml_lib_path = yaml_download_loc_u + pkg_name + '/lib'
+        yaml_lib_path = os.path.join(POAP_DIR_U, pkg_name, 'lib')
         import_yaml_module(yaml_lib_path)
     else:
-        abort_cleanup_exit()
+        cleanup_exit(1)
 
 
 def syslog(message, level=LEVEL['notice'], facility=FACILITY['daemon'],
@@ -216,7 +192,9 @@ def syslog(message, level=LEVEL['notice'], facility=FACILITY['daemon'],
 def setup_log_file():
     log_filename = '/bootflash/poap.log'
     #now=cli("show clock | sed 's/[ :]/_/g'")
-    now = 1
+    t=time.localtime()
+    now="%d_%d_%d" % (t.tm_hour, t.tm_min, t.tm_sec)
+    #now = 1
     try:
         log_filename = "%s.%s" % (log_filename, now)
     except Exception as inst:
@@ -236,14 +214,31 @@ def poap_log(info):
 
 
 def poap_log_close():
-    LOG_FILE_HANDLE.close()
+    if LOG_FILE_HANDLE:
+        LOG_FILE_HANDLE.close()
 
 #Log set ends
 
 
+def create_poap_dir():
+    if os.path.isdir(POAP_DIR_U):
+        poap_log("Exists- %s" %POAP_DIR_U)
+    else:
+        poap_log("Create %s" %POAP_DIR_U)
+        try:
+            os.mkdir(POAP_DIR_U)
+            poap_log("Created")
+        except OSError:
+            poap_log("Could not create")
+            cleanup_exit(1)
+
+
 def untar(file_src, file_dst):
-    cmd = "tar extract %s to %s" % (file_src, file_dst)
-    run_cli(cmd)
+    poap_log("untar - src %s:, dst : %s" %(file_src, file_dst))
+    tf = tarfile.open(file_src, 'r')
+    tf.extractall(file_dst)
+    #cmd = "tar extract %s to %s" % (file_src, file_dst)
+    #run_cli(cmd)
 
 
 def run_cli(cmd):
@@ -252,10 +247,16 @@ def run_cli(cmd):
 
 
 def rm_rf(filename):
+    filename_u = "/" + filename.replace(":", "/")
+    if not os.path.exists(filename_u):
+        poap_log("rm_rf : Does not exists- %s" %filename_u)
+        return
     try:
-        cli("delete %s" % filename)
+        run_cli("delete %s" %filename)
+        poap_log("Delted")
     except:
-        pass
+        poap_log("Could not delete")
+        cleanup_exit(1)
 
 
 # signal handling
@@ -266,15 +267,29 @@ def sig_handler_no_exit(signum, frame):
 
 def sigterm_handler(signum, frame):
     poap_log("INFO: SIGTERM Handler")
-    abort_cleanup_exit()
     exit(1)
 
 
-def abort_cleanup_exit():
-    poap_log("INFO: cleaning up")
-    send_switch_status(False)
+def del_replay_cfg():
+   replay_files = os.listdir(BOOTFLASH_U)
+   poap_log("Removing previous replay files")
+   for filename in replay_files:
+       if REPLAY_FILE_TAG in filename:
+           poap_log("Replay file found -%s" %filename)
+           try:
+               os.remove(os.path.join(BOOTFLASH_U, filename))
+               poap_log("Deleted")
+           except OSError:
+               poap_log("Could not delete")
+
+
+def cleanup_exit(exit_code):
+    poap_log("INFO: cleaning up - exit code %s" %exit_code)
+    if exit_code:
+        del_replay_cfg()
+        send_switch_status(False)
     poap_log_close()
-    exit(1)
+    exit(exit_code)
 
 
 def wait_box_online():
@@ -292,7 +307,7 @@ def get_file(access_protocol='', hostname='', port='', username='', password='',
     rm_rf(file_dst)
 
     if access_protocol == PROTO_SCP:
-        cmd = "terminal dont-ask ; terminal password %s ; " % password
+        cmd = "terminal password %s ; " % password
         cmd += "copy %s://%s@%s%s %s vrf %s" % (access_protocol, username, hostname, file_src, file_dst, vrf)
 
     if access_protocol == PROTO_TFTP:
@@ -303,13 +318,14 @@ def get_file(access_protocol='', hostname='', port='', username='', password='',
             cmd = "copy %s://%s/%s %s vrf %s" % (access_protocol, hostname, file_src, file_dst, vrf)
 
     if access_protocol == PROTO_SFTP:
-        cmd = "terminal dont-ask ; terminal password %s ; " % password
+        cmd = "terminal password %s ; " % password
         cmd += "copy %s://%s@%s%s %s vrf %s" % (access_protocol, username, hostname, file_src, file_dst, vrf)
 
     if access_protocol == PROTO_HTTP:
         cmd = "copy %s://%s%s %s vrf %s" % (access_protocol, hostname, file_src, file_dst, vrf)
 
     try:
+        cmd = "terminal dont-ask ; " + cmd
         run_cli(cmd)
         return True
     except:
@@ -319,6 +335,7 @@ def get_file(access_protocol='', hostname='', port='', username='', password='',
 
 def get_yaml_file(ignite_resp_data):
     global yaml_lib_src
+    global yaml_response_file
     yaml_lib_src = ignite_resp_data[RESP_YAML_LIB_PATH]
     file_src = ignite_resp_data[RESP_FILE_SRC]
     hostname = ignite_resp_data[RESP_HOSTNAME]
@@ -326,7 +343,8 @@ def get_yaml_file(ignite_resp_data):
     access_protocol = ignite_resp_data[RESP_ACCESS_METHOD]
     username = ignite_resp_data[RESP_USERNAME]
     password = ignite_resp_data[RESP_PASSWORD]
-    return get_file(access_protocol, hostname, port, username, password, file_src, YAML_RESP_FILE)
+    yaml_response_file = "%s%s" %(VOLATILE, os.path.basename(file_src))
+    return get_file(access_protocol, hostname, port, username, password, file_src, yaml_response_file)
 
 
 def send_cdp_neigh_info(ignite_req):
@@ -338,7 +356,7 @@ def send_cdp_neigh_info(ignite_req):
     if not resp_data[RESP_STATUS]:
         poap_log("Ignite server response status is Flase with error message: %s"
                  % resp_data[RESP_ERR])
-        abort_cleanup_exit()
+        cleanup_exit(1)
 
     poap_log("Ignite response")
     poap_log("file_src: %s hostname: %s: access_protocol: %s username: %s password: %s"
@@ -365,14 +383,17 @@ def do_no_shut_intf():
     no_shut_intf = "conf t"
     for interface in interface_list['TABLE_interface']['ROW_interface']:
         no_shut_intf = no_shut_intf + " ; interface " + interface['interface'] + " ; no shut"
-    cli(no_shut_intf)
+    run_cli(no_shut_intf)
 
 
 def get_cdp_neigh_info():
     do_no_shut_intf()
     #Wait for CDP timeout time before collecting cdp neigh info
-    time.sleep(int(cli("show cdp global | grep Refresh | awk '{print $4}'").strip('\n')) + 1)
-    cdp_nei = clid("show cdp neigh")
+    #time.sleep(int(run_cli("show cdp global | grep Refresh | awk '{print $4}'").strip('\n')) + 1)
+    cmd = "show cdp neigh"
+    poap_log("cmd : %s" %cmd)
+    cdp_nei = clid(cmd)
+    poap_log(cdp_nei)
     json_cdp_nei = json.loads(cdp_nei)
     cdp_row_det = json_cdp_nei['TABLE_cdp_neighbor_brief_info']['ROW_cdp_neighbor_brief_info']
     neighbours = []
@@ -394,19 +415,43 @@ def get_cdp_neigh_info():
     req_data[SERIAL_NUM] = system_id
     req_data[MODEL_TYPE] = chassis_id
     req_data[NEIGHBOR_LIST] = neighbours
-    return(json.dumps(req_data))
+    json_req_data = json.dumps(req_data)
+    poap_log(json_req_data)
+    return(json_req_data)
 
 
 def set_system_info():
     global system_id
     global chassis_id
-    system_id = str(json.loads(clid("show inv"))['TABLE_inv']['ROW_inv'][0]['serialnum'])
-    chassis_id = str(json.loads(clid("show inv"))['TABLE_inv']['ROW_inv'][0]['desc'])
+    counter = 1
+    steps = 5
+    cmd = "show inv"
+    LOG_FILE_HANDLE.write("CLI : %s\n" %cmd)
+    LOG_FILE_HANDLE.flush()
+    while ((counter <= RETRY_COUNT) and (not system_id or not chassis_id)):
+        if counter != 1:
+            wait_time = counter * steps;
+            info = "Failing to get system info - sleep for %s\n" % wait_time
+            LOG_FILE_HANDLE.write(info)
+            LOG_FILE_HANDLE.flush()
+            time.sleep(wait_time)        
+	system_info = json.loads(clid("show inv"))
+	system_id = str(system_info['TABLE_inv']['ROW_inv'][0]['serialnum'])
+	chassis_id =  str(system_info['TABLE_inv']['ROW_inv'][0]['desc']) 
+	info = "Serial number : %s, Chassis : %s\n" %(system_id, chassis_id)
+	LOG_FILE_HANDLE.write(info)
+	LOG_FILE_HANDLE.flush()
+
+    if not system_id or not chassis_id:
+        LOG_FILE_HANDLE.write("Aborting- set_system_info failed")
+        LOG_FILE_HANDLE.flush()
+        poap_log_close()
+        exit(1) 
 
 
 def fetch_task():
     import yaml
-    yaml_file_u = YAML_RESP_FILE.replace(':', '/')
+    yaml_file_u = yaml_response_file.replace(':', '/')
     yaml_file_u = "/" + yaml_file_u
     yaml_file_fh = open(yaml_file_u, 'r')
 
@@ -428,7 +473,7 @@ def fetch_task():
             if loc_name not in loc_name_list:
                 poap_log("Location-%s not found for task-%s"
                          % (loc_name, "task"))
-                abort_cleanup_exit()
+                cleanup_exit(1)
 
     copy_status = False
 
@@ -442,15 +487,14 @@ def fetch_task():
         password = loc[PASSWORD]
         hostname = loc[HOSTNAME]
         file_src = task[TASK_HANDLER]
-        file_dst = TASK_FILE_LOC + os.path.basename(file_src)
+        file_dst = VOLATILE + os.path.basename(file_src)
         copy_status = get_file(access_protocol, hostname, port,
                                username, password, file_src, file_dst)
-        poap_log("Task fetch success")
 
         if not copy_status:
             poap_log("Fetch failed for task %s" % file_src)
-            abort_cleanup_exit()
-        poap_log("Copy complete")
+            cleanup_exit(1)
+        poap_log("Task fetch success")
         task.update({TASK_DST: file_dst})
 
     return task_list
@@ -470,7 +514,7 @@ def import_module(task):
         poap_log("Loaded  module: %s" % (str(module)))
     except:
         poap_log("Failed to load the module: %s" % import_name)
-        abort_cleanup_exit()
+        cleanup_exit(1)
 
 
 def create_process(task):
@@ -494,7 +538,7 @@ def run_process(task):
     proc.start()
     proc.join()
     if proc.exitcode:
-        abort_cleanup_exit()
+        cleanup_exit(1)
 
 
 def exec_task(task_list):
@@ -512,8 +556,11 @@ def exec_task(task_list):
 if __name__ == "__main__":
     signal.signal(signal.SIGTERM, sig_handler_no_exit)
     setup_log_file()
+    LOG_FILE_HANDLE.write("Started execution of poap script-1\n")
+    LOG_FILE_HANDLE.flush()
     set_system_info()
-    poap_log("Started execution of poap script")
+    poap_log("system info fetch complete")
+    create_poap_dir()
     req_data = get_cdp_neigh_info()
     ignite_response = send_cdp_neigh_info(req_data)
     get_yaml_file(ignite_response)
@@ -522,4 +569,4 @@ if __name__ == "__main__":
     exec_task(task_list)
     send_switch_status(True)
     poap_log("Completed execution of poap script")
-    exit(0)
+    cleanup_exit(0)

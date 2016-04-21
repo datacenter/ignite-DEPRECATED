@@ -168,7 +168,8 @@ def update_switch(fab_id, switch_id, data, user):
 
     # check if switch is already booted
     if switch.boot_detail:
-        raise IgniteException(ERR_NO_NAME_CHANGE)
+        if any([switch.name != data[NAME], switch.model.id != data[MODEL], switch.serial_num != data[SERIAL_NUM]]):
+            raise IgniteException(ERR_NO_NAME_CHANGE)
 
     # check if switch already exists with new name
     # switch name is searched across all fabrics

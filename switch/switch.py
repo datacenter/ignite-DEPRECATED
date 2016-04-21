@@ -42,8 +42,9 @@ def _add_switch(data, user, id=0):
         # get existing switch
         switch = SwitchModel.objects.get(pk=id)
         # decrement ref count of existing line cards
-        if switch.switch_type == FIXED and switch.switch_data[MODULE_ID]:
-            linecard.update_ref_count(switch.switch_data[MODULE_ID], -1)
+        if switch.switch_type == FIXED:
+	    if switch.switch_data.has_key(MODULE_ID):
+                linecard.update_ref_count(switch.switch_data[MODULE_ID], -1)
         elif switch.switch_type == CHASSIS:
             for slot in switch.switch_data[SLOTS]:
                 linecard.update_ref_count(slot[LC_ID], -1)

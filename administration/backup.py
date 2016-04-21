@@ -4,12 +4,13 @@ from django.http import HttpResponse
 import mimetypes
 import os
 import psycopg2
+import platform
 import subprocess
 import tarfile
 
 from constants import *
 from ignite.conf import DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT
-from ignite.settings import MEDIA_ROOT
+from ignite.settings import MEDIA_ROOT, BASE_DIR
 from models import AAAServer, AAAUser
 from utils.exception import IgniteException
 
@@ -17,17 +18,43 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def execute_cmd(cmd):
+    proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
+    out, err = proc.communicate()
+    if not proc.returncode:
+        logger.debug("[OK] - " + cmd)
+        return True
+    else:
+        logger.error("[ERROR] - " + cmd)
+        logger.error(str(err))
+        return False
+
+
 def db_dump(filename):
+    OS_DISTRIBUTION_NAME = platform.linux_distribution()[0]
     logger.debug("db backup file name '%s'" % filename)
 
-    command = 'export PGPASSWORD=%s\npg_dump %s -U %s --file="%s" -h localhost' % (DB_PASSWORD, DB_NAME, DB_USER, filename)
-    status = subprocess.call(command, shell=True)
-    if status:
+    if OS_DISTRIBUTION_NAME == 'Ubuntu':
+        command = 'export PGPASSWORD=%s\npg_dump %s -U %s --file="%s" -h localhost' % (DB_PASSWORD, DB_NAME, DB_USER, filename)
+
+    elif OS_DISTRIBUTION_NAME == 'CentOS Linux':
+        PATH_TO_PG_DUMP = '/usr/pgsql-9.3/bin/'
+        command = 'export PGPASSWORD=%s\n' + PATH_TO_PG_DUMP + 'pg_dump %s -U %s --file="%s" -h localhost' % (DB_PASSWORD, DB_NAME, DB_USER,
+                                                                                                          filename)
+    else:
+        raise IgniteException(ERR_UNKNOWN_OS_TYPE)
+
+    status = execute_cmd(command)
+    if not status:
         raise IgniteException(ERR_FAILED_TO_BACKUP_DB)
+
     logger.debug("db backup is done")
 
 
 def create_backup():
+    cwd = os.getcwd()
+    os.chdir(BASE_DIR)
     current_date = datetime.utcnow().strftime(FILE_TIME_FORMAT)
     filename = os.path.join(MEDIA_ROOT, current_date + SQL_FORMAT)
     backup_name = "Ignite_" + current_date + TAR_FORMAT
@@ -36,6 +63,7 @@ def create_backup():
     db_dump(filename)
 
     file_obj = tarfile.open(tar_name, "w:gz")
+    logger.debug("cwd = " + os.getcwd())
     for name in FILE_LIST:
         file_obj.add(MEDIA + "/" + name)
 
@@ -51,10 +79,13 @@ def create_backup():
     resp = {}
     resp["status"] = "success"
     resp["filename"] = backup_name
+    os.chdir(cwd)
     return resp
 
 
 def get_list():
+    cwd = os.getcwd()
+    os.chdir(BASE_DIR)
     names = os.listdir(os.path.join(MEDIA_ROOT, BACKUP))
     tar_list = []
     for name in names:
@@ -63,10 +94,13 @@ def get_list():
     path = MEDIA + "/" + BACKUP + "/"
     tar_list.sort(key=lambda x: os.path.getmtime(path+x))
     tar_list.reverse()
+    os.chdir(cwd)
     return tar_list
 
 
 def download_backup(fn):
+    cwd = os.getcwd()
+    os.chdir(BASE_DIR)
     fn = fn + TAR_FORMAT
     filename = MEDIA + "/" + BACKUP + "/" + fn
     if os.path.isfile(filename):
@@ -81,6 +115,7 @@ def download_backup(fn):
             response['Content-Type'] = content_type
             response['Content-Length'] = str(filesize)
             return response
+    os.chdir(cwd)
     raise IgniteException(ERR_BACKUP_NOT_FOUND + fn)
 
 

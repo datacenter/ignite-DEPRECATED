@@ -44,6 +44,7 @@ ERR_PROTO_NOT_FOUND = "Protocol is not supported"
 ERR_CFG_NOT_FOUND = "Config file not found!!"
 ERR_PKG_NOT_FOUND = "Package not found!!"
 ERR_SCRIPT_NOT_FOUND = "Script not found!!"
+ERR_SERIAL_NUM_MISMATCH = "Serial number mismatch"
 ERR_SWITCH_NOT_BOOTED = "Switch has not yet booted"
 ERR_YML_NOT_FOUND = "YAML file not found!!"
 

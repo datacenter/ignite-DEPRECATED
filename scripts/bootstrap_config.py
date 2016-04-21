@@ -3,9 +3,10 @@ import json
 import os
 import socket
 import sys
+import time
 
 #Set syslog server and port - fill in from ignite/config.py
-SYSLOG_SERVER = "127.0.0.1"
+SYSLOG_SERVER = "172.31.219.250"
 SYSLOG_PORT = 514
 
 md5sum_ext_src = "md5"
@@ -27,6 +28,9 @@ PROTO_HTTP = 'http'
 #serial number of switch
 serial_num_g = ""
 
+#Log file handle on switch
+LOG_FILE_HANDLE = ''
+
 #Remote log infra
 #Log levels and facility
 FACILITY = 3
@@ -36,7 +40,30 @@ LEVEL = {
 }
 
 
+def close_log_file():
+    if LOG_FILE_HANDLE:
+        LOG_FILE_HANDLE.close()
+
+
+def set_log_file():
+    log_filename = '/bootflash/poap_config.log'
+    t=time.localtime()
+    now="%d_%d_%d" % (t.tm_hour, t.tm_min, t.tm_sec)
+    #now=cli("show clock | sed 's/[ :]/_/g'")
+    #now = 1
+    try:
+        log_filename = "%s.%s" % (log_filename, now)
+    except Exception as inst:
+        pass
+    global LOG_FILE_HANDLE
+    LOG_FILE_HANDLE = open(log_filename, "w+")
+
+
 def syslog(info, level=LEVEL['info']):
+    global LOG_FILE_HANDLE
+    LOG_FILE_HANDLE.write(info)
+    LOG_FILE_HANDLE.write("\n")
+    LOG_FILE_HANDLE.flush()
     message = "%s : %s : %s" % (serial_num_g, os.path.basename(__file__), info)
     data = '<%d>%s' % (level + FACILITY*8, message)
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -56,8 +83,9 @@ def rm_rf(filename):
         pass
 
 
-def abort_cleanup_exit(exit_status):
+def cleanup_exit(exit_status):
     syslog("INFO: cleaning up")
+    close_log_file()
     exit(exit_status)
 
 
@@ -139,9 +167,9 @@ def get_config(protocol="scp", port="", hostname="", file_src="",
     if "" in [protocol, hostname, file_src, file_dst, username, password]:
 
         if fatal:
-            abort_cleanup_exit(1)
+            cleanup_exit(1)
 
-        abort_cleanup_exit(0)
+        cleanup_exit(0)
 
     global protocol_g
     protocol_g = protocol
@@ -158,6 +186,8 @@ def get_config(protocol="scp", port="", hostname="", file_src="",
     global serial_num_g
     serial_num_g = serial_num
 
+    set_log_file()
+
     run_cli("terminal dont-ask")
 
     rm_rf(file_dst)
@@ -167,9 +197,9 @@ def get_config(protocol="scp", port="", hostname="", file_src="",
         syslog("Failed copy of Config file")
 
         if fatal:
-            abort_cleanup_exit(1)
+            cleanup_exit(1)
 
-        abort_cleanup_exit(0)
+        cleanup_exit(0)
 
     syslog("Completed copy of Config file")
     status = check_md5sum(file_src, file_dst)
@@ -177,9 +207,11 @@ def get_config(protocol="scp", port="", hostname="", file_src="",
     if not status and fatal:
         syslog("md5sum check failed")
         if fatal:
-            abort_cleanup_exit(1)
+            cleanup_exit(1)
 
-        abort_cleanup_exit(0)
+        cleanup_exit(0)
 
     run_cli("copy running-config startup-config")
     run_cli('copy %s scheduled-config' % file_dst)
+    cleanup_exit(0)
+

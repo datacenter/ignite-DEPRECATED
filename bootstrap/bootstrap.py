@@ -311,7 +311,8 @@ def preparelogs(file_name_list,  key1, is_common_log):
                 sys_fo = gzip.open(sysfile, 'r')
             else:
                 sys_fo = open(sysfile, 'r')
-        except:
+        except Exception as e:
+            logger.error(str(e))
             return []
 
         start_string_handler = None
@@ -349,6 +350,7 @@ def get_logs(id):
     file_with_switch = [REMOTE_SYSLOG_PATH + serial_num + '.log']
     log_file = []
     try:
+        logger.debug(str(file_name_list))
         log_file += [preparelogs(file_with_switch, serial_num, False)]
         log_file += [preparelogs(file_name_list, serial_num, True)]
         time_list = []
@@ -365,8 +367,11 @@ def get_logs(id):
                 for item in log_file:
                     if item:
                         return item
-        except:
+        except Exception as e:
+            logger.error(str(e))
             return []
-    except:
+
+    except Exception as e:
+        logger.error(str(e))
         raise IgniteException(ERR_FAILED_TO_READ_SYSLOGS)
     return []

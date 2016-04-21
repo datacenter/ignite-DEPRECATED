@@ -36,3 +36,4 @@ ERR_USER_ADMIN = "Admin user can not be deleted"
 ERR_ADMIN_UPDATE = "Admin details can not be updated"
 ERR_NOT_LIST = "Expecting a list"
 ERR_EMPTY_LIST = "List is empty, Excepting list of filenames"
+ERR_UNKNOWN_OS_TYPE = 'Unknown os found'
