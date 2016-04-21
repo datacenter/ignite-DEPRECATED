@@ -270,7 +270,7 @@ def get_image(protocol="scp", port="", hostname="", file_src="",
         cmd += "copy running-config startup-config ; "
         run_cli(cmd)
     else:
-        cmd +=  "config terminal ; boot nxos %s ; exit ; " % (file_dst)
+        cmd =  "config terminal ; boot nxos %s ; exit ; " % (file_dst)
         cmd += "copy running-config startup-config ; "
         run_cli(cmd)
 
