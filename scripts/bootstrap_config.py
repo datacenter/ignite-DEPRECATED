@@ -6,7 +6,7 @@ import sys
 import time
 
 #Set syslog server and port - fill in from ignite/config.py
-SYSLOG_SERVER = "172.31.219.250"
+SYSLOG_SERVER = "127.0.0.1"
 SYSLOG_PORT = 514
 
 md5sum_ext_src = "md5"

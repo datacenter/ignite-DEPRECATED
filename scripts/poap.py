@@ -15,10 +15,10 @@ import urllib2
 
 
 #Ignite server access details - fill in from ignite/config.py
-ignite_username = "admin"
-ignite_password = "cisco123"
-ignite_hostname = "172.31.219.250"
-ignite_port = "80"
+ignite_username = "ignite"
+ignite_password = "ignite"
+ignite_hostname = "127.0.0.1"
+ignite_port = "8000"
 vrf = "management"
 
 #non editable
