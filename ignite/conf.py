@@ -1,8 +1,5 @@
 # Ignite Configuration File
 
-# Project directory (will be appended to BASE_DIR)
-PROJECT_DIR = ""
-
 # Database Parameters
 DB_NAME = "ignite"
 DB_USER = "postgres"
@@ -43,3 +40,8 @@ RMQ_VHOST = "vhost"
 #Celery Daemon Settings
 CELERYD_USER = "user"
 CELERYD_GROUP = "user"
+
+# Project directory (will be prefixed to BASE_DIR)
+#Do not change this parameter is server is hosted inside apache2 and is placed in /var/www/ folder.
+PROJECT_DIR = "ignite"
+

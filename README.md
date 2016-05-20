@@ -3,7 +3,7 @@ This guide contains the information about package requirements of and installati
 
   
 ##1. Prerequisite
-Prerequisites can be installed either by separately installing each package as described further in this section or by using ignite setup script as described in section 2. 
+Prerequisites can be installed either by separately installing each package as described further in this section or by using ignite setup script as described in section 4. 
 
 ###1.1. System package dependencies
 - Python 2.7
@@ -49,7 +49,7 @@ Prerequisites can be installed either by separately installing each package as d
 
 
 ##2. Ignite server integration with Apache2
-Apache2 could be configured to host Ignite server. By creating a virtual host which will listen on a port dedicated to Ignite server, it's traffic can be segregated ignite from other web services.
+Configure Apache2 to host Ignite server. By creating a virtual host which will listen on a port dedicated to Ignite server it's traffic can be segregated ignite from other web services.
 
 ###2.1. Apache2 configuration
        
@@ -92,40 +92,70 @@ To enable the ignite.conf created in step 2.1.3. use a2ensite command.
 
          service apache2 restart
      
-
-
 ##3. Ignite server installation
-Clone/upload ignite server code in any apt directory. To upload using a tar, access the tar file from
-
-         https://cisco.box.com/s/awpoga2yweav73oy0dtcbs90rmmifdv7
-
-And upload the tar file in the apt directory and execute **untar** command.
-
-         untar -xvf ignite.tar
-
-
-
-To clone using github repository use **git clone** command.
+Clone in directory /var/www/ using github repository use **git clone** command.
 
          git clone <repo-url> --branch <branch-name>
 
-**Note:** To host it using Apache2 use directory /var/www/.
 ###3.1. Update Ignite configuration parameters
 
   Edit ~ignite/ignite/conf.py file to update parameters.
+
+  Parameter details-
+
+######Database Parameters
+        DB_NAME - Name of databse for the ignite server.
+        DB_USER - Database user name for ignite server.
+        DB_PASSWORD - Password for DB_USER.
+        DB_HOST - IP address on which postgresql is listening(typically 127.0.0.1).
+        DB_PORT - Port on which postgresql is listening(leave blank if postgres server is running on default port)
+ 
+######Ignite server access details
+        IGNITE_IP - IP address of VM on which ignite server will be hosted.
+        IGNITE_PORT - Port on which Ignite server will listen.
+        IGNITE_USER - User name for VM.
+        IGNITE_PASSWORD - Password for VM.
+
+######Log file path for switch specific logs file in Ignite server
+**Note:** for generating log file for each switch individually see section 7.2
+ 
+        REMOTE_SYSLOG_PATH - Path to switch specific log files along with file name prefix.
+
+######Log file name, for RHEL, it is messages
+
+        SYSLOG_PATH - File name of syslog/messages file with full path.
+
+######syslog port
+        SYSLOG_PORT - Port on which syslog server is listening(default is 514).
+
+######ACCESS_METHODS
+        ACCESS_PROTOCOL - Protocol for communication between Ignite server and switch during POAP. These options are supported : scp, http, tftp, sftp
+
+######Number of lines to display in logs
+        LOG_LINE_COUNT - POAP Logs for a switch can be accessed through Ignite UI. This parameter sets the limit on logs to be displayed in the UI.
+
+######RabbitMQ Settings
+**Note** Leave these parameter to default if there are no specific requirements.
+
+        RMQ_USERNAME - Username for RMQ server.
+        RMQ_PASSWORD - Password for RMQ_USERNAME.
+        RMQ_VHOST - RMQ vhost.
+
+######Celery Daemon Settings
+**Note** Leave these parameter to default if there are no specific requirements.
+
+        CELERYD_USER - Username for celery.
+        CELERYD_GROUP - Password for CELERYD_USER.
+
 
   **Note:** Set parameter PROJECT_DIR to "ignite" if server is to be hosted using apache2. 
 
 ###3.2. Execute setup script
 Installation script runs in three stages. It first installs system packages then python packages and the sets up the Ignite server. User can skip first 2 stages of installation during execution of setup script if dependencies had been installed beforehand. 
 
-Change directory to ~ignite and execute setup.py with sudo privilege.
+Run setup.py from /var/www/ directory with sudo privilege if server is hosted using apache2.
 
-       sudo python setup.py
-
-**Note:** Run setup.py from /var/www/ directory with sudo privilege if server is hosted using apache2.
-
-       sudo python ignite/setup.py
+        sudo python ignite/setup.py
 
 Sample output of a trial run of setup.py
 
