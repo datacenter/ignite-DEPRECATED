@@ -1378,7 +1378,6 @@ module.exports = {
 , setCTM: function(element, matrix, defs) {
 
 
-	//debugger;
     var that = this
       , s = 'matrix(' + matrix.a + ',' + matrix.b + ',' + matrix.c + ',' + matrix.d + ',' + matrix.e + ',' + matrix.f + ')';
 

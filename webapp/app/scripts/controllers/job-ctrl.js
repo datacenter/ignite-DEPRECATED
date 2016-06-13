@@ -112,7 +112,6 @@ angular.module('PoapServer')
                     status : '--'
                 };
             }*/
-            debugger;
             if(a.type != undefined) {
                 a.type_display = appSettings.fieldValues.jobs.upgrade_type.filter(function(b){
                     if(b.value == a.type) {
@@ -221,7 +220,7 @@ angular.module('PoapServer')
     };
 
     $scope.fetchRequiredList = function() {
-        appServices.doAPIRequest(appSettings.appAPI.group.list, null, null).then(function(data) {
+        appServices.doAPIRequest(appSettings.appAPI.job.getGroupList, null, null).then(function(data) {
             $scope.selectList.groups = data;
         });
         appServices.doAPIRequest(appSettings.appAPI.images.list, null, null).then(function(data) {
@@ -231,7 +230,6 @@ angular.module('PoapServer')
 
 
   var checkPosition = function(positionHelper) {
-            debugger;
             if(positionHelper == 'start') {
                 return 0
             }
@@ -291,7 +289,7 @@ angular.module('PoapServer')
                 animation: $scope.animationsEnabled,
                 templateUrl: 'pages/template/modal/addGrpTaskModal.html',
                 controller: 'AddTaskToJobCtrl',
-                size: 'md',
+                size: 'lg',
                 backdrop: 'static',
                 resolve: {
                     dataToModal : function() {
@@ -362,7 +360,7 @@ angular.module('PoapServer')
   
 
     /** Datepicker **/
-    $scope.open = function($event) {
+  $scope.open = function($event) {
     $scope.status.opened = true;
   };
 
@@ -395,10 +393,17 @@ angular.module('PoapServer').controller('AddTaskToJobCtrl', function($scope, $mo
     $scope.action = dataToModal.action;
     $scope.mode = dataToModal.mode;
     $scope.defaultEdit = true;
+    $scope.showDefault = false;
     $scope.selectList = {
         images : angular.copy(dataToModal.images),
-        groups : angular.copy(dataToModal.groups)
+        groups : angular.copy(dataToModal.groups),
+        scripts : []
     }
+    $scope.paramStructure = {
+                "param_name": "",
+                "param_type": "",
+                "param_val": ""
+            };
     $scope.task = {
         "group_id": "",
         "image_id": "",
@@ -412,18 +417,15 @@ angular.module('PoapServer').controller('AddTaskToJobCtrl', function($scope, $mo
         "group" : {
             "group_name" : "",
             "new_item": true
-        },
-        "params" : {
-            "image" : {
-                "new_item": true
-            }
-            
         }
     };
 
     $scope.init = function() {
         if($scope.action == 'view' || $scope.action == 'edit') {
             $scope.task = angular.copy(dataToModal.job);
+            appServices.doAPIRequest(appSettings.appAPI.job.getScripts, null, null).then(function(data) {
+                $scope.selectList.scripts = data;
+            });
         }
         if($scope.action == 'view') {
             $scope.defaultEdit = false;
@@ -435,6 +437,27 @@ angular.module('PoapServer').controller('AddTaskToJobCtrl', function($scope, $mo
         if(action == 'edit') {
             $scope.defaultEdit = true;
         }
+    };
+
+    $scope.taskTypeChange = function() {
+        if($scope.task.type == 'custom') {
+            $scope.task.params = [];
+            if($scope.selectList.scripts.length == 0) {
+                appServices.doAPIRequest(appSettings.appAPI.job.getScripts, null, null).then(function(data) {
+                    $scope.selectList.scripts = data;
+                });
+            }
+        } else {
+            delete $scope.task.params;
+        }
+    };
+
+    $scope.addParam = function() {
+        $scope.task.params.push(angular.copy($scope.paramStructure));
+    };
+
+    $scope.deleteParam = function(index) {
+        $scope.task.params.splice(index,1);
     };
 
     $scope.transformData = function() {
@@ -453,6 +476,10 @@ angular.module('PoapServer').controller('AddTaskToJobCtrl', function($scope, $mo
                 $scope.task.type_display = a.label;
             }
         });
+    };
+
+    $scope.toggleDefaultShow = function() {
+        $scope.showDefault = !$scope.showDefault;
     };
 
     $scope.ok = function() {

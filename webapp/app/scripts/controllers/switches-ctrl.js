@@ -92,6 +92,41 @@ angular.module('PoapServer')
             });
         };
 
+        $scope.fetchSwitchStatus = function(status,swich) {
+            if(swich[status] == 0) {
+                return false;
+            }
+            var switch_stat = '';
+            switch(status)
+            {
+                case 'booted_with_success' : switch_stat = 'success';
+                                          break;
+                case 'boot_in_progress' : switch_stat = 'progress';
+                                          break;
+                case 'booted_with_fail' : switch_stat = 'fail';
+                                          break;
+            }
+
+            $scope.modalInstance = $modal.open({
+                animation: $scope.animationsEnabled,
+                templateUrl: 'pages/template/modal/switchStatusList.html',
+                controller: 'SwitchStatusModalCtrl',
+                size: 'lg',
+                backdrop: 'static',
+                resolve: {
+                    dataToModal : function() {
+                        return {
+                            status : switch_stat,
+                            id : swich.id,
+                            callerScope : $scope
+                        }
+                    }
+                 }
+            });
+            
+            /**/
+        };
+
         $scope.submitData = function(modalData) {
             /* this is for add */
             if(modalData.action == 'add') {
@@ -450,4 +485,51 @@ angular.module('PoapServer').controller('SwitchModalCtrl', function($scope, $mod
     };
 
     $scope.init();
+});
+
+angular.module('PoapServer').controller('SwitchStatusModalCtrl', 
+    function($scope, $modalInstance, appSettings, appServices, dataToModal, $filter, ngTableParams) {
+    $scope.appServices = appServices;
+        $scope.switches = [];
+        $scope.id = dataToModal.id;
+        $scope.status = dataToModal.status;
+
+        $scope.tableParams = new ngTableParams({
+            page: 1,
+            count: appSettings.tableSettings.count,
+            sorting: {
+                "name": "asc"
+            }
+        }, {
+            counts:[],
+            getData: function($defer, params) {
+                appServices.tablePagination($defer, $filter, params, $scope.switches, $scope.searchKeyword);
+            }
+        });
+
+        $scope.toggleAnimation = function() {
+            $scope.animationsEnabled = !$scope.animationsEnabled;
+        };
+
+        $scope.$watch("searchKeyword", function () {
+            $scope.tableParams.reload();
+            $scope.tableParams.page(1);
+        });
+        $scope.cancel = function() {
+            $modalInstance.dismiss('cancel');
+        };
+
+        $scope.init = function() {
+            var reqHeader = {
+                appendToURL : true,
+                value : $scope.id+'/status/'+$scope.status,
+                noTrailingSlash : true
+            };
+            appServices.doAPIRequest(appSettings.appAPI.switches.switch_modal_status, null, reqHeader).then(function(data) {
+               $scope.switches = data;
+               $scope.tableParams.reload();
+            });
+        };
+
+        $scope.init();
 });

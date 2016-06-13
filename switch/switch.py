@@ -4,6 +4,7 @@ from constants import *
 from fabric.models import Switch
 import linecard
 from models import SwitchModel
+from bootstrap.constants import BOOT_PROGRESS, BOOT_SUCCESS, BOOT_FAIL
 from utils.exception import IgniteException
 
 import logging
@@ -12,17 +13,17 @@ logger = logging.getLogger(__name__)
 
 def get_all_switches(switch_type, tier):
     if switch_type == ALL:
-        switches = SwitchModel.objects.all().exclude(pk=1).order_by(NAME)
+        switches = SwitchModel.objects.all().order_by(NAME)
     else:
-        switches = (SwitchModel.objects.filter(switch_type=switch_type).exclude(pk=1).
-                    order_by(NAME))
+        switches = (SwitchModel.objects.filter(switch_type=switch_type).order_by(NAME))
 
     switch_list = list()
 
     for switch in switches:
-        if tier == ALL or tier in switch.switch_data[TIERS]:
+        if switch.id==1:
             switch_list.append(switch)
-
+        elif tier == ALL or tier in switch.switch_data[TIERS]:
+            switch_list.append(switch)
     return switch_list
 
 
@@ -43,7 +44,7 @@ def _add_switch(data, user, id=0):
         switch = SwitchModel.objects.get(pk=id)
         # decrement ref count of existing line cards
         if switch.switch_type == FIXED:
-	    if switch.switch_data.has_key(MODULE_ID):
+            if switch.switch_data.has_key(MODULE_ID):
                 linecard.update_ref_count(switch.switch_data[MODULE_ID], -1)
         elif switch.switch_type == CHASSIS:
             for slot in switch.switch_data[SLOTS]:
@@ -133,6 +134,9 @@ def update_switch(id, data, user):
 
 
 def delete_switch(id):
+    if id==1:
+        raise IgniteException(ERR_CAN_NOT_DELETE_UNKNOWN_MODEL)
+
     switch = SwitchModel.objects.get(pk=id)
 
     # decrement ref count of existing line cards
@@ -146,3 +150,19 @@ def delete_switch(id):
         switch.delete()
     except ProtectedError:
         raise IgniteException(ERR_SW_IN_USE)
+
+
+def get_status_switches(mid, status):
+#    SwitchModel = switchmodel.objects.get(id=mid)
+    switches = Switch.objects.filter(model_id=mid)
+    data=list()
+    for switch in switches:
+        if switch:
+            if switch.boot_detail:
+                if switch.boot_detail.boot_status==status:
+                    sw = dict()
+                    sw['fabric_name'] = switch.topology.name
+                    sw['switch_name'] = switch.name
+                    sw['serial_number'] = switch.serial_num
+                    data.append(sw)
+    return data

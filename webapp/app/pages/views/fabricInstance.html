@@ -6,6 +6,9 @@
                 <li>
                     <a href="javascript:void(0);" data-ng-click="addFabric()"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>Add</a>
                 </li>
+                <li>
+                    <a href="javascript:void(0);" data-ng-click="discoverFabric()"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>Discover</a>
+                </li>
                 <li class="del_link">
                     <a href="javascript:void(0);" class="hide"><span class="glyphicon glyphicon-minus-sign" aria-hidden="true"></span>Delete</a>
                 </li>
@@ -55,7 +58,9 @@
                         <input type="checkbox" class="form-control chk chk-trans" ng-checked="isChecked" ng-click="getChecked()" ng-checked="checkbox1">
                     </td>
                     <td>{{appServices.generateSeq(tableParams.page(), tableParams.count(), $index)}}</td>
-                    <td><a ng-href="#/fabricInstance/edit/{{fabricInstance.id}}">{{fabricInstance.name}}</a>
+                    <td><a ng-href="#/fabricInstance/edit/{{fabricInstance.id}}">{{fabricInstance.name}}
+                        <!-- <span class="icon_discovery" tooltip="Discovered Fabric" data-ng-if="fabricInstance.is_discovered" aria-hidden="true"></span> -->
+                    </a>
                     </td>
                     <td>
                         <span class="glyphicon glyphicon-ok success_color"  ng-if="fabricInstance.submit">

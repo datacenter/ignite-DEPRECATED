@@ -1,8 +1,9 @@
 from django.db.models import ProtectedError
 
+from constants import *
 from models import ImageProfile
 from utils.exception import IgniteException
-from constants import *
+from utils.encrypt import encrypt_data, decrypt_data
 import logging
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,9 @@ def add_profile(data, user, id=0):
     profile.kickstart_image = data[KICKSTART_IMAGE]
     profile.image_server_ip = data[IMAGE_SERVER_IP]
     profile.image_server_username = data[IMAGE_SERVER_USERNAME]
-    profile.image_server_password = data[IMAGE_SERVER_PASSWORD]
+    password = encrypt_data(data[IMAGE_SERVER_PASSWORD])
+    profile.image_server_password = str(password)
+    profile.is_encrypted = True
     profile.access_protocol = data[ACCESS_PROTOCOL]
     profile.updated_by = user
 
@@ -49,6 +52,8 @@ def add_profile(data, user, id=0):
 
 
 def delete_profile(id):
+    if id==1:
+        raise IgniteException(ERR_CAN_NOT_DELETE_DEFAULT_IMAGE)
     try:
         ImageProfile.objects.get(pk=id).delete()
     except ProtectedError:

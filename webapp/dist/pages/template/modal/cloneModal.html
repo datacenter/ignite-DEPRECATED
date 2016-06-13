@@ -3,35 +3,58 @@
       <button type="button" class="close" data-dismiss="modal" ng-click="cancel()" aria-label="Close">
           <span aria-hidden="true">&times;</span>
       </button>
-    <h3 class="modal-title pull-left">Clone</h3>
+    <h3 class="modal-title pull-left"><span data-ng-if="source == 'job'">Job </span>Clone</h3>
   </div>
   <div class="modal-body">
     <form>
       <div class="row">
         <div class="col-sm-12">
           <div class="form-group">
-            <label for="name">Clone Name:</label>
+            <label for="name"><span data-ng-if="source != 'job'">Clone </span>Name:</label>
             <input class="form-control" id="Name" ng-model="submitData.name" placeholder="Clone Name" type="text">
           </div>
-          <!-- <div class="col-md-4 col-sm-6"> -->
-              <div class="form-group form-inline form_inline_style" data-ng-if="source == 'fabric'">
-                  <label for="" class="">Switch Name Operation</label>
-                  <div class="radio mt_12">
-                      <label class="pt-13">
-                          <input type="radio" name="name_operaion" value="replace"
-                          ng-model="submitData.name_operation">
-                          Replace
-                      </label>
-                  </div>
-                  <div class="radio mt_12">
-                      <label class="pt-13">
-                          <input type="radio" name="name_operaion" value="prepend"
-                          ng-model="submitData.name_operation">
-                          Prepend
-                      </label>
-                  </div>
+          <div class="form-group form-inline form_inline_style" data-ng-if="source == 'fabric'">
+              <label for="" class="">Switch Name Operation</label>
+              <div class="radio mt_12">
+                  <label class="pt-13">
+                      <input type="radio" name="name_operaion" value="replace"
+                      ng-model="submitData.name_operation">
+                      Replace
+                  </label>
               </div>
-          <!-- </div> -->
+              <div class="radio mt_12">
+                  <label class="pt-13">
+                      <input type="radio" name="name_operaion" value="prepend"
+                      ng-model="submitData.name_operation">
+                      Prepend
+                  </label>
+              </div>
+          </div>
+          <div class="form-group form-inline form_inline_style" data-ng-if="source == 'job'">
+            <label for="username">Schedule</label>
+                <p class="input-group schedulePicker" data-ng-if="mode != 'view'">
+                  <input type="text" class="form-control"
+                      datepicker-popup="dd/MMM/yyyy" ng-model="submitData.schedule"
+                      is-open="status.opened" datepicker-options="dateOptions"
+                      min-date="job.currentDate"
+                      date-disabled="disabled(date, mode)" ng-required="true"
+                      close-text="Close" data-ng-change="prepareSchedule()" disabled/>
+                    <span class="input-group-btn">
+                      <button type="button" class="btn btn-default" ng-click="open()"
+                          data-ng-disabled="mode == 'view'|| ( mode == 'edit' && job.status != 'SCHEDULED')">
+                          <i class="glyphicon glyphicon-calendar"></i>
+                      </button>
+                    </span>
+              </p>
+          </div>
+
+            <div class="form-group form-inline form_inline_style" data-ng-if="source == 'job'">
+                <timepicker ng-model="job.scheduleTime" style="margin-top: -10px;"
+                     hour-step="hstep" minute-step="mstep" class="ScheduleTimePicker"
+                    show-meridian="true" data-ng-change="prepareSchedule()" readonly-input="'view' == mode|| ( mode == 'edit' && job.status != 'SCHEDULED')">
+                </timepicker>
+            </div>
+
         </div>
       </div>
     </form>

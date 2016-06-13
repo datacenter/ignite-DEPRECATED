@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 def get_rma_switch(old_serial_num):
     try:
         switch = Switch.objects.get(serial_num=old_serial_num)
-        logger.debug("switch found")
+        logger.debug("switch found with serial number : %s", old_serial_num)
         return switch
     except Switch.DoesNotExist:
         return None
@@ -37,6 +37,7 @@ def get_rma_detail(old_serial_num):
                 for group_switch in group_switches:
                     group = Group.objects.get(pk=group_switch)
                     if group.ref_count>0:
+                        logger.debug(ERR_SWITCH_IN_USE_JOB_SCHEDULE)
                         raise IgniteException(ERR_SWITCH_IN_USE_JOB_SCHEDULE)
             except GroupSwitch.DoesNotExist:
                 pass
@@ -64,10 +65,17 @@ def update_rma_detail(data):
     updated = False
     old_serial_num = data[OLD_SERIAL_NUM]
     new_serial_num = data[NEW_SERIAL_NUM]
+
+    switch = get_rma_switch(new_serial_num)
+    if switch:
+        logger.debug("Switch with serial number %s is already present. Can not assign same serial number to multiple switches", new_serial_num)
+        raise IgniteException(ERR_NOT_ALLOWED_DUPLICATE_SERIAL + new_serial_num + 
+                                 ERR_NOT_ALLOWED_DUPLICATE_SERIAL_CONTINUES + switch.topology.name)
+
     switch = get_rma_switch(old_serial_num)
 
     if switch:
-        logger.debug("switch found")
+        logger.debug("switch found with serial number:"+ old_serial_num)
         switch.serial_num = new_serial_num
         if switch.boot_detail:
             if switch.boot_detail.boot_status == BOOT_PROGRESS:
@@ -87,20 +95,25 @@ def update_rma_detail(data):
                     switch.name = new_serial_num
 
                 switch.save()
+                logger.debug("Serial number has been updated from %s to %s",old_serial_num, new_serial_num)
+                logger.debug("Deleting boot details of switch")
                 boot_detail.delete()
+                logger.debug("boot details deleted")
                 updated = True
 
         else:
             if switch.topology:
                 switch.save()
-                updated = True
                 logger.debug("switch is present in fabric as not booted but build config is done")
+                logger.debug("serial number has been updated from %s to %s",old_serial_num, new_serial_num)
+                updated = True
             else:
                 updated = update_rma_rule(old_serial_num, new_serial_num)
                 switch.name = new_serial_num
-                switch.save()
-                updated = True
                 logger.debug("switch found as not booted and discovery rule also exist")
+                switch.save()
+                logger.debug("serial number has been updated from %s to %s",old_serial_num, new_serial_num)
+                updated = True
     else:
         updated = update_rma_rule(old_serial_num, new_serial_num)
 
@@ -114,6 +127,7 @@ def update_rma_rule(old_serial_num, new_serial_num, id=0):
         try:
             rule = DiscoveryRule.objects.get(id=id)
         except DiscoveryRule.DoesNotExist:
+            logger.debug(ERR_DISOVERY_RULE_EXIST)
             raise IgniteException(ERR_DISOVERY_RULE_EXIST)
     else:
         rule = find_dup_serial_discovery([old_serial_num], rma_case=True)

@@ -92,7 +92,6 @@ angular.module('PoapServer')
     };
 
     $scope.transformData = function() {
-        debugger;
         $scope.groups.filter(function(group){
             var switchlist = '';
             group.switch_list.filter(function(grpSwitch){

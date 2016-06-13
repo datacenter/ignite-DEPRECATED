@@ -5,6 +5,7 @@ from constants import *
 from models import Task
 from utils.exception import IgniteException
 from utils.utils import parse_file
+from utils.encrypt import encrypt_data, decrypt_data
 
 import logging
 logger = logging.getLogger(__name__)
@@ -38,7 +39,9 @@ def _add_task(data, user, id=0):
     task.location_access_protocol = data[LOC_ACCESS_PROTO]
     task.location_server_ip = data[LOC_SERVER_IP]
     task.location_server_user = data[LOC_SERVER_USER]
-    task.location_server_password = data[LOC_SERVER_PASSWORD]
+    password = encrypt_data(data[LOC_SERVER_PASSWORD])
+    task.location_server_password = password
+    task.is_encrypted = True
     task.parameters = data[PARAMETERS]
     task.updated_by = user
     task.save()

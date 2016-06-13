@@ -30,7 +30,7 @@ def get_nxapi_template():
 
 def handle_nxapi_error(command):
     if command[2] in [ 'system-install' , 'epld-install' ]:
-        return 'FAILUREE'
+        return 'FAILURE'
     else:
         return 'CONTINUE'
 

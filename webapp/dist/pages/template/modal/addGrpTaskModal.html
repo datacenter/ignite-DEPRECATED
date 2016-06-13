@@ -15,9 +15,8 @@
     </div>
     <div class="modal-body">
         <form name="addGrpTaskForm">
-
             <div class="row">
-                <div class="col-xs-6">
+                <div class="col-xs-4">
                     <div class="form-group">
                         <label for="group">Group</label>
                         <select class="form-control"
@@ -28,8 +27,8 @@
                         </select>
                     </div>
                 </div>
-                <div class="row"></div>
-                <div class="col-xs-6">
+                <!-- <div class="row"></div> -->
+                <div class="col-xs-4">
                     <div class="form-group">
                         <label for="image">Task Input</label>
                         <select class="form-control"
@@ -40,63 +39,153 @@
                         </select>
                     </div>
                 </div>
-                <div class="col-xs-6">
+                <div class="col-xs-4">
                     <div class="form-group">
                         <label for="type">Task Type</label>
                         <select class="form-control"
                             data-ng-model="task.type" required
-                            data-ng-disabled="!defaultEdit"
+                            data-ng-disabled="!defaultEdit" ng-change="taskTypeChange()"
                             ng-options = "v.value as v.label for (k, v) in appSettings.fieldValues.jobs.upgrade_type">
                             <option value=''>--Select--</option>
                         </select>
                     </div>
                 </div>
-                <div class="col-xs-6">
+                <div class="col-xs-4" data-ng-if="task.type == 'custom'">
                     <div class="form-group">
-                        <label for="group_name">Run Size</label>
-                        <input type="number" class="form-control" 
-                            placeholder="Run Size"
-                            required min="1" max="5"
+                        <label for="file_name">File Name</label>
+                        <select class="form-control" name="file_name"
+                            data-ng-model="task.file_name" required
                             data-ng-disabled="!defaultEdit"
-                            ng-model="task.run_size">
+                            ng-options = "script as script for script in selectList.scripts">
+                            <option value=''>--Select--</option>
+                        </select>
                     </div>
                 </div>
-                <div class="col-xs-6">
+                <div class="col-xs-4" data-ng-if="task.type == 'custom'">
                     <div class="form-group">
-                        <label for="group_name">Retry Count</label>
-                        <input type="number" class="form-control" 
-                            placeholder="Retry Count"
-                            required min="0" max="3"
+                        <label for="function">Function Name</label>
+                        <input type="text" class="form-control" 
+                            placeholder="Function Name"
+                            required
                             data-ng-disabled="!defaultEdit"
-                            ng-model="task.retry_count">
+                            ng-model="task.function">
                     </div>
                 </div>
+                <table class="table table-hover" data-ng-if="task.type == 'custom'">
+                    <thead>
+                        <tr>
+                            <th class="col-xs-3">Parameter</th>
+                            <th class="col-xs-3">Type</th>
+                            <th class="col-xs-3">Value</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-ng-if="task.params.length == 0">
+                            <td>
+                                <a href="javascript:void(0);" data-ng-click="addParam()">
+                                    <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+                                    Add Parameter
+                                </a>
+                            </td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr data-ng-repeat="param in task.params">
+                            <td>
+                                <input type="text" name="param_name"
+                                class="form-control" required
+                                placeholder="Parameter"
+                                ng-model="param.param_name" />
+                            </td>
+                            <td>
+                                <select class="form-control"
+                                 data-ng-model="param.param_type" required
+                                 data-ng-options="v.value as v.label for (k, v) in appSettings.fieldValues.jobs.task_param_type">
+                                 <option value=''>--Select--</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" name="param_val"
+                                class="form-control" required
+                                placeholder="Parameter Value"
+                                ng-model="param.param_val" />
+                            </td>
+                            <td style="vertical-align: middle;">
+                                <a href="javascript:void(0);" ng-click="deleteParam($index)">
+                                    <span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete
+                                </a>
+                                <a href="javascript:void(0);" data-ng-click="addParam()"
+                                    data-ng-if="$index == task.params.length-1"
+                                    style="padding-left: inherit;">
+                                    <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+                                    Add
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
                 <div class="row"></div>
-                <div class="row_head">
-                    <div class="row">
-                        <div class="col-xs-4">
-                            <label for="startRange" class="grid_label">Failure Actions</label>
+                <div class="col-xs-12">
+                    <a href="javascript:void(0);" data-ng-click="toggleDefaultShow()">
+                        <span class="glyphicon glyphicon-chevron-right"
+                            aria-hidden="true" ng-if="!showDefault"></span>
+                        <span class="glyphicon glyphicon-chevron-down"
+                            aria-hidden="true" ng-if="showDefault"></span>
+                        <span ng-if="!showDefault">Show Defaults</span>
+                        <span ng-if="showDefault">Hide Defaults</span>
+                    </a>
+                </div>
+                
+                <div class="row"></div>
+                <div ng-if="showDefault">
+                    <div class="row_head">
+                        <div class="row">
+                            <div class="col-xs-4">
+                                <label for="startRange" class="grid_label">Default Values</label>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-xs-6">
-                    <div class="form-group">
-                        <label for="group_name">Individual Switch</label>
-                        <select class="form-control"
-                            data-ng-model="task.failure_action_ind" required
-                            data-ng-disabled="!defaultEdit"
-                            data-ng-options="v.value as v.label for (k, v) in appSettings.fieldValues.jobs.failure_actions">
-                        </select>
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <label for="group_name">Run Size</label>
+                            <input type="number" class="form-control" 
+                                placeholder="Run Size"
+                                required min="1" max="5"
+                                data-ng-disabled="!defaultEdit"
+                                ng-model="task.run_size">
+                        </div>
                     </div>
-                </div>
-                <div class="col-xs-6">
-                    <div class="form-group">
-                        <label for="group_name">Group</label>
-                        <select class="form-control"
-                            data-ng-model="task.failure_action_grp" required
-                            data-ng-disabled="!defaultEdit"
-                            data-ng-options="v.value as v.label for (k, v) in appSettings.fieldValues.jobs.failure_actions">
-                        </select>
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <label for="group_name">Retry Count</label>
+                            <input type="number" class="form-control" 
+                                placeholder="Retry Count"
+                                required min="0" max="3"
+                                data-ng-disabled="!defaultEdit"
+                                ng-model="task.retry_count">
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <label for="group_name">Individual Switch</label>
+                            <select class="form-control"
+                                data-ng-model="task.failure_action_ind" required
+                                data-ng-disabled="!defaultEdit"
+                                data-ng-options="v.value as v.label for (k, v) in appSettings.fieldValues.jobs.failure_actions">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <label for="group_name">Group</label>
+                            <select class="form-control"
+                                data-ng-model="task.failure_action_grp" required
+                                data-ng-disabled="!defaultEdit"
+                                data-ng-options="v.value as v.label for (k, v) in appSettings.fieldValues.jobs.failure_actions">
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>

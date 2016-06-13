@@ -6,7 +6,7 @@ import sys
 from ignite.conf import DB_NAME, DB_USER, DB_PASSWORD, SYSLOG_PORT
 from ignite.conf import IGNITE_IP, IGNITE_PORT, IGNITE_USER, IGNITE_PASSWORD
 from ignite.conf import RMQ_USERNAME, RMQ_PASSWORD, RMQ_VHOST, CELERYD_USER,CELERYD_GROUP
-from ignite.settings import UI_ROOT, MEDIA_ROOT, SCRIPT_PATH
+from ignite.settings import BASE_DIR, UI_ROOT, MEDIA_ROOT, SCRIPT_PATH
 
 CFG_FILE = os.path.join(SCRIPT_PATH, "bootstrap_config.py")
 IMG_FILE = os.path.join(SCRIPT_PATH, "bootstrap_image.py")
@@ -82,6 +82,8 @@ CMD_LIST_SETUP = (
      "python manage.py loaddata workflow/fixtures/initial_data.json",),
     ("Load switch fixtures",
      "python manage.py loaddata switch/fixtures/initial_data.json",),
+    ("Load configprofile fixture",
+     "python manage.py loaddata config/fixtures/initial_data.json",),
     ("Javascript IP+Port Setting", JS_SED_CMD,),
     ("POAP User Setting", POAP_USER_CMD,),
     ("POAP Password Setting", POAP_PWD_CMD,),
@@ -102,6 +104,8 @@ CMD_LIST_SETUP = (
      "service rabbitmq-server restart",),
     ("Setting Celery User", CELERYD_USER_CMD,),
     ("Setting Celery Group", CELERYD_GROUP_CMD,),
+    ("Export django settings", "export DJANGO_SETTINGS_MODULE=ignite.settings",),
+    ("Permission setting for ignite log", "chmod 777 " + BASE_DIR + "ignite/ignite.log",),
     ("Copying celeryd init",
      "cp scripts/celeryd /etc/init.d/celeryd",),
     ("Copying celeryd settings",

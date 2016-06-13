@@ -129,7 +129,6 @@ angular.module('PoapServer')
     };
 
     var checkPosition = function(positionHelper) {
-            debugger;
             if(positionHelper == 'start') {
                 return 0
             }

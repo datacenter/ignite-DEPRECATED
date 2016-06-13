@@ -32,6 +32,10 @@ def ports_to_string(ports):
         logger.warning("Port list is empty!")
         return string
 
+    if ports[0].startswith('mgmt0'):
+        logger.debug("port %s is mgmt", ports)
+        return ports[0]
+
     module = ports[0].split("/")[0]
     start = ports[0].split("/")[1]
     end = start

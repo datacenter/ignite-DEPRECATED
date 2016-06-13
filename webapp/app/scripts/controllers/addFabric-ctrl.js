@@ -307,7 +307,6 @@ angular.module('PoapServer')
           $scope.goBack('/fabricInstance');
         });
       } else if (modalData.action == 'clone') {
-        debugger;
         var dataToSubmit = modalData.submitData;
         var requestHeader = {
           appendToURL: true,

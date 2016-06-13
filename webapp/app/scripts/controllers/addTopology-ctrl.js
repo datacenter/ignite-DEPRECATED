@@ -25,10 +25,13 @@ angular.module('PoapServer')
 
     };
 
+    $scope.disc_leave_flag = false;
     $scope.switchDetails = {
       'defaults_switch_name':[],
       'default_switches':[],
-      'selectList':{},
+      'selectList':{
+        'config_type_list':appSettings.fieldValues.fabric.switch_config
+      },
       'vpc_connected':[],
       'curLink':{},
       'count' : {
@@ -281,7 +284,8 @@ angular.module('PoapServer')
             "serial_num": $scope.topologyData.switches[index].serial_num,
             "config_profile": $scope.topologyData.switches[index].config_profile,
             "feature_profile": $scope.topologyData.switches[index].feature_profile,
-            "workflow": $scope.topologyData.switches[index].workflow
+            "workflow": $scope.topologyData.switches[index].workflow,
+            "config_type": $scope.topologyData.switches[index].config_type
         };
 
         editRequest = appSettings.appAPI.fabricInstance.edit;
@@ -455,7 +459,6 @@ angular.module('PoapServer')
             foundFlag = true;
           }
         });
-        debugger;
         if(foundFlag) {
           return false;
         }
@@ -620,6 +623,7 @@ angular.module('PoapServer')
     };
 
     $scope.openDepSwitchConfigModal = function(statId) {
+      $('#popEdit_Item_'+statId).modal('toggle');
       $scope.modalInstance = $modal.open({
         animation: $scope.animationsEnabled,
         templateUrl: 'pages/template/modal/fabricConfigView.html',
@@ -629,19 +633,88 @@ angular.module('PoapServer')
         resolve: {
             dataToModal : function() {
                 return {
-                    "statId" : statId
+                    "statId" : statId,
+                    "type" : "depConfig"
                 }
             }
          }
       });
       $scope.modalInstance.result.then(function(modalData) {
+        $timeout(function() {
+          $('#popEdit_Item_'+statId).modal('toggle');
+        },500);
          $log.info('Modal dismissed at: ' + new Date());
       }, function() {
+          $timeout(function() {
+            $('#popEdit_Item_'+statId).modal('toggle');
+          },500);
           $log.info('Modal dismissed at: ' + new Date());
       });
     };
 
+    $scope.openConfigHistory = function(switch_id) {
+      $('#popEdit_Item_'+switch_id).modal('toggle');
+      $scope.modalInstance = $modal.open({
+        animation: $scope.animationsEnabled,
+        templateUrl: 'pages/template/modal/configVersions.html',
+        controller: 'ConfigHistoryModalCtrl',
+        size: 'lg',
+        backdrop: 'static',
+        resolve: {
+            dataToModal : function() {
+                return {
+                    "switch_id" : switch_id,
+                    "fabricId" : $scope.selectedId
+                }
+            }
+         }
+      });
+      $scope.modalInstance.result.then(function(modalData) {
+        $timeout(function() {
+         $('#popEdit_Item_'+switch_id).modal('toggle');
+        },500);
+         $log.info('Modal dismissed at: ' + new Date());
+      }, function() {
+          $timeout(function() {
+            $('#popEdit_Item_'+switch_id).modal('toggle');
+          },500);
+         $log.info('Modal dismissed at: ' + new Date());
+      });
+    };
+
+    $scope.openSwitchPullConfigModal = function(statId) {
+      $('#popEdit_Item_'+statId).modal('toggle');
+      $scope.modalInstance = $modal.open({
+        animation: $scope.animationsEnabled,
+        templateUrl: 'pages/template/modal/fabricConfigView.html',
+        controller: 'DeployedSwitchConfigModalCtrl',
+        size: 'lg',
+        backdrop: 'static',
+        resolve: {
+            dataToModal : function() {
+                return {
+                    "statId" : statId,
+                    "fabricId" : $scope.selectedId,
+                    "type" : "pullConfig"
+                }
+            }
+         }
+      });
+      $scope.modalInstance.result.then(function(modalData) {
+         $timeout(function() {
+          $('#popEdit_Item_'+statId).modal('toggle');
+        },500);
+         $log.info('statId Modal dismissed at: ' + new Date());
+      }, function() {
+          $timeout(function() {
+            $('#popEdit_Item_'+statId).modal('toggle');
+          },500);
+          $log.info(statId+' Modal dismissed at: ' + new Date());
+      });
+    };
+
     $scope.openDepSwitchLogModal = function(statId) {
+      $('#popEdit_Item_'+statId).modal('toggle');
       $scope.modalInstance = $modal.open({
         animation: $scope.animationsEnabled,
         templateUrl: 'pages/template/modal/logs.html',
@@ -657,10 +730,33 @@ angular.module('PoapServer')
          }
       });
       $scope.modalInstance.result.then(function(modalData) {
+          $timeout(function() {
+             $('#popEdit_Item_'+statId).modal('toggle');
+           },500);
          $log.info('Modal dismissed at: ' + new Date());
       }, function() {
+          $timeout(function() {
+            $('#popEdit_Item_'+statId).modal('toggle');
+          },500);
           $log.info('Modal dismissed at: ' + new Date());
       });
+    };
+
+    $scope.reset_switch = function(switch_id) {
+      var reqHeader = {
+                appendToURL : true,
+                value : $scope.selectedId+"/switch/"+switch_id+"/resetbootdetail",
+                noTrailingSlash : true
+            };
+      appServices.doAPIRequest(appSettings.appAPI.fabricInstance.reset_switch, null, reqHeader).then(function(data) {
+       ngToast.create({
+          className: 'success',
+          content: 'Switch Reset, successful!.'
+        });
+        $scope.topology = data;
+        $scope.topologyData = angular.copy($scope.topology);
+        $scope.viewAddedSwitches(data);
+      });      
     };
 
     $scope.PopEdit = function(id) {
@@ -910,6 +1006,38 @@ angular.module('PoapServer')
       });
     };
 
+    $scope.viewMG = function() {
+      $scope.modalInstance = $modal.open({
+            animation: $scope.animationsEnabled,
+            templateUrl: 'pages/template/modal/createFabGrpModal.html',
+            controller: 'FabGroupsCtrl',
+            size: 'lg',
+            backdrop: 'static',
+            resolve: {
+                dataToModal : function() {
+                    return {
+                        switches : $scope.topologyData.switches,
+                        fabId : $scope.selectedId
+                        /*action : action,
+                        configEdit : $scope.configEdit,
+                        topology : $scope.topology,
+                        source : $scope.source,
+                        config_list : $scope.switchDetails.selectList.config_list,
+                        fabricProfile_list : $scope.switchDetails.selectList.fabricProfile_list,
+                        workflow_list : $scope.switchDetails.selectList.workflow_list,
+                        callerScope : $scope*/
+                    }
+                }
+             }
+        });
+        $scope.modalInstance.result.then(function(modalData) {
+            $scope.topologyData.maintenance_group_count = angular.copy(modalData.totalGrp);
+            $scope.topology.maintenance_group_count = angular.copy(modalData.totalGrp);
+        }, function() {
+            $log.info('Modal dismissed at: ' + new Date());
+        });
+    };
+
     $scope.fetchImageList = function() {
       var reqHeader = {
                 appendToURL : true,
@@ -1021,7 +1149,44 @@ angular.module('PoapServer')
             $location.path('/topology/edit/'+data.id);
           });
         }
+      } else if(modalData.action == 'add_discovery') {
+          var requestHeader = angular.copy(reqHeader);
+          requestHeader.value = requestHeader.value+"/save";
+          appServices.doAPIRequest(appSettings.appAPI.fabricInstance.discovery_save,modalData.submitData,requestHeader).then(function(data){
+              $scope.disc_leave_flag = true;
+              $location.path('/fabricInstance/edit/'+$scope.selectedId);
+          });
+      } else if(modalData.action == 'del_discovery') {
+          var requestHeader = angular.copy(reqHeader);
+          requestHeader.value = requestHeader.value+"/delete";
+          appServices.doAPIRequest(appSettings.appAPI.fabricInstance.discovery_delete,null,requestHeader).then(function(data){
+              $scope.disc_leave_flag = true;
+              $location.path('/fabricInstance');
+          });
       }
+    };
+
+    $scope.saveDiscovery = function() {
+        $scope.modalInstance = $modal.open({
+            animation: $scope.animationsEnabled,
+            templateUrl: 'pages/template/modal/addFabricModal.html',
+            controller: 'FabricCreateCtrl',
+            size: 'md',
+            backdrop: 'static',
+            resolve: {
+                dataToModal : function() {
+                    return {
+                        action : 'add_discovery',
+                        callerScope : $scope
+                    }
+                }
+             }
+        });
+        $scope.modalInstance.result.then(function(modalData) {
+            $scope.submitData(modalData);
+        }, function() {
+            $log.info('Modal dismissed at: ' + new Date());
+        });
     };
 
     angular.element('#topology_svg').ready(function() {
@@ -1030,6 +1195,43 @@ angular.module('PoapServer')
       $scope.init();
     });
 
+    $scope.deleteDiscovery = function() {
+        var modalInstance = $modal.open({
+            animation: $scope.animationsEnabled,
+            templateUrl: 'pages/template/modal/deleteModal.html',
+            controller: 'AlertModalCtrl',
+            size: 'md',
+            resolve: {
+                dataToModal : function() {
+                    return {
+                        id : $scope.selectedId,
+                        action: 'del_discovery',
+                        message: 'Are you sure you want to delete the discovery?',
+                        callerScope : $scope
+                    }
+                }
+             }
+        });
+         modalInstance.result.then(function(modalData) {
+            $scope.submitData(modalData);
+        }, function() {
+            $log.info('Modal dismissed at: ' + new Date());
+        });
+    };
+
+    $scope.$on('$locationChangeStart', function( event ) {
+        if($scope.topologyData.is_discovered === true && !$scope.topologyData.is_saved && !$scope.disc_leave_flag) {
+          var answer = confirm("Leaving this page would delete this fabric. Do you want to continue?")
+          if (answer) {
+              var modalData = {
+                action : 'del_discovery'
+              }
+              $scope.submitData(modalData);
+          } else {
+            event.preventDefault();
+          }
+        }
+    });
 
     $scope.$watch(function() {
         return $rootScope.errorFlag;
@@ -1241,3 +1443,395 @@ angular.module('PoapServer').controller('FabricConfigCtrl',
 
         $scope.init();
   });
+angular.module('PoapServer').controller('FabGroupsCtrl',
+    function($scope, $modalInstance, appSettings, appServices, dataToModal, $log, ngTableParams, $filter, $timeout, $modal){
+
+      $scope.appServices = appServices;
+      $scope.fabId = dataToModal.fabId;
+      $scope.groupData = {
+        name : '',
+        username : '',
+        password : '',
+        switch_list : []
+      }
+      // $scope.view_type = "list";
+      $scope.fab_switches = angular.copy(dataToModal.switches);
+      $scope.core_switches = [];
+      $scope.spine_switches = [];
+      $scope.leaf_switches = [];
+      $scope.border_switches = [];
+      $scope.action = 'list';
+      $scope.editGrpId = -1;
+      $scope.searchSwitchKeyword = '';
+      // $scope.switch_list = [];
+
+      /**For groups table pagination**/
+    $scope.tableParams = new ngTableParams({
+          page: 1,
+          count: appSettings.tableSettings.count,
+          sorting: {
+              "name": "asc"
+          }
+      }, {
+          counts:[],
+          getData: function($defer, params) {
+              appServices.tablePagination($defer, $filter, params, $scope.groups, $scope.searchKeyword);
+          }
+      });
+
+      $scope.toggleAnimation = function() {
+          $scope.animationsEnabled = !$scope.animationsEnabled;
+      };
+
+      $scope.$watch("searchKeyword", function () {
+          $scope.tableParams.reload();
+          $scope.tableParams.page(1);
+      });
+      /** table **/
+
+      $scope.init = function() {
+        $scope.getGroupsList();
+      };
+
+      $scope.getGroupsList = function() {
+        var reqHeader = {
+          appendToURL: true,
+          value: $scope.fabId,
+          noTrailingSlash: true
+        };
+        appServices.doAPIRequest(appSettings.appAPI.group.list, null, reqHeader).then(function(data) {
+            $scope.groups = data;
+            $scope.transformData();
+            $scope.tableParams.reload();
+            $scope.view_type = "list";
+            $scope.action = "list";
+            $scope.totalGrp = data.length;
+        });
+      };
+
+      $scope.transformData = function() {
+        $scope.groups.filter(function(group){
+            var switchlist = '';
+            group.switch_list.filter(function(grpSwitch){
+                switchlist = switchlist+grpSwitch.switch_name+', ';
+            });
+            switchlist = switchlist.substring(0,switchlist.length-2);
+            if (switchlist.length > 50) {
+              switchlist = switchlist.substring(0, 55) + '...';
+              console.log('--------NEW Switch Name----------');
+              console.log(switchlist);
+            }
+            group.switchlist = switchlist;
+            return group;
+        });
+    };
+
+    $scope.createGrp = function() {
+      $scope.action = 'add';
+      $scope.fetchSwitches();
+      $scope.fab_switches.filter(function(modalSwitch){
+        modalSwitch[modalSwitch.id] = false;
+      });
+      $scope.groupData = {
+        name : '',
+        username : '',
+        password : '',
+        switch_list : []
+      }
+    };
+
+    $scope.switches = [];
+
+      $scope.fetchSwitches = function() {
+        var last_index = 0;
+        $scope.switches = [];
+        var tot_iter = Math.floor($scope.fab_switches.length / 3);
+        var multiplier = 0;
+        for(var i = 0; i < tot_iter; i++,multiplier++) {
+          var switchRow = {
+            'switch1' : $scope.fab_switches[(multiplier*3)],
+            'switch2' : $scope.fab_switches[(1) + (multiplier*3)],
+            'switch3' : $scope.fab_switches[(2) + (multiplier*3)]
+          };
+          $scope.switches.push(switchRow);
+          var last_index = (2) + (multiplier*3);
+        }
+        var diff = (($scope.fab_switches.length - 1) - (last_index));
+        if( diff > 0) {
+          var switchRow = {
+            'switch1' : null,
+            'switch2' : null,
+            'switch3' : null
+          };
+          if( diff == 1) {
+            switchRow.switch1 = $scope.fab_switches[last_index + 1];
+          } else {
+            switchRow.switch1 = $scope.fab_switches[last_index + 1];
+            switchRow.switch2 = $scope.fab_switches[last_index + 2]
+          }
+          $scope.switches.push(switchRow);
+        }
+        $scope.view_type = "addGrp";
+        $scope.searchSwitchKeyword = "";
+      };
+
+      $scope.editGrp = function(grpId,action) {
+        $scope.editGrpId = grpId;
+        var reqHeader = {
+          appendToURL: true,
+          value: $scope.fabId+'/'+grpId,
+          noTrailingSlash: true
+        };
+        $scope.fab_switches.filter(function(modalSwitch){
+          modalSwitch[modalSwitch.id] = false;
+        });
+        appServices.doAPIRequest(appSettings.appAPI.group.getById, null, reqHeader).then(function(data) {
+            $scope.groupData = angular.copy(data);
+            $scope.grpSwitchList();
+            $scope.fetchSwitches();
+            $scope.action = action;
+        });
+      };
+
+      $scope.changeAction = function(action) {
+        $scope.action = action;
+      };
+
+      $scope.grpSwitchList = function() {
+        var switchlist = $scope.groupData.switch_list;
+        $scope.groupData.switch_list = [];
+        switchlist.filter(function(swich){
+          $scope.groupData.switch_list.push({'switch_id': swich.switch_id});
+          $log.info(dataToModal);
+          $scope.fab_switches.filter(function(modalSwitch){
+            if(modalSwitch.id == swich.switch_id) {
+              modalSwitch[modalSwitch.id] = true;
+            }
+          });
+          //$scope.switch[swich.switch_name] = true;
+        });
+      };
+
+      $scope.deleteGroup = function(grpId) {
+          var modalInstance = $modal.open({
+              animation: $scope.animationsEnabled,
+              templateUrl: 'pages/template/modal/deleteModal.html',
+              controller: 'AlertModalCtrl',
+              size: 'md',
+              backdrop: 'static',
+              resolve: {
+                  dataToModal : function() {
+                      return {
+                          id : grpId,
+                          action: 'delete',
+                          message: 'Are you sure you want to delete this group?',
+                          callerScope : $scope
+                      }
+                  }
+               }
+          });
+
+          modalInstance.result.then(function(modalData) {
+              var requestHeader = {
+                    appendToURL: true,
+                    value: $scope.fabId+'/'+grpId,
+                    noTrailingSlash: true
+                };
+
+                appServices.doAPIRequest(appSettings.appAPI.group.delete, null, requestHeader).then(function(data) {
+                  $scope.getGroupsList();
+                });
+
+          }, function() {
+              $log.info('Modal dismissed at: ' + new Date());
+          });
+      };
+
+      $scope.save = function() {
+        var reqHeader = {
+          appendToURL: true,
+          value: $scope.fabId,
+          noTrailingSlash: true
+        };
+        
+        appServices.doAPIRequest(appSettings.appAPI.group.create, $scope.groupData, reqHeader).then(function(data) {
+          $scope.getGroupsList();
+        });
+        $log.info($scope.selectedSwitches);
+      };
+
+      $scope.update = function() {
+        var reqHeader = {
+          appendToURL: true,
+          value: $scope.fabId+'/'+$scope.editGrpId,
+          noTrailingSlash: true
+        };
+        
+        appServices.doAPIRequest(appSettings.appAPI.group.edit, $scope.groupData, reqHeader).then(function(data) {
+          $scope.getGroupsList();
+        });
+      };
+
+      $scope.cancel = function() {
+        if($scope.view_type == "list") {
+          $modalInstance.close({
+              totalGrp : $scope.totalGrp
+          });
+        } else {
+          $scope.view_type = "list";
+          $scope.action = "list";
+        }
+      };
+
+      $scope.selectAllSwitches = function() {
+        if($scope.sel_all) {
+          $scope.fab_switches.filter(function(modalSwitch){
+              modalSwitch[modalSwitch.id] = true;
+          });
+        } else {
+          $scope.fab_switches.filter(function(modalSwitch){
+              modalSwitch[modalSwitch.id] = false;
+          });
+        }
+      };
+    
+
+      // Custom search method
+      var fullName = '';
+      /*$scope.searchSwitch = function(swich) {
+        if ($scope.searchSwitchKeyword.length <= 0) return true;
+        if(swich.switch2 != null && swich.switch3 != null) {
+          var searchSwitchKeyword = (""+$scope.searchSwitchKeyword).toLowerCase(),
+                fullName = [swich.switch1.id, swich.switch1.name, swich.switch1.serial_num, swich.switch2.id, swich.switch2.name, swich.switch2.serial_num, swich.switch3.id, swich.switch3.name, swich.switch3.serial_num].join(" ").toLowerCase();
+          return fullName.indexOf(searchSwitchKeyword) > -1;
+        } else if(swich.switch2 != null) {
+          var searchSwitchKeyword = (""+$scope.searchSwitchKeyword).toLowerCase(),
+                fullName = [swich.switch1.id, swich.switch1.name, swich.switch1.serial_num, swich.switch2.id, swich.switch2.name, swich.switch2.serial_num].join(" ").toLowerCase();
+          return fullName.indexOf(searchSwitchKeyword) > -1;
+        } else {
+          var searchSwitchKeyword = (""+$scope.searchSwitchKeyword).toLowerCase(),
+                fullName = [swich.switch1.id, swich.switch1.name, swich.switch1.serial_num].join(" ").toLowerCase();
+          return fullName.indexOf(searchSwitchKeyword) > -1;
+        }
+      }*/
+
+      $scope.searchSwitch = function(swich) {
+        if ($scope.searchSwitchKeyword.length <= 0) return true;
+        var searchSwitchKeyword = (""+$scope.searchSwitchKeyword).toLowerCase(),
+                fullName = [swich.id, swich.name, swich.serial_num].join(" ").toLowerCase();
+        return fullName.indexOf(searchSwitchKeyword) > -1;
+      }
+
+      $scope.init();
+});
+
+angular.module('PoapServer').controller('ConfigHistoryModalCtrl',
+  function($scope, $modalInstance, appSettings, appServices, dataToModal, $log, ngTableParams, $filter, $timeout, $modal){
+
+      $scope.appSettings = appSettings;
+      $scope.appServices = appServices;
+      $scope.fabricId = dataToModal.fabricId;
+      $scope.switch_id = dataToModal.switch_id;
+
+      $scope.config_versions = [];
+      $scope.selected_config = [];
+      $scope.config = {};
+
+
+      /**For config history table pagination**/
+    $scope.tableParams = new ngTableParams({
+          page: 1,
+          count: appSettings.tableSettings.count,
+          sorting: {
+              "name": "asc"
+          }
+      }, {
+          counts:[],
+          getData: function($defer, params) {
+              appServices.tablePagination($defer, $filter, params, $scope.config_versions, $scope.searchKeyword);
+          }
+      });
+
+      $scope.toggleAnimation = function() {
+          $scope.animationsEnabled = !$scope.animationsEnabled;
+      };
+
+      $scope.$watch("searchKeyword", function () {
+          $scope.tableParams.reload();
+          $scope.tableParams.page(1);
+      });
+      /** table **/
+
+      $scope.init = function() {
+        $scope.view_type = 'list';
+
+        var reqHeader = {
+          appendToURL: true,
+          value: $scope.fabricId+'/switch/'+$scope.switch_id+'/config',
+          noTrailingSlash: true
+        };
+        
+        appServices.doAPIRequest(appSettings.appAPI.fabricInstance.config_history, null, reqHeader).then(function(data) {
+          $scope.config_versions = data;
+          $scope.tableParams.reload();
+        });
+      };
+
+      $scope.compare = function(config_list) {
+        var reqHeader = {
+          appendToURL: true,
+          value: $scope.fabricId+'/switch/'+$scope.switch_id+'/config/'+config_list[0].id,
+          noTrailingSlash: true
+        };
+        
+        appServices.doAPIRequest(appSettings.appAPI.fabricInstance.fetch_config, null, reqHeader).then(function(data) {
+          console.log(data);
+          $scope.config.file1 = data;
+          var reqHeader = {
+            appendToURL: true,
+            value: $scope.fabricId+'/switch/'+$scope.switch_id+'/config/'+config_list[1].id,
+            noTrailingSlash: true
+          };
+          appServices.doAPIRequest(appSettings.appAPI.fabricInstance.fetch_config, null, reqHeader).then(function(data) {
+            console.log(data);
+            $scope.config.file2 = data;
+            $scope.view_type = 'compare';
+            $scope.diffUsingJS();
+          });
+        });
+      };
+
+      $scope.diffUsingJS = function () {
+          // var byId = function (id) { return document.getElementById(id); },
+          var  base = difflib.stringAsLines($scope.config.file1),
+            newtxt = difflib.stringAsLines($scope.config.file2),
+            sm = new difflib.SequenceMatcher(base, newtxt),
+            opcodes = sm.get_opcodes(),
+            diffoutputdiv = $("#diffoutput")[0];
+            // contextSize = byId("contextSize").value;
+
+          diffoutputdiv.innerHTML = "";
+          // contextSize = contextSize || null;
+
+          diffoutputdiv.appendChild(diffview.buildView({
+            baseTextLines: base,
+            newTextLines: newtxt,
+            opcodes: opcodes,
+            baseTextName: "Version "+$scope.selected_config[0].version,
+            newTextName: "Version "+$scope.selected_config[1].version,
+            contextSize: null,
+            viewType: 0
+          }));
+        };
+
+      $scope.cancel = function() {
+        if($scope.view_type == 'list') {
+          $modalInstance.dismiss('cancel');
+        } else {
+          $scope.view_type = 'list';
+        }
+      };
+
+      $scope.init();
+
+});

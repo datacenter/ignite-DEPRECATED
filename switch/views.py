@@ -116,3 +116,20 @@ class SwitchDetailView(BaseView):
         """
         services.delete_switch(int(id))
         return Response()
+
+class SwitchModelBootProgressView(BaseView):
+
+    def get(self, request, id, format=None):
+        return Response(services.get_progress_switches(int(id)))
+
+
+class SwitchModelBootFailView(BaseView):
+
+    def get(self, request, id, format=None):
+        return Response(services.get_fail_switches(int(id)))
+
+
+class SwitchModelBootSuccessView(BaseView):
+
+    def get(self, request, id, format=None):
+        return Response(services.get_success_switches(int(id)))

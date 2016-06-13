@@ -3,7 +3,7 @@ from django.shortcuts import render
 from rest_framework.response import Response
 
 import services
-from utils.baseview import BaseView
+from utils.baseview import BaseView,AdminView
 from serializers import *
 
 
@@ -364,3 +364,64 @@ class FabricSwtichDecommissionView(BaseView):
         """
         return Response(services.decommission_fabric_switch(int(fid), int(sid),
                                                            self.username))
+
+class FabricPostDiscoveryView(BaseView):
+    def post(self, request, format=None):
+        """
+        to discover a fabric
+        """
+
+        return Response(services.discover_fabric_post(request.data))
+
+
+class FabricSaveDiscoveryView(BaseView):
+    def put(self, request, id, format=None):
+        """
+        to save a discovered fabric
+        """
+        return Response(services.save_discovered_fabric(int(id), request.data, self.username))
+
+class FabricDeleteDiscoveryView(BaseView):
+    def delete(self, request, id, format=None):
+        """
+        to delete a discovered fabric
+        """
+        services.delete_discovered_fabric(int(id))
+        return Response()
+
+
+class SwitchRunningConfigListView(BaseView):
+    def get(self, request, fid, sid, format=None):
+        """
+        to get list of running configs of given switch id
+        """
+        return Response(services.get_switch_config_list(fid, sid))
+
+
+class SwitchLatestRunningConfigView(BaseView):
+    def get(self, request, fid, sid, format=None):
+        """
+        to get latest pulled config of switch
+        """
+        return services.get_switch_config_latest(fid, sid)
+
+    def put(self, request, fid, sid, format=None):
+        """
+        to pull the config from switch
+        ---
+  request_serializer: "SwitchConfigSerializer"
+        """
+        return services.pull_switch_config(request.data, fid, sid, self.username)
+
+
+class SwitchRunningConfigView(BaseView):
+    def get(self, request, fid, sid, id, format=None):
+        """
+        to get switch config of given version
+        """
+        return services.get_switch_config(fid, sid, id)
+
+
+class SwitchBootStatusResetView(AdminView):
+    def put(self, request, fid, sid, format=None):
+        return Response(services.reset_switch_boot_status(int(sid)))

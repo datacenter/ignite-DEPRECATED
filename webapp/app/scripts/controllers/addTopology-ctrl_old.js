@@ -393,7 +393,6 @@ angular.module('PoapServer')
           $('#alertLinkSame').hide()
         }
 
-        debugger;
 
         for (var i = 0; i < $scope.topology.links.length; i++) {
 
@@ -953,7 +952,6 @@ angular.module('PoapServer')
         };
 
         appServices.doAPIRequest(appSettings.appAPI.fabricInstance.edit, modalData.submitData, reqHeader).then(function(data) {
-          debugger;
           $scope.topology = data;
           $scope.topologyData = angular.copy($scope.topology);
           $scope.tierCounter = 0;
@@ -1111,7 +1109,6 @@ angular.module('PoapServer').controller('AddSwitchModalCtrl',
   });
 angular.module('PoapServer').controller('FabricConfigCtrl',
       function($scope, $modalInstance, appSettings, appServices, dataToModal){
-        debugger;
         $scope.action = dataToModal.action;
         $scope.configEdit = dataToModal.configEdit;
         $scope.source = dataToModal.source;

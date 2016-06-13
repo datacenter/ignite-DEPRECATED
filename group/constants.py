@@ -60,10 +60,38 @@ NEIGHBOR_LIST = 'neighbor_list'
 # Match types
 MATCH_TYPES = [SERIAL_NUMBER, NEIGHBOR]
 
+
+# custom script constants
+EVAL = 'eval'
+FIXED = 'fixed'
+PARAM_VAL = 'param_val'
+PARAM_NAME = 'param_name'
+PARAM_TYPE = 'param_type'
+FIXED_SCRIPTS = ['__init__.py', 'upgrade.py', 'pull_running_config.py']
+
+# Clone constants
+FAILURE_ACTION_GRP = "failure_action_grp"
+FAILURE_ACTION_IND = "failure_action_ind"
+FILE_NAME = "file_name"
+FUNCTION = "function"
+GROUP = "group"
+GROUP_ID = "group_id"
+GROUP_NAME = "group_name"
+IMAGE_ID = "image_id"
+IMAGE_NAME = "image_name"
+PARAMS = "params"
+PASSWORD = "password"
+RETRY_COUNT = "retry_count"
+RUN_SIZE = "run_size"
+TYPE = "type"
+USERNAME = "username"
+
 # error messages
 ERR_BUILD_WITHOUT_SUBMIT = "Submit the fabric first before build config"
 ERR_CANT_DEL_BOOTED_FABRIC = "Cannot delete a fabric that is already booted"
 ERR_CANT_DEL_BOOTED_SWITCH = "Cannot delete a switch that is already booted"
+ERR_EVAL_SYNTAX = "Error in eval syntax"
+ERR_IN_PARAMS = "Error in parameter keys/values"
 ERR_INV_PORTS = "Ports are either in use or not of right type"
 ERR_INV_PORT_COUNT = "Port count does not match # of links"
 ERR_INV_TOP_MODEL = "Invalid topology model name"

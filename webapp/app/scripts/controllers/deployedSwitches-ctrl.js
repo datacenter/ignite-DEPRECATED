@@ -32,7 +32,8 @@ angular.module('PoapServer')
                 resolve: {
                     dataToModal : function() {
                         return {
-                            "statId" : statId
+                            "statId" : statId,
+                            "type" : "depConfig"
                         }
                     }
                  }
@@ -162,28 +163,45 @@ angular.module('PoapServer')
         
 });
 
-angular.module('PoapServer').controller('DeployedSwitchConfigModalCtrl', function($scope, $modalInstance, FileReader, appSettings, appServices, dataToModal) {
+angular.module('PoapServer').controller('DeployedSwitchConfigModalCtrl', function($scope, $rootScope, $modalInstance, FileReader, appSettings, appServices, dataToModal) {
       
-    $scope.getConfigDetails = function(statId) {
+    $scope.getConfigDetails = function(statId,type) {
             var reqHeader = {
                 appendToURL : true,
-                value : statId,
+                value : '',
                 noTrailingSlash : true
             };
 
-            appServices.doAPIRequest(appSettings.appAPI.deployedSwitches.view_config, null, reqHeader).then(function(data) {
-                $scope.configDetails = data;
-            });
+            if( 'depConfig' === type ) {
+                reqHeader.value = statId;
+                appServices.doAPIRequest(appSettings.appAPI.deployedSwitches.view_config, null, reqHeader).then(function(data) {
+                    $scope.configDetails = data;
+                });
+            } else if ( 'pullConfig' === type ) {
+                reqHeader.value = dataToModal.fabricId+'/switch/'+statId+'/config/latest';
+                appServices.doAPIRequest(appSettings.appAPI.fabricInstance.switchConfig, null, reqHeader).then(function(data) {
+                    $scope.configDetails = data;
+                });
+            }
         };
 
     $scope.close = function() {
         $modalInstance.dismiss('cancel');
     };
 
-    $scope.getConfigDetails(dataToModal.statId);
+    /* watch for the error flag */
+
+    $scope.$watch(function() {
+        return $rootScope.errorFlag;
+    },function() {
+        if($rootScope.errorFlag == true)
+            $scope.close();
+    });
+
+    $scope.getConfigDetails(dataToModal.statId,dataToModal.type);
 });
 
-angular.module('PoapServer').controller('ViewFabricLogModalCtrl', function($scope, $modalInstance, FileReader, appSettings, appServices, dataToModal) {
+angular.module('PoapServer').controller('ViewFabricLogModalCtrl', function($scope, $rootScope, $modalInstance, FileReader, appSettings, appServices, dataToModal) {
    
     $scope.close = function() {
         $modalInstance.dismiss('cancel');
@@ -200,6 +218,15 @@ angular.module('PoapServer').controller('ViewFabricLogModalCtrl', function($scop
             $scope.logDetails = data;
         });
     };
+
+    /* watch for the error flag */
+
+    $scope.$watch(function() {
+        return $rootScope.errorFlag;
+    },function() {
+        if($rootScope.errorFlag == true)
+            $scope.close();
+    });
 
     $scope.getLogDetails(dataToModal.statId);
 });

@@ -4,6 +4,7 @@ from constants import *
 import linecard
 from serializers import *
 import switch
+from bootstrap.constants import BOOT_PROGRESS, BOOT_FAIL, BOOT_SUCCESS
 from utils.exception import IgniteException
 
 import logging
@@ -79,6 +80,9 @@ def get_switch(id):
 
 @transaction.atomic
 def update_switch(id, data, username=''):
+    if id==1:
+        raise IgniteException(ERR_CAN_NOT_EDIT_UNKNOWN_MODEL)
+
     if data[SWITCH_TYPE] == FIXED:
         serializer = SwitchFixedSerializer(data=data)
     elif data[SWITCH_TYPE] == CHASSIS:
@@ -95,3 +99,18 @@ def update_switch(id, data, username=''):
 @transaction.atomic
 def delete_switch(id):
     switch.delete_switch(id)
+
+
+@transaction.atomic
+def get_progress_switches(mid):
+    return switch.get_status_switches(mid, status=BOOT_PROGRESS)
+
+    
+@transaction.atomic
+def get_fail_switches(mid):
+    return switch.get_status_switches(mid, status=BOOT_FAIL)
+
+
+@transaction.atomic
+def get_success_switches(mid):
+    return switch.get_status_switches(mid, status=BOOT_SUCCESS)

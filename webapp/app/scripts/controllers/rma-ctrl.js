@@ -157,6 +157,10 @@ angular.module('PoapServer')
     	}
     };
 
+    $scope.cancel = function() {
+        $location.path('fabricInstance');
+    };
+
     $scope.init = function() {
         var reqHeader = {
                 appendToURL: true,

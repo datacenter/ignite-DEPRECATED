@@ -18,7 +18,7 @@ ADMIN = "admin"
 # Backup constants
 TAR_FORMAT = ".tar.gz"
 SQL_FORMAT = ".sql"
-FILE_LIST = ["configlets", "features", "repo"]
+FILE_LIST = ["configlets", "custom", "features", "repo", "switch"]
 CONF_FILE = "ignite/conf.py"
 MEDIA = "media"
 BACKUP = "backup"

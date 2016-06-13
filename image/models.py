@@ -12,6 +12,7 @@ class ImageProfile(models.Model):
     image_server_ip = models.GenericIPAddressField(protocol='IPv4')
     image_server_username = models.TextField()
     image_server_password = models.TextField()
+    is_encrypted = models.BooleanField(default=False)
     access_protocol = models.TextField()
     updated_by = models.TextField(default='')
     created = models.DateTimeField(auto_now_add=True)

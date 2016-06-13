@@ -1,15 +1,17 @@
 <div class="topologyBlock">
     <section>
         <div class="container">
-            <div class="row tool-bar">
+            <div class="row tool-bar" ng-if="action !== 'discovery'">
                 <div class="col-sm-1">
                     <a href="javascript:void(0);" ng-click="goBackToList()">
                         <span class="glyphicon glyphicon-chevron-left">Back</span>
                     </a>
                 </div>
-                <div class="col-sm-4" >
+                <div class="col-sm-4">
                     <h4 class="col-sm-3 no-margin" data-ng-if="source == 'topology'">Topology</h4>
-                    <h4 class="col-sm-3 no-margin" data-ng-if="source == 'fabric'">Fabric</h4>
+                    <h4 class="col-sm-3 no-margin" data-ng-if="source == 'fabric'">
+                        <!-- <span class="icon_discovery" tooltip="Discovered Fabric" data-ng-if="topologyData.is_discovered" aria-hidden="true"></span> -->    Fabric
+                    </h4>
                     <!-- <span class="alert alert-danger hide" ng-if="topology.name==''">Please enter a topology name</span> -->
                     <input type="text" class="form-control" style="display: inline; width: 50%; margin-top: -6px"
                         name="name" data-ng-disabled="!nameEdit"
@@ -32,7 +34,7 @@
                         / Cancel
                     </a>
                 </div>
-                 <div class="col-sm-4 toolbox">
+                 <div class="col-sm-7 toolbox">
                     <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-default"
                             ng-click="addSwitch();" data-toggle="tooltip" title="Add Switch"><i class="glyphicon glyphicon-plus"></i> Add Switch
@@ -66,21 +68,43 @@
                         ng-click="submitWork()">
                         <span class="glyphicon glyphicon-ok success_color"></span> Submit
                     </button>
-                    <span ng-if="topology.submit" class="success_color" style="padding-left: 25px;">
+                    <span ng-if="topology.submit" class="success_color" style="padding-left: 20px;">
                         <i class="glyphicon glyphicon-ok"></i> Submitted
                     </span>
+                    <button class="btn btn-raised btn-primary" ng-hide="action == 'view'"
+                        ng-if="source == 'fabric'" ng-click="viewMG()" aria-hidden="false"
+                        style="margin: -1px 0px 0px 27px;">
+                        Maintenance Group ({{topologyData.maintenance_group_count}})
+                    </button>
+                    <span class="text-right pull-right" style="padding-top: 3px;">
+                        <span>
+                            <a href="javascript:void(0);" data-ng-if="source == 'fabric'" data-ng-click="showConfig()">View Profiles</a>
+                        </span>
+                        <span>
+                            <a href="javascript:void(0);" data-ng-click="showDefaults()">View Defaults</a>
+                        </span>
+                    </span>
                 </div>
-                <div class="col-sm-3 text-right">
+                <!-- <div class="col-sm-3 text-right">
                     <span>
                         <a href="javascript:void(0);" data-ng-if="source == 'fabric'" data-ng-click="showConfig()">View Profiles</a>
                     </span>
                     <span>
                         <a href="javascript:void(0);" data-ng-click="showDefaults()">View Defaults</a>
                     </span>
-                    <!-- <span>
-                        <button type="button" class="btn btn-sm btn-default" ng-click="goBackToList()">
-                            <span class="glyphicon glyphicon-chevron-left"></span>Back to List</button>
-                    </span> -->
+                </div> -->
+            </div>
+            <div class="row tool-bar" ng-if="action === 'discovery'">
+                <div class="col-sm-5"></div>
+                <div class="col-sm-2 text-right">
+                    <span>
+                        <button class="btn btn-trans btn-raised btn-primary"
+                            ng-click="saveDiscovery()">Save</button>
+                    </span> &nbsp;&nbsp;
+                    <span>
+                        <button class="btn btn-trans btn-raised btn-primary"
+                            ng-click="deleteDiscovery()">Cancel</button>
+                    </span>
                 </div>
             </div>
         </div>
@@ -278,7 +302,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" ng-click="closeSwitchEdit()" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <a href="javascript:void(0);" tooltip="Edit" class="pull-right pr-15" tooltip-placement="bottom" data-ng-if="!editSwitchFlag">
+                        <a href="javascript:void(0);" tooltip="Edit" class="pull-right pr-15" tooltip-placement="bottom" data-ng-if="action !== 'discovery' && !editSwitchFlag">
                             <span class="glyphicon glyphicon-pencil" ng-click="editSwitch()" aria-hidden="true"></span>
                         </a>
                         <h4 class="modal-title" id="myModalLabel">Switch</h4>
@@ -354,6 +378,13 @@
                                 <input type="text" class="form-control"
                                     data-ng-disabled="!editSwitchFlag" data-ng-model="switch.serial_num">
                             </div>
+                            <div class="input-group  input-group-sm" data-ng-if="source == 'fabric'">
+                                <span class="input-group-addon link_switch_modal_field"> Config Type</span>
+                                <select class="form-control input-addon" ng-disabled="!editSwitchFlag" ng-init="switch.config_type" ng-model="switch.config_type" ng-options="v.value as v.label for (k,v) in switchDetails.selectList.config_type_list" data-ng-if="editSwitchFlag || (!editSwitchFlag && switch.config_type != null)" >
+                                </select>
+                                <input type="text" class="form-control" readonly
+                                    data-ng-if="switch.config_type == null && !editSwitchFlag" value="--Tier Default--">
+                            </div>
                         </div>
                         <hr class="hr_fabSwitch" data-ng-if="source=='fabric' && (switch.tier == 'Spine' || switch.tier == 'Leaf')">
                         <div class="popBody" data-ng-if="source=='fabric' && (switch.tier == 'Spine' || switch.tier == 'Leaf')">
@@ -366,6 +397,11 @@
                                 <span ng-class="{success_color : switch.boot_detail.boot_status == 'Success', red : switch.boot_detail.boot_status == 'Failed'}"
                                     class="input-group-addon" style="float: left">
                                     {{switch.boot_detail.boot_status}}
+                                </span>
+                                <span class="input-group-addon" ng-if="switch.boot_detail.boot_status == 'Failed' || switch.boot_detail.boot_status == 'In progress'">
+                                    <a href="javascript:void(0)" ng-click="reset_switch(switch.id)">
+                                        Reset
+                                    </a>
                                 </span>
                                 <!-- <span ng-if="switch.boot_detail.boot_status == 'Failed'"
                                     class="input-group-addon red" style="float: left">
@@ -394,26 +430,34 @@
                             </div>
                             <div class="input-group input-group-sm"
                                 data-ng-if="switch.boot_detail || topologyData.build_time">
-                                <span class="input-group-addon link_switch_modal_field">  </span>
-                                <span class="input-group-addon pull-left">
-                                    <a href="javascript:void(0)" ng-click="openDepSwitchConfigModal(switch.id)">Config</a>
+                                <span class="input-group-addon link_switch_modal_field">
+                                    <a href="javascript:void(0)" ng-click="openDepSwitchConfigModal(switch.id)">POAP Config</a>
                                 </span>
-                                <span class="input-group-addon pull-right"
+                                <span class="input-group-addon pull-left"
                                     data-ng-if="switch.boot_detail.boot_status">
                                     <a href="javascript:void(0)" ng-click="openDepSwitchLogModal(switch.id)">Logs</a>
+                                </span>
+                            </div>
+                            <div class="input-group input-group-sm"
+                                data-ng-if="(switch.boot_detail || topologyData.build_time) && switch.boot_detail.boot_status == 'Success'">
+                                <span class="input-group-addon link_switch_modal_field">
+                                    <a href="javascript:void(0)" ng-click="openSwitchPullConfigModal(switch.id)">Running Config</a>
+                                </span>
+                                <span class="input-group-addon pull-left">
+                                    <a href="javascript:void(0)" ng-click="openConfigHistory(switch.id)">Config History</a>
                                 </span>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-danger" ng-click="deleteSwitch(switch.id,'delete')"
-                            data-ng-if="!switch.boot_detail || (switch.boot_detail != null && !switch.boot_detail.boot_status)">Delete
+                            data-ng-if="action !== 'discovery' && (!switch.boot_detail || (switch.boot_detail != null && !switch.boot_detail.boot_status))">Delete
                         </button>
                         <button class="btn btn-danger" ng-click="deleteSwitch(switch.id,'decommission')"
-                            data-ng-if="!(!switch.boot_detail || (switch.boot_detail != null && !switch.boot_detail.boot_status))">Decommission
+                            data-ng-if="action !== 'discovery' && !(!switch.boot_detail || (switch.boot_detail != null && !switch.boot_detail.boot_status))">Decommission
                         </button>
-                        <button type="button" class="btn btn-primary" ng-if="editSwitchFlag" data-dismiss="modal" ng-click="saveSwitchEdit(switch.id, $index)">Save</button>
-                        <button type="button" class="btn btn-default" ng-click="closeSwitchEdit()" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" ng-if="action !== 'discovery' && editSwitchFlag" data-dismiss="modal" ng-click="saveSwitchEdit(switch.id, $index)">Save</button>
+                        <button type="button" class="btn btn-default" ng-if="!editSwitchFlag" ng-click="closeSwitchEdit()" data-dismiss="modal">Cancel</button>
                     </div>
                 </div>
             </div>
@@ -429,7 +473,7 @@
                     <button type="button" class="close" data-dismiss="modal" ng-click="closeLinkEdit()"
                         aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <a href="javascript:void(0);" tooltip="Edit" class="pull-right pr-15"
-                        tooltip-placement="bottom" data-ng-if="!editLinkFlag && source == 'fabric'">
+                        tooltip-placement="bottom" data-ng-if="action !== 'discovery' && !editLinkFlag && source == 'fabric'">
                         <span class="glyphicon glyphicon-pencil" ng-click="editLink()"
                             aria-hidden="true"></span>
                     </a>
@@ -477,10 +521,11 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-danger" ng-click="removeItemLinkType(link.id, $index)">
+                    <button class="btn btn-danger"
+                        data-ng-if="action !== 'discovery'" ng-click="removeItemLinkType(link.id, $index)">
                         Delete
                     </button>
-                    <button type="button" class="btn btn-primary" ng-if="editLinkFlag && source == 'fabric'" data-dismiss="modal" ng-click="saveLinkEdit(link.id, $index)">Save</button>
+                    <button type="button" class="btn btn-primary" ng-if="action !== 'discovery' && editLinkFlag && source == 'fabric'" data-dismiss="modal" ng-click="saveLinkEdit(link.id, $index)">Save</button>
                     <button type="button" class="btn btn-default" ng-click="closeLinkEdit()" data-dismiss="modal">Cancel</button>
                 </div>
             </div>

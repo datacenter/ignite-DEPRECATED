@@ -72,8 +72,10 @@ def get_profile(id):
 
 @transaction.atomic
 def update_profile(id, data, username=''):
-    serializer = ProfileSerializer(data=data)
+    if id==1:
+        raise IgniteException(ERR_CAN_NOT_EDIT_DEFAULT_CONFIG)
 
+    serializer = ProfileSerializer(data=data)
     if not serializer.is_valid():
         raise IgniteException(serializer.errors)
 
@@ -84,4 +86,6 @@ def update_profile(id, data, username=''):
 
 @transaction.atomic
 def delete_profile(id):
+    if id==1:
+        raise IgniteException(ERR_CAN_NOT_DELETE_DEFAULT_CONFIG)
     profile.delete_profile(id)

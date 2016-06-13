@@ -3,7 +3,8 @@
         <button type="button" class="close" data-dismiss="modal" ng-click="cancel()" aria-label="Close">
             <span aria-hidden="true">&times;</span>
         </button>
-        <h3 class="modal-title pull-left">Profile Settings</h3>
+        <h3 class="modal-title pull-left" data-ng-if="action != 'add_discovery'">Profile Settings</h3>
+        <h3 class="modal-title pull-left" data-ng-if="action == 'add_discovery'">Fabric</h3>
         <div class="pull-right modal-form-action">
             <a href="javascript:void(0);" ng-show="action == 'editConfig' && !configEdit" tooltip="Edit" tooltip-placement="bottom">
                 <span class="glyphicon glyphicon-pencil" ng-click="changeAction('edit')" aria-hidden="true"></span>
@@ -24,7 +25,7 @@
                             ng-model="submitData.name">
                     </div>
                 </div>
-                <div class="col-xs-6" data-ng-if="source != 'fabric'">
+                <div class="col-xs-6" data-ng-if="action != 'add_discovery' && source != 'fabric'">
                     <div class="form-group">
                         <label for="topology" class="col-xs-5" style="float:none;">Topology</label>
                         <select class="form-control wid50" name="topology" style="display: inline;"
@@ -34,6 +35,9 @@
                         </select>
                     </div>
                 </div>
+            </div>
+                <!-- <div class="row"></div> -->
+            <div class="row" data-ng-if="action != 'add_discovery'">
                 <div class="col-xs-6">
                     <div class="form-group">
                         <label for="config" class="col-xs-5" style="float:none">Fabric Config Profile</label>
@@ -59,8 +63,8 @@
                     </div>
                 </div>
             </div>
-            <h4>Switches</h4>
-            <table class="table table-hover">
+            <h4 data-ng-if="action != 'add_discovery'">Switches</h4>
+            <table class="table table-hover" data-ng-if="action != 'add_discovery'">
                 <thead>
                     <tr>
                         <th class="col-xs-3">Tier</th>
@@ -111,9 +115,9 @@
     </div>
 </div>
 <div class="modal-footer">
-    <div class="small pull-left profile-note"><b>Note:</b> For a Tier both Config Profile and Feature Profile cannot be --None--</div>
-    <div class="small pull-left"><b>Note:</b> Feature Profile should be either --None-- for both the tiers or shouldnot be --None-- for any of the tiers</div>
+    <div class="small pull-left profile-note" data-ng-if="action != 'add_discovery'"><b>Note:</b> For a Tier both Config Profile and Feature Profile cannot be --None--</div>
+    <div class="small pull-left" data-ng-if="action != 'add_discovery'"><b>Note:</b> Feature Profile should be either --None-- for both the tiers or shouldnot be --None-- for any of the tiers</div>
+    <div class="small pull-left" data-ng-if="action == 'add_discovery'"><b>Note:</b> Default Config Profile, Image Profile and Switch Model will be applied on saving the fabric</div>
     <button class="btn btn-trans btn-default btn-raised" ng-click="cancel()">Cancel</button>
     <button class="btn btn-raised btn-primary" ng-hide="!configEdit" data-ng-disabled="addFabricForm.$invalid" ng-click="ok()">Save</button>
-</div>
 </div>

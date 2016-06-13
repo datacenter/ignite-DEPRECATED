@@ -7,6 +7,7 @@ ACCESS_METHOD = "access_method"
 ERR_MSG = "err_msg"
 FILE = "yaml_file"
 FILE_REPO_PATH = "media/repo"
+FILE_SWITCH_PATH = "media/switch"
 MODEL_TYPE = "model_type"
 PKG_DIR = "packages"
 SERVER_IP = "ignite_ip"
@@ -29,6 +30,7 @@ NOT_BOOTED = 'Not Booted'
 
 #logs
 LOG_SEARCH_COL = 3
+#SYSLOG_PATH = '/var/log/syslog*'
 
 #Error Messages
 ERR_NO_RESPONSE = "No match found for serial number or neighbor list"
@@ -42,6 +44,8 @@ ERR_CREATE_BOOT_STATUS = "Failed to create boot status of switch without build t
 ERR_SWITCH_IN_USE_JOB_SCHEDULE = "Switch is busy in Job scheduling. Can not be updated"
 ERR_PROTO_NOT_FOUND = "Protocol is not supported"
 ERR_CFG_NOT_FOUND = "Config file not found!!"
+ERR_NOT_ALLOWED_DUPLICATE_SERIAL = "Switch with serial number: "
+ERR_NOT_ALLOWED_DUPLICATE_SERIAL_CONTINUES = " is already present as part of Fabric: "
 ERR_PKG_NOT_FOUND = "Package not found!!"
 ERR_SCRIPT_NOT_FOUND = "Script not found!!"
 ERR_SERIAL_NUM_MISMATCH = "Serial number mismatch"

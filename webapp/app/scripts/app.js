@@ -235,37 +235,37 @@ app.config(function($routeProvider) {
         .when('/group',{
             templateUrl: 'pages/views/groups.html',
             controller: 'GroupsCtrl',
-            activemenu: 'manage',
+            activemenu: 'fabric',
             activetab: 'group'
         })
         .when('/group/:mode', {
             templateUrl: 'pages/views/group.html',
             controller: 'GrpCtrl',
-            activemenu:'manage',
+            activemenu:'fabric',
             activetab: 'group'
         })
         .when('/group/:mode/:id', {
             templateUrl: 'pages/views/group.html',
             controller: 'GrpCtrl',
-            activemenu:'manage',
+            activemenu:'fabric',
             activetab: 'group'
         })
         .when('/jobs', {
             templateUrl: 'pages/views/jobList.html',
             controller: 'JobsCtrl',
-            activemenu:'manage',
+            activemenu:'fabric',
             activetab: 'job'
         })
         .when('/job/:mode', {
             templateUrl: 'pages/views/job.html',
             controller: 'Job_Ctrl',
-            activemenu:'manage',
+            activemenu:'fabric',
             activetab: 'job'
         })
         .when('/job/:mode/:id', {
             templateUrl: 'pages/views/job.html',
             controller: 'Job_Ctrl',
-            activemenu:'manage',
+            activemenu:'fabric',
             activetab: 'job'
         })
         .when('/rma',{

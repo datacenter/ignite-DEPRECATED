@@ -88,6 +88,9 @@
                                 </a>
                             </li>
                             <li>
+                                <a href="javascript:void(0);" ng-click="cloneJob(job.id,job.name)" ng-model="inputModel" tooltip="Clone" tooltip-placement="bottom"><span class="icon_clone" aria-hidden="true"></span></a>
+                            </li>
+                            <li>
                                 <a href="javascript:void(0);" tooltip="Delete" tooltip-placement="bottom" ng-click="deleteJob(job.id)">
                                     <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
                                 </a>
@@ -95,7 +98,6 @@
                         </ul>
                     </td>
                 </tr>
-                
             </tbody>
         </table>
     </div>

@@ -12,6 +12,7 @@ class Task(models.Model):
     location_server_ip = models.TextField(default='')
     location_server_user = models.TextField(null=True, default='')
     location_server_password = models.TextField(null=True, default='')
+    is_encrypted = models.BooleanField(default=False)
     location_access_protocol = models.TextField(default='')
     editable = models.BooleanField(default=True)
     created = models.DateTimeField(auto_now_add=True)

@@ -10,6 +10,7 @@ from ignite.conf import IGNITE_IP, IGNITE_USER, IGNITE_PASSWORD, ACCESS_PROTOCOL
 from ignite.settings import SCRIPT_PATH
 from models import Task, Workflow
 from utils.exception import IgniteException
+from utils.encrypt import decrypt_data
 
 import logging
 logger = logging.getLogger(__name__)
@@ -150,7 +151,10 @@ def _get_server_location(task_obj=None):
     location[PROTOCOL] = task_obj.location_access_protocol
     location[HOSTNAME] = task_obj.location_server_ip
     location[USERNAME] = task_obj.location_server_user
-    location[PASSWORD] = task_obj.location_server_password
+    password = task_obj.location_server_password
+    if task_obj.is_encrypted:
+        password = decrypt_data(password)
+    location[PASSWORD] = password
     return location
 
 
@@ -172,5 +176,8 @@ def _update_image_params(img, serial_number):
     param[HOSTNAME] = img.image_server_ip
     param[FILE_SRC] = img.system_image
     param[USERNAME] = img.image_server_username
-    param[PASSWORD] = img.image_server_password
+    password = img.image_server_password
+    if img.is_encrypted:
+        password = decrypt_data(password)
+    param[PASSWORD] = password
     return param

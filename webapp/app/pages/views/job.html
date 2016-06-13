@@ -156,7 +156,7 @@
                     </td> -->
                     <td><a href="javascript:void(0);" ng-click="viewGroup(task.group,task.group_id)">{{task.group.group_name}}</a></td>
                     <td>
-                        <a href="javascript:void(0);" ng-click="viewImage(task.params.image, task.image_id)">
+                        <a href="javascript:void(0);" ng-click="viewImage({new_item : true}, task.image_id)">
                             {{task.image_name}}
                         </a>
                     </td>

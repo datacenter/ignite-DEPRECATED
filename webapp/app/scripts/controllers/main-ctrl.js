@@ -22,7 +22,6 @@ angular.module('PoapServer')
         };
 
         $scope.logout = function() {
-            debugger;
             var dataToSubmit = {
                 "username" : lclStorage.valueOf('InternalStore').inMemoryCache.userDetails.username
             };

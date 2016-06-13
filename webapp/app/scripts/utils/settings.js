@@ -208,7 +208,7 @@
                         "url" : "/api/fabric/topology/",
                         "method" : "DELETE",
                         "auth" : "true"
-                      },
+                      }
                 },
                 "configuration": {
                     "list": {
@@ -291,10 +291,15 @@
                       "method" : "GET",
                       "auth" : "true"
                     },
+                    "switchConfig" : {
+                      "url" : "/api/fabric/fabric/",
+                      "method" : "GET",
+                      "auth" : "true"
+                    },
                     "delete" : {
-                        "url": "/api/fabric/fabric/",
-                        "method": "DELETE",
-                        "auth": "true"
+                      "url": "/api/fabric/fabric/",
+                      "method": "DELETE",
+                      "auth": "true"
                     },
                     "buildConfig" : {
                       "url": "/api/fabric/fabric/",
@@ -304,6 +309,36 @@
                     "add_switch_Link" : {
                       "url": "/api/fabric/fabric/",
                       "method": "POST",
+                      "auth": "true"
+                    },
+                    "discovery_create" : {
+                      "url": "/api/fabric/fabric/discovery",
+                      "method": "POST",
+                      "auth": "true"
+                    },
+                    "discovery_save" : {
+                      "url": "/api/fabric/fabric/discovery/",
+                      "method": "PUT",
+                      "auth": "true"
+                    },
+                    "discovery_delete": {
+                      "url": "/api/fabric/fabric/discovery/",
+                      "method": "DELETE",
+                      "auth": "true"
+                    },
+                    "reset_switch": {
+                      "url": "/api/fabric/fabric/",
+                      "method": "PUT",
+                      "auth": "true"
+                    },
+                    "config_history": {
+                      "url": "/api/fabric/fabric/",
+                      "method": "GET",
+                      "auth": "true"
+                    },
+                    "fetch_config": {
+                      "url": "/api/fabric/fabric/",
+                      "method": "GET",
                       "auth": "true"
                     }
                 },
@@ -425,6 +460,11 @@
                   "delete" : {
                       "url": "/api/switch/model/",
                       "method": "DELETE",
+                      "auth": "true"
+                    },
+                  "switch_modal_status" : {
+                      "url": "/api/switch/model/",
+                      "method": "GET",
                       "auth": "true"
                     }
                 },
@@ -577,12 +617,12 @@
               },
               "group" : {
                     "list" : {
-                      "url": "/api/manage/group",
+                      "url": "/api/manage/group/",
                       "method": "GET",
                       "auth": "true"
                     },
                     "create": {
-                      "url": "/api/manage/group",
+                      "url": "/api/manage/group/",
                       "method": "POST",
                       "auth": "true"
                     },
@@ -637,6 +677,21 @@
                       "url": "/api/manage/job/",
                       "method": "DELETE",
                       "auth": "true"
+                    },
+                    "getScripts": {
+                      "url": "/api/manage/scriptlist",
+                      "method": "GET",
+                      "auth": "true"
+                    },
+                    "getGroupList": {
+                       "url": "/api/manage/group",
+                       "method": "GET",
+                       "auth": "true"
+                    },
+                    "clone": {
+                       "url": "/api/manage/job/",
+                       "method": "POST",
+                       "auth": "true"
                     }
               }
             },
@@ -735,6 +790,16 @@
                       "label" : "DOWNLINK_PORTS"
                     }
                   ]
+                },
+                'fabric': {
+                  'switch_config' : [{
+                    "value" : "POAP_CONFIG",
+                    "label" : "POAP Config"
+                  },
+                  {
+                    "value" : "RUNNING_CONFIG",
+                    "label" : "Running Config"
+                  }]
                 },
                 'fabricConstruct' : {
                     "types" : [{
@@ -847,6 +912,14 @@
                     {
                       "value" : "epld_upgrade",
                       "label" : "EPLD Upgrade"
+                    },
+                    {
+                      "value" : "import_config",
+                      "label" : "Import Config"
+                    },
+                    {
+                      "value" : "custom",
+                      "label" : "Custom"
                     }
                   ],
                   "failure_actions" : [
@@ -857,6 +930,16 @@
                     {
                       "value" : "abort",
                       "label" : "abort"
+                    }
+                  ],
+                  "task_param_type" : [
+                    {
+                      "value" : "eval",
+                      "label" : "Evaluate"
+                    },
+                    {
+                      "value" : "fixed",
+                      "label" : "Fixed"
                     }
                   ]
                 }

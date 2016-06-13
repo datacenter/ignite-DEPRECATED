@@ -16,22 +16,28 @@ def get_all_groups():
     return serializer.data
 
 
+def get_all_groups_fabric(fab_id):
+    grp = group.get_all_groups_fabric(fab_id)
+    serializer = GroupDetailSerializer(grp, many=True)
+    return serializer.data
+
+
 @transaction.atomic
-def add_group(data, username=''):
+def add_group(data, fab_id, username=''):
     serializer = GroupPostSerializer(data=data)
     if not serializer.is_valid():
         raise IgniteException(serializer.errors)
-    grp = group.add_group(serializer.data, username)
+    grp = group.add_group(serializer.data, fab_id, username)
     serializer = GroupBriefSerializer(grp)
     return serializer.data
 
 
 @transaction.atomic
-def update_group(id, data, username=''):
+def update_group(data, fab_id, grp_id, username=''):
     serializer = GroupPostSerializer(data=data)
     if not serializer.is_valid():
         raise IgniteException(serializer.errors)
-    grp = group.update_group(id, serializer.data, username)
+    grp = group.update_group(serializer.data, fab_id, grp_id, username)
     serializer = GroupBriefSerializer(grp)
     return serializer.data
 
@@ -42,28 +48,6 @@ def delete_group(id):
 
 
 def get_group(gid):
-    grp = group.get_group(gid)
-    serializer = GroupDetailSerializer(grp)
-    return serializer.data
-
-
-@transaction.atomic
-def add_switch(gid, data, username=''):
-    serializer = GroupSwitchPostSerializer(data=data, many=True)
-    if not serializer.is_valid():
-        raise IgniteException(serializer.errors)
-    group.add_switch(gid, serializer.data, username)
-    grp = group.get_group(gid)
-    serializer = GroupDetailSerializer(grp)
-    return serializer.data
-
-
-@transaction.atomic
-def delete_switch(gid, data):
-    serializer = GroupSwitchPostSerializer(data=data, many=True)
-    if not serializer.is_valid():
-        raise IgniteException(serializer.errors)
-    group.delete_switch(gid, serializer.data)
     grp = group.get_group(gid)
     serializer = GroupDetailSerializer(grp)
     return serializer.data
@@ -104,3 +88,17 @@ def update_job(id, data, username=''):
 @transaction.atomic
 def delete_job(id):
     jb = job.delete_job(id)
+
+
+def get_scripts():
+    return job.get_scripts()
+
+
+@transaction.atomic
+def clone_job(data, id, username=''):
+    serializer = JobCloneSerializer(data=data)
+    if not serializer.is_valid():
+        raise IgniteException(serializer.errors)
+    jb = job.clone_job(serializer.data, id, username)
+    serializer = JobDetailSerializer(jb)
+    return serializer.data

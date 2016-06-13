@@ -3,7 +3,7 @@
         "model": "switch.SwitchModel",
         "pk":1,
         "fields": {
-            "name":"others",
+            "name":"Unknowns",
             "switch_type":"Fixed",
             "updated_by" : "admin",
             "created": "2016-02-14 09:29:51.405893+00:00",

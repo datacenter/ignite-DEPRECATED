@@ -45,7 +45,6 @@ angular.module('PoapServer')
             noTrailingSlash : true
         };
         appServices.doAPIRequest(appSettings.appAPI.backup.download, null, reqHeader).then(function(data) {
-            debugger;
             saveData(data, file_name);
         });*/
     };

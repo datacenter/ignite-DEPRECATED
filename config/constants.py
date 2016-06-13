@@ -45,6 +45,9 @@ ERR_PROF_IN_USE = "Profile is in use"
 ERR_VALUE_NOT_FOUND = "Value not found for parameter"
 ERR_PROF_IS_EMPTY = "No configlet is added"
 ERR_CONFIGLET_FILE_NOT_FOUND = "Configlet not found"
+ERR_CAN_NOT_DELETE_DEFAULT_CONFIG = "Deletion of default config profile is not allowed"
+ERR_CAN_NOT_EDIT_DEFAULT_CONFIG = "Can not edit default config profile"
+
 #Instance dependent params
 HOST_NAME = 'HOST_NAME'
 VPC_PEER_SRC = 'VPC_PEER_SRC'

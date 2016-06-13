@@ -10,14 +10,16 @@ from config.profile import build_config_profile
 from constants import *
 import discovery.discoveryrule as discoveryrule
 from fabric.constants import SERIAL_NUM, SERIAL_NUMBER, NEIGHBOR, ERR_SERIAL_NUM_IN_USE
+from fabric.constants import POAP_CONFIG, RUNNING_CONFIG
 from fabric.build import build_config, build_switch_config
 from fabric.fabric import search_fabric, get_switch_workflow
 from fabric.fabric import get_switch_image, get_switch_feature_profile
 from fabric.models import Switch
+from fabric.switch_config import get_latest_version
 from switch.models import SwitchModel
-from ignite.conf import IGNITE_IP, IGNITE_USER, IGNITE_PASSWORD
-from ignite.conf import REMOTE_SYSLOG_PATH, LOG_LINE_COUNT, ACCESS_PROTOCOL, SYSLOG_PATH
-from ignite.settings import REPO_PATH, PKG_PATH, YAML_LIB
+from ignite.conf import IGNITE_IP, IGNITE_USER, IGNITE_PASSWORD, SYSLOG_PATH
+from ignite.conf import REMOTE_SYSLOG_PATH, LOG_LINE_COUNT, ACCESS_PROTOCOL
+from ignite.settings import REPO_PATH, PKG_PATH, YAML_LIB, SWITCH_CONFIG_PATH
 from models import SwitchBootDetail
 from utils.exception import IgniteException
 from workflow.constants import PROTO_SCP, PROTO_TFTP, PROTO_HTTP, PROTO_SFTP
@@ -29,6 +31,16 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def get_cfg_file_path(path, cfg, file_path):
+    if ACCESS_PROTOCOL in [PROTO_SCP, PROTO_SFTP]:
+        cfg_file = os.path.join(path, cfg)
+    elif ACCESS_PROTOCOL == PROTO_HTTP:
+        cfg_file = os.path.join(DOWNLOAD_URL, CONFIG, cfg)
+    else:
+        cfg_file = os.path.join(file_path, cfg)
+    return cfg_file
+
+
 def ignite_request(request):
     if ACCESS_PROTOCOL not in ACCESS_PROTOCOLS:
         msg = ERR_PROTO_NOT_FOUND + "- " + ACCESS_PROTOCOL
@@ -38,19 +50,40 @@ def ignite_request(request):
     model_type = request[MODEL_TYPE]
     switch, match_type = search_fabric(request)
     if switch:
+        logger.info("config type - " + switch.config_type)
+        cfg_file = None
+        if switch.config_type == POAP_CONFIG:
+            if (switch.topology.feature_profile or
+                get_switch_feature_profile(switch)):
+                logger.debug("Switch have feture profiles applied")
+                build_config(switch.topology.id)
+            else:
+                # delete cfg file
+                try:
+                    os.remove(os.path.join(REPO_PATH + str(switch.id) + '.cfg'))
+                except OSError as e:
+                    pass
+                # build new cfg
+                build_switch_config(switch)
 
-        if (switch.topology.feature_profile or
-            get_switch_feature_profile(switch)):
-            logger.debug("Switch have feture profiles applied")
-            build_config(switch.topology.id)
-        else:
-            # delete cfg file
-            try:
-                os.remove(os.path.join(REPO_PATH + str(switch.id) + '.cfg'))
-            except OSError as e:
-                pass
-            # build new cfg
-            build_switch_config(switch)
+            cfg_file = str(switch.id) + CFG_FILE_EXT
+
+            cfg_file = get_cfg_file_path(REPO_PATH, cfg_file, FILE_REPO_PATH)
+            if not cfg_file:
+                logger.error(ERR_CFG_NOT_FOUND)
+                return _get_server_response(False,
+                                            err_msg=ERR_CFG_NOT_FOUND)
+            logger.info("config file found for " + switch.config_type)
+
+        elif switch.config_type == RUNNING_CONFIG:
+            running_config = get_latest_version(switch.id)
+
+            cfg_file = get_cfg_file_path(SWITCH_CONFIG_PATH, running_config, FILE_SWITCH_PATH)
+            if not cfg_file:
+                logger.error(ERR_CFG_NOT_FOUND)
+                return _get_server_response(False,
+                                            err_msg=ERR_CFG_NOT_FOUND)
+            logger.info("config file found for " + switch.config_type)
 
         # fetch switch workflow
         wf = get_switch_workflow(switch)
@@ -58,16 +91,9 @@ def ignite_request(request):
         # fetch switch image
         image = get_switch_image(switch)
 
-        cfg_file = str(switch.id) + CFG_FILE_EXT
         wf_file = str(switch.id) + YAML_FILE_EXT
 
         logger.debug("Build workflow")
-        if ACCESS_PROTOCOL in [PROTO_SCP, PROTO_SFTP]:
-            cfg_file = os.path.join(REPO_PATH, cfg_file)
-        elif ACCESS_PROTOCOL == PROTO_HTTP:
-            cfg_file = os.path.join(DOWNLOAD_URL, CONFIG, cfg_file)
-        else:
-            cfg_file = os.path.join(FILE_REPO_PATH, cfg_file)
 
         with open(os.path.join(REPO_PATH, wf_file), 'w') as output_fh:
             output_fh.write(yaml.safe_dump(build_workflow(wf,
@@ -81,7 +107,6 @@ def ignite_request(request):
                            boot_time=timezone.now(),
                            model_type=model_type)
 
-        update_switch_model(switch, model_type)
 
         #update switch serial number
         if switch.serial_num != serial_number:
@@ -152,8 +177,6 @@ def ignite_request(request):
                            boot_status=BOOT_PROGRESS,
                            model_type=model_type)
 
-        update_switch_model(switch, model_type)
-
         cfg_file = str(switch.id) + CFG_FILE_EXT
         wf_file = str(switch.id) + YAML_FILE_EXT
 
@@ -192,8 +215,10 @@ def update_boot_detail(switch, boot_status="",
 
     if not switch.boot_detail:
         boot_detail = SwitchBootDetail()
+        old_status = None
     else:
         boot_detail = switch.boot_detail
+        old_status = switch.boot_detail.boot_status
 
     if boot_status:
         boot_detail.boot_status = boot_status
@@ -213,6 +238,10 @@ def update_boot_detail(switch, boot_status="",
     boot_detail.save()
     switch.boot_detail = boot_detail
     switch.save()
+    if model_type:
+        update_switch_model(old_status, boot_status, model_type)
+    else:
+        update_switch_model(old_status, boot_status, boot_detail.model_type)
 
 
 def _get_server_response(status, yaml_file=None, err_msg=""):
@@ -258,34 +287,32 @@ def update_boot_status(data):
         else:
             update_boot_detail(switch, boot_status=BOOT_FAIL)
 
-        update_switch_model(switch, model_type)
 
     except Switch.DoesNotExist:
         raise IgniteException(ERR_SERIAL_NUM_MISMATCH)
 
 
-def update_switch_model(switch, model_type):
+def update_switch_model(old_status, boot_status, model_type):
     try:
         switch_model = SwitchModel.objects.get(name=model_type)
     except SwitchModel.DoesNotExist:
         switch_model = SwitchModel.objects.get(pk=1)
 
-    update_switch_model_details(switch.boot_detail.boot_status, switch_model)
-
-
-def update_switch_model_details(boot_status, switch_model):
     if boot_status == BOOT_PROGRESS:
-        switch_model.boot_in_progress += 1
-        switch_model.save()
-        return
-
-    switch_model.boot_in_progress -= 1
+        if not old_status == BOOT_PROGRESS:
+            switch_model.boot_in_progress += 1
+            switch_model.save()
+            return
 
     if boot_status == BOOT_SUCCESS:
-        switch_model.booted_with_success += 1
+        if old_status == BOOT_PROGRESS:
+            switch_model.booted_with_success += 1
+            switch_model.boot_in_progress -= 1
 
     elif boot_status == BOOT_FAIL:
-        switch_model.booted_with_fail += 1
+        if old_status == BOOT_PROGRESS:
+            switch_model.booted_with_fail += 1
+            switch_model.boot_in_progress -= 1
 
     switch_model.save()
 
@@ -321,12 +348,12 @@ def preparelogs(file_name_list,  key1, is_common_log):
 
         if is_common_log:
             for line in lines:
-	        try:
+                try:
                     words = line.split()
                     if key1 == words[LOG_SEARCH_COL]:
                         partial_log_file.append(line)
                 except:
-		    pass
+                    pass
         else:
             partial_log_file = lines
 
@@ -370,7 +397,6 @@ def get_logs(id):
         except Exception as e:
             logger.error(str(e))
             return []
-
     except Exception as e:
         logger.error(str(e))
         raise IgniteException(ERR_FAILED_TO_READ_SYSLOGS)

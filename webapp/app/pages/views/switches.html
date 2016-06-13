@@ -85,7 +85,38 @@
                     <td>
                         <a href="javascript:void(0);" ng-click="viewSwitch(switch.id)">
                             {{switch.name}}
-                        </a>
+                        </a><br/>
+                        <div class="row col-xs-12">
+                            <span class="success">
+                                <a href="javascript:void(0);"
+                                ng-click="fetchSwitchStatus('booted_with_success',switch)"
+                                tooltip="Boot Success"
+                                tooltip-placement="bottom"
+                                ng-class="{anchor_disabled: switch.booted_with_success == 0}">
+                                <i class="circle_icon"></i>
+                                {{switch.booted_with_success}}</a>
+                            </span>
+                            <span class="status-separator">|</span>
+                            <span class="in_progress">
+                                <a href="javascript:void(0);"
+                                ng-click="fetchSwitchStatus('boot_in_progress',switch)"
+                                tooltip="Boot In Progress"
+                                tooltip-placement="bottom"
+                                ng-class="{anchor_disabled: switch.boot_in_progress == 0}">
+                                <i class="circle_icon"></i>
+                                {{switch.boot_in_progress}}</a>
+                            </span>
+                            <span class="status-separator">|</span>
+                            <span class="failure">
+                                <a href="javascript:void(0);"
+                                ng-click="fetchSwitchStatus('booted_with_fail',switch)"
+                                tooltip="Boot Failure"
+                                tooltip-placement="bottom"
+                                ng-class="{anchor_disabled: switch.booted_with_fail == 0}">
+                                <i class="circle_icon"></i>
+                                {{switch.booted_with_fail}}</a>
+                            </span>
+                        </div>
                     </td>
                     <td>{{switch.base_model}}</td>
                     <td>
@@ -149,5 +180,16 @@
                 </tr>
             </tbody>
         </table>
+    </div>
+    <div class="pull-right">
+        <span class="success">
+            <i class="circle_icon"></i> Boot Success
+        </span>
+        <span class="in_progress">
+            <i class="circle_icon"></i> Boot In Progress
+        </span>
+        <span class="failure">
+            <i class="circle_icon"></i> Boot Failure
+        </span>
     </div>
 </div>

@@ -106,7 +106,6 @@ app.filter('age', function($filter) {
 
 /*app.filter('filter_link', function() {
   return function(linkTypes, applicableTo) {
-    debugger;
     var linkTypeFiltered = [];
 
     for (var i = 0; i < linkTypes.length; i++) {

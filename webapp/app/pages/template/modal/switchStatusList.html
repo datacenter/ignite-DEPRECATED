@@ -1,0 +1,60 @@
+<div>
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" ng-click="cancel()" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <h3 class="modal-title pull-left">Switches</h3>
+        <div class="modal-form-action">
+            <div class="pull-right">
+                <div class="search-cont">
+                    <input type="search" class="form-control" title="Search" ng-model='searchKeyword' data-toggle="tooltip" placeholder="Search">
+                    <i class="glyphicon glyphicon-search"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-body">    
+        <div class="table-responsive">
+            <table class="table table-hover" ng-table="tableParams">
+                <thead>
+                    <tr>
+                        <th width="2%" class="hide">
+                            <input type="checkbox" class="form-control chk chk-trans">
+                        </th>
+                        <th width="2%">#</th>
+                        <th class="sortable" 
+                        ng-class="{
+                            'sort-asc': tableParams.isSortBy('fabric_name', 'asc'),
+                            'sort-desc': tableParams.isSortBy('fabric_name', 'desc')
+                        }"
+                        ng-click="tableParams.sorting({'fabric_name' : tableParams.isSortBy('fabric_name', 'asc') ? 'desc' : 'asc'})">Fabric_name</th>
+                        <th class="sortable" 
+                        ng-class="{
+                            'sort-asc': tableParams.isSortBy('switch_name', 'asc'),
+                            'sort-desc': tableParams.isSortBy('switch_name', 'desc')
+                        }"
+                        ng-click="tableParams.sorting({'switch_name' : tableParams.isSortBy('switch_name', 'asc') ? 'desc' : 'asc'})">Switch Name</th>
+                        <th class="sortable" 
+                        ng-class="{
+                            'sort-asc': tableParams.isSortBy('serial_number', 'asc'),
+                            'sort-desc': tableParams.isSortBy('serial_number', 'desc')
+                        }"
+                        ng-click="tableParams.sorting({'serial_number' : tableParams.isSortBy('serial_number', 'asc') ? 'desc' : 'asc'})">Serial Number</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-class="{active: classVal}" ng-repeat="switch in $data | filter : search">
+                        <td>{{appServices.generateSeq(tableParams.page(), tableParams.count(), $index)}}</td>
+                        <td>{{switch.fabric_name}}</td>
+                        <td>{{switch.switch_name}}</td>
+                        <td>{{switch.serial_number}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-trans btn-default btn-raised" ng-click="cancel()">Close</button>
+</div>
+</div>

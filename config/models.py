@@ -26,7 +26,7 @@ class Profile(models.Model):
 
     name = models.TextField(unique=True)
     submit = models.BooleanField(default=False)
-    construct_list = JSONField()
+    construct_list = JSONField(default=[])
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     updated_by = models.TextField(default='')

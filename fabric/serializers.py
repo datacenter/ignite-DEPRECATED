@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from constants import LINK_TYPES, MATCH_TYPES, TIER_NAMES
+from constants import LINK_TYPES, MATCH_TYPES, TIER_NAMES, CONFIG_LIST
 from constants import FAB_CLONE_NAME
 from models import Topology
 
@@ -8,7 +8,7 @@ from models import Topology
 NUM_LINKS_MIN = 1
 NUM_LINKS_MAX = 4
 COUNT_MIN = 0
-COUNT_MAX = 96
+COUNT_MAX = 128
 
 
 class NameSerializer(serializers.Serializer):
@@ -138,6 +138,7 @@ class FabricBriefSerializer(serializers.Serializer):
     name = serializers.CharField()
     model_name = serializers.CharField()
     submit = serializers.BooleanField()
+    is_discovered = serializers.BooleanField()
     build_time = serializers.DateTimeField(read_only=True)
     updated = serializers.DateTimeField()
     updated_by = serializers.CharField()
@@ -176,6 +177,55 @@ class FabricDefaultsSerializer(serializers.Serializer):
     links = DefaultLinkSerializer(many=True)
 
 
+class FabricSwitchPutSerializer(serializers.Serializer):
+
+    name = serializers.CharField()
+    serial_num = serializers.CharField(allow_blank=True)
+    model = serializers.IntegerField()
+    image_profile = serializers.IntegerField(allow_null=True)
+    config_profile = serializers.IntegerField(allow_null=True)
+    feature_profile = serializers.IntegerField(allow_null=True)
+    workflow = serializers.IntegerField(allow_null=True)
+    config_type = serializers.ChoiceField(CONFIG_LIST)
+
+
+class FabricProfilesPutSerializer(serializers.Serializer):
+
+    config_profile = serializers.IntegerField(allow_null=True)
+    feature_profile = serializers.IntegerField(allow_null=True)
+    profiles = FabricProfilesSerializer(many=True)
+
+
+class CloneTopoSerializer(serializers.Serializer):
+    name = serializers.CharField()
+
+
+class CloneFabricSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    name_operation = serializers.ChoiceField(FAB_CLONE_NAME)
+
+
+class DiscoveryPostSerializer(serializers.Serializer):
+
+    class AuthDetailsSerializer(serializers.Serializer):
+
+        username = serializers.CharField()
+        password = serializers.CharField()
+
+    class BlockSerializer(serializers.Serializer):
+        start = serializers.CharField()
+        end = serializers.CharField()
+
+    auth_details = AuthDetailsSerializer()
+    leaf_ip = serializers.CharField()
+    spine_ip = serializers.CharField()
+    ip_range = BlockSerializer(many=True)
+
+class DiscoverySaveSerializer(serializers.Serializer):
+    
+    name = serializers.CharField()
+
+
 class FabricSerializer(serializers.Serializer):
 
     class FabricSwitchSerializer(serializers.Serializer):
@@ -195,7 +245,25 @@ class FabricSerializer(serializers.Serializer):
         config_profile = serializers.PrimaryKeyRelatedField(read_only=True)
         feature_profile = serializers.PrimaryKeyRelatedField(read_only=True)
         workflow = serializers.PrimaryKeyRelatedField(read_only=True)
+        config_type = serializers.ChoiceField(CONFIG_LIST)
         boot_detail = SwitchBootDetailSerializer()
+
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField()
+    model_name = serializers.CharField()
+    submit = serializers.BooleanField()
+    is_discovered = serializers.BooleanField()
+    is_saved = serializers.BooleanField()
+    build_time = serializers.DateTimeField(read_only=True)
+    config_profile = serializers.PrimaryKeyRelatedField(read_only=True)
+    feature_profile = serializers.PrimaryKeyRelatedField(read_only=True)
+    site = serializers.CharField()
+    defaults = FabricDefaultsSerializer()
+    switches = FabricSwitchSerializer(many=True)
+    links = LinkSerializer(many=True)
+    maintenance_group_count  = serializers.IntegerField(read_only=True)
+
+class DiscoveredFabricSerializer(serializers.Serializer):
 
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField()
@@ -205,33 +273,14 @@ class FabricSerializer(serializers.Serializer):
     config_profile = serializers.PrimaryKeyRelatedField(read_only=True)
     feature_profile = serializers.PrimaryKeyRelatedField(read_only=True)
     site = serializers.CharField()
-    defaults = FabricDefaultsSerializer()
-    switches = FabricSwitchSerializer(many=True)
-    links = LinkSerializer(many=True)
 
 
-class FabricSwitchPutSerializer(serializers.Serializer):
-
-    name = serializers.CharField()
-    serial_num = serializers.CharField(allow_blank=True)
-    model = serializers.IntegerField()
-    image_profile = serializers.IntegerField(allow_null=True)
-    config_profile = serializers.IntegerField(allow_null=True)
-    feature_profile = serializers.IntegerField(allow_null=True)
-    workflow = serializers.IntegerField(allow_null=True)
+class SwitchConfigSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField()
 
 
-class FabricProfilesPutSerializer(serializers.Serializer):
-
-    config_profile = serializers.IntegerField(allow_null=True)
-    feature_profile = serializers.IntegerField(allow_null=True)
-    profiles = FabricProfilesSerializer(many=True)
-
-
-class CloneTopoSerializer(serializers.Serializer):
-    name = serializers.CharField()
-
-
-class CloneFabricSerializer(serializers.Serializer):
-    name = serializers.CharField()
-    name_operation = serializers.ChoiceField(FAB_CLONE_NAME)
+class SwitchConfigListSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    version = serializers.IntegerField()
+    last_updated = serializers.DateTimeField(read_only=True)

@@ -424,7 +424,6 @@ angular.module('PoapServer').controller('PoolsModalCtrl', function($scope, $moda
                 noTrailingSlash : true
             };
             appServices.doAPIRequest(appSettings.appAPI.pools.getById, null, requestHeader).then(function(data) {
-                debugger;
                 $scope.submitData = data;
                 $scope.submitData.blocks = $scope.submitData.blocks.filter(function(a){
                     a.noEdit = true;

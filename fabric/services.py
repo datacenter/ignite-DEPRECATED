@@ -5,6 +5,7 @@ from constants import MODEL_NAME
 import fabric
 import topology
 from serializers import *
+import switch_config
 from topology import BaseTopology
 from utils.exception import IgniteException
 
@@ -172,7 +173,6 @@ def add_fabric_switch(fab_id, data, user=""):
     serializer = SwitchPostSerializer(data=data)
     if not serializer.is_valid():
         raise IgniteException(serializer.errors)
-
     fabric.add_switches(fab_id, serializer.data, user)
     serializer = FabricSerializer(fabric.get_fabric(fab_id))
     return serializer.data
@@ -274,3 +274,59 @@ def clone_fabric(fab_id, data, user=""):
     new_fab = fabric.clone_fabric(fab_id, data, user)
     serializer = FabricSerializer(new_fab)
     return serializer.data
+
+
+@transaction.atomic
+def discover_fabric_post(data):
+    serializer = DiscoveryPostSerializer(data=data)
+    if not serializer.is_valid():
+        raise IgniteException(serializer.errors)
+
+    fab_id = fabric.create_empty_fabric(serializer.data)
+    fabric.get_discovery(fab_id, serializer.data)
+    fab = fabric.get_fabric(fab_id)
+    serializer = FabricSerializer(fab)
+    return serializer.data
+
+@transaction.atomic
+def save_discovered_fabric(fab_id, data, user=""):
+    serializer = DiscoverySaveSerializer(data=data)
+    if not serializer.is_valid():
+        raise IgniteException(serializer.errors)
+
+    fab = fabric.save_discovered_fabric(fab_id, data, user)
+    serializer = DiscoveredFabricSerializer(fab)
+    return serializer.data
+
+
+@transaction.atomic
+def delete_discovered_fabric(fab_id):
+    fabric.delete_discovered_fabric(fab_id)
+
+
+@transaction.atomic
+def pull_switch_config(data, fid, sid, username=''):
+    serializer = SwitchConfigSerializer(data=data)
+    if not serializer.is_valid():
+       raise IgniteException(serializer.errors)
+    return switch_config.pull_switch_config(data, fid, sid, username)
+
+
+def get_switch_config_latest(fid, sid):
+    return switch_config.get_switch_config_latest(fid, sid)
+
+
+@transaction.atomic
+def reset_switch_boot_status(sw_id):
+    serializer = FabricSerializer(fabric.reset_switch_boot_status(sw_id))
+    return serializer.data
+
+
+def get_switch_config_list(fid, sid):
+    configs = switch_config.get_switch_config_list(fid, sid)
+    serializer = SwitchConfigListSerializer(configs, many=True)
+    return serializer.data
+
+
+def get_switch_config(fid, sid, id):
+    return switch_config.get_switch_config(fid, sid, id)

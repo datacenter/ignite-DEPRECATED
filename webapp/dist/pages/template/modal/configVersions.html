@@ -1,0 +1,84 @@
+<div class="maintenance_grp">
+    <div class="modal-header">
+        <div class="table-header-cont">
+            <button type="button" class="close" data-dismiss="modal" ng-click="cancel()" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            <h3 class="modal-title pull-left">Config Versions<span ng-if="view_type == 'list'">({{tableParams.total()}})<span></h3>
+            <div class="pull-right" ng-show="view_type == 'list'">
+                <div class="search-cont">
+                    <input type="search" class="form-control" title="Search" ng-model='searchKeyword' data-toggle="tooltip" placeholder="Search">
+                    <i class="glyphicon glyphicon-search"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-body" ng-class="{config_compare : view_type == 'compare'}">
+        <div class="empty_list" ng-if="view_type == 'list' && tableParams.total() == 0">
+            <span>Currently no versions of the config file is present</span>
+        </div>
+        <div ng-show="view_type == 'list' && tableParams.total() > 0" class="table-responsive">
+            <table class="table table-hover" ng-table="tableParams">
+                <thead>
+                    <tr>
+                        <th width="2%">
+                            <!-- <input type="checkbox" class="form-control chk chk-trans"> -->
+                        </th>
+                        <th width="2%">#</th>
+                        <th class="sortable" 
+                        ng-class="{
+                            'sort-asc': tableParams.isSortBy('version', 'asc'),
+                            'sort-desc': tableParams.isSortBy('version', 'desc')
+                        }"
+                        ng-click="tableParams.sorting({'version' : tableParams.isSortBy('version', 'asc') ? 'desc' : 'asc'})"
+                        >Version</th>
+                        <th class="sortable" 
+                        ng-class="{
+                            'sort-asc': tableParams.isSortBy('last_updated', 'asc'),
+                            'sort-desc': tableParams.isSortBy('last_updated', 'desc')
+                        }"
+                        ng-click="tableParams.sorting({'last_updated' : tableParams.isSortBy('last_updated', 'asc') ? 'desc' : 'asc'})"
+                        >Last Modified on</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="config in $data">
+                        <td>
+                            <!-- <input type="checkbox" class="form-control chk chk-trans" ng-click="getChecked()" ng-checked="checkbox1"> -->
+                            <input type="checkbox"
+                                name="config_{{config.id}}"
+                                checklist-model="selected_config"
+                                checklist-value="{'id' : config.id,'version' : config.version}">
+                        </td>
+                        <td>{{appServices.generateSeq(tableParams.page(), tableParams.count(), $index)}}</td>
+                        <td>{{config.version}}</td>
+                        <td>{{config.last_updated | date : appSettings.dateFormat}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div ng-show="view_type == 'compare'">
+            <!-- <div class="textInput">
+                <h2>Version {{selected_config[0].version}}</h2>
+                <textarea id="baseText">{{config.file1}}</textarea>
+            </div>
+            <div class="textInput spacer">
+                <h2>Version {{selected_config[1].version}}</h2>
+                <textarea id="newText">{{config.file2}}</textarea>
+            </div>
+            <div class="viewType">
+                <input type="radio" name="_viewtype" id="sidebyside" ng-click="diffUsingJS();" /> <label for="sidebyside">Side by Side Diff</label>
+                &nbsp; &nbsp;
+                <input type="radio" name="_viewtype" id="inline" ng-click="diffUsingJS();" /> <label for="inline">Inline Diff</label>
+            </div> -->
+            <div id="diffoutput"> </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-raised btn-primary" data-ng-if="view_type == 'list'"
+            ng-click="compare(selected_config)" ng-disabled="selected_config.length != 2">
+            Compare
+        </button>
+        <button class="btn btn-trans btn-default btn-raised" ng-click="cancel()">Cancel</button>
+    </div>
+</div>

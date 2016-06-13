@@ -344,6 +344,8 @@ module.exports = function (grunt) {
             'data/**/*',
             'images/**/*',
             'fonts/{,*/}*.*',
+            'scripts/pluginjs/difflib.js',
+            'scripts/pluginjs/diffview.js',
             'scripts/pluginjs/snap.svg-min.js',
             'scripts/pluginjs/snap.svg-connectors.js',
             'scripts/pluginjs/svg-pan-zoom.min.js',

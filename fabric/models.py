@@ -14,6 +14,8 @@ class Topology(models.Model):
     name = models.TextField(unique=True)
     model_name = models.TextField()
     is_fabric = models.BooleanField(default=True)
+    is_saved = models.BooleanField(default=True)
+    is_discovered = models.BooleanField(default=False)
     submit = models.BooleanField(default=False)
     config_profile = models.ForeignKey(ConfigProfile, null=True, default=None,
                                        on_delete=models.PROTECT)
@@ -51,6 +53,7 @@ class Switch(models.Model):
                                  on_delete=models.PROTECT)
     boot_detail = models.ForeignKey(SwitchBootDetail, null=True, default=None,
                                     on_delete=models.PROTECT)
+    config_type = models.TextField(default='POAP_CONFIG')
 
 
 class Link(models.Model):
@@ -65,3 +68,20 @@ class Link(models.Model):
     num_links = models.IntegerField()
     src_ports = models.TextField(default="")
     dst_ports = models.TextField(default="")
+
+
+def generate_filename(self, filename):
+    url = "switch/%s" % (self.name)
+    return url
+
+
+class SwitchConfig(models.Model):
+
+    name = models.TextField(default=None)
+    path = models.FileField(upload_to=generate_filename)
+    switch = models.ForeignKey(Switch, null=True, default=None,
+                                on_delete=models.CASCADE)
+    version = models.IntegerField(null=True, default=None)
+    created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+    updated_by = models.TextField(default='')

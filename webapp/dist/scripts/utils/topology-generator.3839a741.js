@@ -94,7 +94,6 @@
         var blockClass = 'block';
 
         // var hovertext = "VPC-Member Link";
-        debugger;
         var hovertext = "Link Type="+switches.link_type+",  Local Port ("+switches.src_switch_name+") ="+switches.src_ports+", Remote Port ("+switches.dst_switch_name+") ="+switches.dst_ports;
 
         g[switchCount].attr({

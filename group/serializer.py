@@ -6,10 +6,19 @@ from models import *
 from utils.serializers import JSONSerializerField
 
 
+JOB_TYPES = ['switch_upgrade', 'epld_upgrade', 'custom', 'import_config']
+PARAM_TYPES = ['fixed', 'eval']
+
+
+class GroupSwitchPostSerializer(serializers.Serializer):
+    switch_id = serializers.IntegerField()
+
+
 class GroupPostSerializer(serializers.Serializer):
     name = serializers.CharField()
     username = serializers.CharField()
     password = serializers.CharField()
+    switch_list = GroupSwitchPostSerializer(many=True)
 
 
 class GroupBriefSerializer(serializers.Serializer):
@@ -17,6 +26,7 @@ class GroupBriefSerializer(serializers.Serializer):
     name = serializers.CharField()
     username = serializers.CharField()
     password = serializers.CharField()
+    fabric = serializers.PrimaryKeyRelatedField(read_only=True)
     updated_by = serializers.CharField()
     created = serializers.DateTimeField(read_only=True)
     updated = serializers.DateTimeField(read_only=True)
@@ -38,14 +48,17 @@ class GroupDetailSerializer(serializers.Serializer):
     name = serializers.CharField()
     username = serializers.CharField()
     password = serializers.CharField()
+    fabric = serializers.PrimaryKeyRelatedField(read_only=True)
     updated_by = serializers.CharField()
     created = serializers.DateTimeField(read_only=True)
     updated = serializers.DateTimeField(read_only=True)
     switch_list = GroupSwitchSerializer(many=True)
 
 
-class GroupSwitchPostSerializer(serializers.Serializer):
-    switch_id = serializers.IntegerField()
+class ParamSerializer(serializers.Serializer):
+    param_name = serializers.CharField()
+    param_type = serializers.ChoiceField(PARAM_TYPES)
+    param_val = serializers.CharField()
 
 
 class JobPostSerializer(serializers.Serializer):
@@ -54,7 +67,11 @@ class JobPostSerializer(serializers.Serializer):
         image_id = serializers.IntegerField()
         run_size = serializers.IntegerField(min_value=1, max_value=5)
         retry_count = serializers.IntegerField(min_value=0, max_value=3)
-        type = serializers.ChoiceField(choices=['switch_upgrade', 'epld_upgrade'])
+        file_name = serializers.CharField(required=False)
+        function = serializers.CharField(required=False)
+        #params = JSONSerializerField(required=False)
+        params = serializers.ListField(required=False, child=ParamSerializer(required=False))
+        type = serializers.ChoiceField(choices=JOB_TYPES)
         failure_action_grp = serializers.ChoiceField(choices=['continue', 'abort'])
         failure_action_ind = serializers.ChoiceField(choices=['continue', 'abort'])
     name = serializers.CharField()
@@ -91,8 +108,10 @@ class JobDetailSerializer(serializers.Serializer):
         image_id = serializers.IntegerField()
         switch_count = serializers.IntegerField()
         image_name = serializers.CharField()
-        params = JSONSerializerField(required=False)
-        type = serializers.ChoiceField(choices=['switch_upgrade', 'epld_upgrade'])
+        file_name = serializers.CharField(required=False)
+        function = serializers.CharField(required=False)
+        params = serializers.ListField(required=False)
+        type = serializers.ChoiceField(choices=JOB_TYPES)
         failure_action_grp = serializers.CharField(required=False)
         failure_action_ind = serializers.CharField(required=False)
         ctime = serializers.CharField(required=False)
@@ -108,3 +127,8 @@ class JobDetailSerializer(serializers.Serializer):
     updated_by = serializers.CharField()
     created = serializers.DateTimeField(read_only=True)
     updated = serializers.DateTimeField(read_only=True)
+
+
+class JobCloneSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    schedule = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S")

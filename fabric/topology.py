@@ -11,6 +11,7 @@ from image.image_profile import get_profile
 from models import Link, Switch, Topology
 from switch.constants import BOTH, DOWNLINK, TIERS, UPLINK
 from switch.switch import get_switch
+from switch_config import clear_switch_config
 from utils.exception import IgniteException
 from utils.utils import ports_to_string, string_to_ports
 
@@ -78,6 +79,9 @@ class BaseTopology(object):
 
         # add topology default switches with dummy=True
         for item in data[DEFAULTS][SWITCHES]:
+            if item[MODEL]==1:
+                raise IgniteException(ERR_CAN_NOT_ASSIGN_UNKOWN_MODEL)
+
             switch = Switch()
             switch.topology = self._top
             switch.dummy = True
@@ -207,6 +211,25 @@ class BaseTopology(object):
         for item in data[SWITCHES]:
             if not item[COUNT]:
                 continue
+            
+            curr_count = Switch.objects.filter(topology_id=self._top.id, tier=item[TIER],
+                                     dummy=False).count()
+
+            if item[TIER]==SPINE:
+                if curr_count+item[COUNT]>MAX_SPINES:
+                    raise IgniteException(ERR_SPINE_EXCEEDED_MAX_LIMIT)
+
+            if item[TIER]==LEAF:
+                if curr_count+item[COUNT]>MAX_LEAFS:
+                    raise IgniteException(ERR_LEAF_EXCEEDED_MAX_LIMIT)
+
+            if item[TIER]==CORE:
+                if curr_count+item[COUNT]>MAX_CORES:
+                    raise IgniteException(ERR_CORE_EXCEEDED_MAX_LIMIT)
+
+            if item[TIER]==BORDER:
+                if curr_count+item[COUNT]>MAX_BORDERS:
+                    raise IgniteException(ERR_BORDER_EXCEEDED_MAX_LIMIT)
 
             # get next switch index for tier
             index = self._get_next_index(item[TIER])
@@ -236,7 +259,6 @@ class BaseTopology(object):
             switch.name = tier + str(index)
 
         switch.save()
-
         self._add_auto_links(switch)
 
     def _get_next_index(self, tier):
@@ -260,6 +282,9 @@ class BaseTopology(object):
 
     def update_switch(self, switch_id, data):
         switch = Switch.objects.get(pk=switch_id)
+
+        if data[MODEL]==1:
+            raise IgniteException(ERR_CAN_NOT_ASSIGN_UNKOWN_MODEL)
 
         # TODO: check if model is valid, currently UI perform this check
 
@@ -297,6 +322,11 @@ class BaseTopology(object):
         # delete switch and boot detail if any
         boot_detail = switch.boot_detail
         switch_id = switch.id
+
+        try:
+            clear_switch_config(switch_id)
+        except Exception as e:
+            logger.error(e)
 
         try:
             switch.delete()
@@ -341,6 +371,8 @@ class BaseTopology(object):
                              src_ports, dst_ports)
 
     def _get_ports(self, switch, port_role, num_ports, ports=[]):
+        if switch.model_id == 1 or switch.model_id==None:
+            raise IgniteException("Cant not add switch as no switch model assigned")
         logger.debug("switch id = %d, port_role = %s", switch.id, port_role)
 
         # get all links for switch
@@ -348,7 +380,6 @@ class BaseTopology(object):
                                     Q(dst_switch_id=switch.id),
                                     topology_id=self._top.id,
                                     dummy=False)
-
         used_ports = list()
 
         # make list of ports currently in use
@@ -545,6 +576,7 @@ class LeafSpineTopology(BaseTopology):
             self._update_border(switch)
 
     def _update_core(self, switch):
+            
         # get all links (only downlinks for core switch)
         links = (Link.objects.filter(topology_id=self._top.id,
                                      src_switch_id=switch.id,
@@ -667,7 +699,6 @@ class LeafSpineTopology(BaseTopology):
         # auto links only for Spine & Leaf switches
         if switch.tier not in [SPINE, LEAF]:
             return
-
         if switch.tier == SPINE:
             switch_port_role = DOWNLINK
             neigh_port_role = UPLINK

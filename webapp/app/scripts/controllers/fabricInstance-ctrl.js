@@ -59,6 +59,34 @@ angular.module('PoapServer')
             });
         };
 
+        $scope.discoverFabric = function() {
+            $scope.action = "discover";
+            $scope.selectedId = null;
+            $scope.openDiscoverModal();
+        }
+
+        $scope.openDiscoverModal = function() {
+            $scope.modalInstance = $modal.open({
+                animation: $scope.animationsEnabled,
+                templateUrl: 'pages/template/modal/discoverFabricModal.html',
+                controller: 'FabricDiscoverCtrl',
+                size: 'md',
+                backdrop: 'static',
+                resolve: {
+                    dataToModal : function() {
+                        return {
+                            action : $scope.action,
+                            callerScope : $scope
+                        }
+                    }
+                 }
+            });
+            $scope.modalInstance.result.then(function(modalData) {
+                $scope.submitData(modalData);
+            }, function() {
+                $log.info('Modal dismissed at: ' + new Date());
+            });
+        };
 
         $scope.addFabric = function() {
           $scope.action = "add";
@@ -173,6 +201,11 @@ angular.module('PoapServer')
             appServices.doAPIRequest(appSettings.appAPI.fabricInstance.clone, modalData.submitData, reqHeader).then(function(data) {
                 $location.path('/fabricInstance/edit/'+data.id);
             });
+        } else if (modalData.action == 'discover') {
+            console.log('discover : '+JSON.stringify(modalData.submitData));
+            appServices.doAPIRequest(appSettings.appAPI.fabricInstance.discovery_create, modalData.submitData, null).then(function(data) {
+                $location.path('/fabricInstance/discovery/'+data.id);
+            });
         }
     };
 
@@ -246,29 +279,31 @@ angular.module('PoapServer').controller('FabricCreateCtrl',
             };
 
             var defaultVal = {"id" : 0, "name" : "--None--"};
-            appServices.doAPIRequest(appSettings.appAPI.topology.list, null, reqHeader).then(function(data) {
-                $scope.selectList.topology_list = data;
-                $scope.selectList.topology_list.unshift({id:'',name:'--Select--'});
-            });
-            appServices.doAPIRequest(appSettings.appAPI.workflow.list, null, reqHeader).then(function(data) {
-                $scope.selectList.workflow_list = data;
-                $scope.selectList.workflow_list.unshift(defaultVal);
-            });
-            appServices.doAPIRequest(appSettings.appAPI.configuration.list, null, reqHeader).then(function(data) {
-                $scope.selectList.config_list = data;
-                $scope.selectList.config_list.unshift(defaultVal);
-                appServices.doAPIRequest(appSettings.appAPI.fabricProfile.list, null, reqHeader).then(function(data) {
-                    $scope.selectList.fabricProfile_list = data;
-                    $scope.selectList.fabricProfile_list.unshift(defaultVal);
-                    for(var index = 0; index < $scope.submitData.switches.length; index++) {
-                        if(undefined !== $scope.addFabricForm["config_profile"+index]){
-                            $scope.addFabricForm["config_profile"+index].$setValidity('required',false);
-                            $scope.addFabricForm["feature_profile"+index].$setValidity('required',false);
-                        }
-                    }
-                    $('.profile-note').addClass('noteHighlight');
+            if($scope.action !== 'add_discovery'){
+                appServices.doAPIRequest(appSettings.appAPI.topology.list, null, reqHeader).then(function(data) {
+                    $scope.selectList.topology_list = data;
+                    $scope.selectList.topology_list.unshift({id:'',name:'--Select--'});
                 });
-            });
+                appServices.doAPIRequest(appSettings.appAPI.workflow.list, null, reqHeader).then(function(data) {
+                    $scope.selectList.workflow_list = data;
+                    $scope.selectList.workflow_list.unshift(defaultVal);
+                });
+                appServices.doAPIRequest(appSettings.appAPI.configuration.list, null, reqHeader).then(function(data) {
+                    $scope.selectList.config_list = data;
+                    $scope.selectList.config_list.unshift(defaultVal);
+                    appServices.doAPIRequest(appSettings.appAPI.fabricProfile.list, null, reqHeader).then(function(data) {
+                        $scope.selectList.fabricProfile_list = data;
+                        $scope.selectList.fabricProfile_list.unshift(defaultVal);
+                        for(var index = 0; index < $scope.submitData.switches.length; index++) {
+                            if(undefined !== $scope.addFabricForm["config_profile"+index]){
+                                $scope.addFabricForm["config_profile"+index].$setValidity('required',false);
+                                $scope.addFabricForm["feature_profile"+index].$setValidity('required',false);
+                            }
+                        }
+                        $('.profile-note').addClass('noteHighlight');
+                    });
+                });
+            }
         };
 
         $scope.checkTierValidity = function(index) {
@@ -303,3 +338,47 @@ angular.module('PoapServer').controller('FabricCreateCtrl',
 
         $scope.init();
   });
+
+angular.module('PoapServer').controller('FabricDiscoverCtrl',
+      function($scope, $modalInstance, appSettings, appServices, dataToModal){
+        $scope.action = dataToModal.action;
+        /*$scope.configEdit=true;*/
+
+        $scope.submitData = {
+            "auth_details":
+                {
+                    "username":"",
+                    "password": ""
+                },
+            "spine_ip": "",
+            "leaf_ip": "",
+            "ip_range": [
+                {
+                    "start" : "",
+                    "end" : ""
+                }
+            ]
+        };
+
+        $scope.ok = function() {
+            var submitData = $scope.submitData;
+
+            $modalInstance.close({
+                submitData : submitData,
+                action : $scope.action
+            });
+        };
+
+        $scope.cancel = function() {
+            $modalInstance.dismiss('cancel');
+        };
+
+        $scope.addRange = function() {
+          $scope.submitData.ip_range.push({start : '', end : ''});
+        };
+
+        $scope.removeRange = function($index) {
+          $scope.submitData.ip_range.splice($index, 1);
+        };
+
+});

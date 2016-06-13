@@ -5,8 +5,11 @@ from serializers import *
 from discovery.discoveryrule import find_dup_serial_discovery
 from constants import *
 from utils.exception import IgniteException
-
 import rma
+
+import logging
+logger = logging.getLogger(__name__)
+
 
 
 @transaction.atomic
@@ -41,6 +44,7 @@ def get_rma_detail(old_serial_num):
         serializer = RmaSerializer(rule)
         return serializer.data
 
+    logger.debug(ERR_SERIAL_NOT_FOUND)
     raise IgniteException(ERR_SERIAL_NOT_FOUND)
 
 

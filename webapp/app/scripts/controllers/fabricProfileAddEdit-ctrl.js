@@ -360,7 +360,6 @@ angular.module('PoapServer').controller('FabricProfileConstructModalCtrl', funct
 
 
     $scope.filterParams = function() {
-        debugger;
         $scope.params_list = [];
         $scope.submitData.param_list = [];
         angular.forEach($scope.profileTemplatesCache, function(val, key) {

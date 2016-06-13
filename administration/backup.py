@@ -40,8 +40,8 @@ def db_dump(filename):
 
     elif OS_DISTRIBUTION_NAME == 'CentOS Linux':
         PATH_TO_PG_DUMP = '/usr/pgsql-9.3/bin/'
-	PG_COMMAND = PATH_TO_PG_DUMP + 'pg_dump %s -U %s --file="%s" -h localhost' % (DB_NAME, DB_USER, filename)
-	command = 'export PGPASSWORD=%s\n' % (DB_PASSWORD) + PG_COMMAND
+        PG_COMMAND = PATH_TO_PG_DUMP + 'pg_dump %s -U %s --file="%s" -h localhost' % (DB_NAME, DB_USER, filename)
+        command = 'export PGPASSWORD=%s\n' % (DB_PASSWORD) + PG_COMMAND
     else:
         raise IgniteException(ERR_UNKNOWN_OS_TYPE)
 

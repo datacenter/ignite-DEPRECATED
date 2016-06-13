@@ -19,7 +19,19 @@ class GroupList(BaseView):
         """
         return Response(services.get_all_groups())
 
-    def post(self, request, format=None):
+
+class GroupListPerFabric(BaseView):
+
+    def get(self, request, fab_id, format=None):
+        """
+        to get all Groups for given fabric id
+        ---
+  response_serializer: "GroupDetailSerializer"
+
+        """
+        return Response(services.get_all_groups_fabric(fab_id))
+
+    def post(self, request, fab_id, format=None):
         """
         to add a Group
         ---
@@ -27,22 +39,22 @@ class GroupList(BaseView):
   response_serializer: "GroupBriefSerializer"
 
         """
-        return Response(services.add_group(request.data, self.username),
+        return Response(services.add_group(request.data, fab_id, self.username),
                         status=status.HTTP_201_CREATED)
 
 
 class GroupDetail(BaseView):
 
-    def get(self, request, id, format=None):
+    def get(self, request, fab_id, grp_id, format=None):
         """
         to get a Group by id
         ---
   response_serializer: "GroupDetailSerializer"
 
         """
-        return Response(services.get_group(int(id)))
+        return Response(services.get_group(int(grp_id)))
 
-    def put(self, request, id, format=None):
+    def put(self, request, fab_id, grp_id, format=None):
         """
         to edit a Group
         ---
@@ -50,36 +62,13 @@ class GroupDetail(BaseView):
   response_serializer: "GroupBriefSerializer"
 
         """
-        return Response(services.update_group(int(id),
-                        request.data, self.username))
+        return Response(services.update_group(request.data,
+                                              int(fab_id), int(grp_id),
+                                              self.username))
 
-    def delete(self, request, id, format=None):
-        services.delete_group(int(id))
+    def delete(self, request, fab_id, grp_id, format=None):
+        services.delete_group(int(grp_id))
         return Response()
-
-
-class GroupSwitchList(BaseView):
-
-    def post(self, request, gid, format=None):
-        """
-        to add a switches into Group
-        ---
-  request_serializer: "GroupSwitchPostSerializer"
-  response_serializer: "GroupDetailSerializer"
-
-        """
-        return Response(services.add_switch(int(gid), request.data,
-                        self.username))
-
-    def delete(self, request, gid, format=None):
-        """
-        to delete a switches from Group
-        ---
-  request_serializer: "GroupSwitchPostSerializer"
-  response_serializer: "GroupDetailSerializer"
-
-        """
-        return Response(services.delete_switch(int(gid), request.data))
 
 
 class JobList(BaseView):
@@ -130,3 +119,24 @@ class JobDetail(BaseView):
     def delete(self, request, id, format=None):
         services.delete_job(int(id))
         return Response()
+
+
+class ScriptList(BaseView):
+
+    def get(self, request, format=None):
+        """
+        to get list of user defined scripts
+        """
+        return Response(services.get_scripts())
+
+
+class JobCloneView(BaseView):
+    def post(self, request, id, format=None):
+        """
+        to clone a job
+        ---
+  request_serializer: "JobCloneSerializer"
+  response_serializer: "JobDetailSerializer"
+
+        """
+        return Response(services.clone_job(request.data, id, self.username))

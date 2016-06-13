@@ -77,12 +77,15 @@
                         <li ng-class="{active: $route.current.activetab == 'deployedSwitches'}">
                             <a href="#/deployedSwitches">Deployed Switches</a>
                         </li>
+                        <li ng-class="{active: $route.current.activetab == 'job'}">
+                            <a href="#/jobs">Job Schedule</a>
+                        </li>
                         <li ng-class="{active: $route.current.activetab == 'rma'}">
                             <a href="#/rma">RMA Workflow</a>
                         </li>
                     </ul>
                 </li>
-                <li ng-class="{ active: $route.current.activemenu == 'manage'}" >
+                <!-- <li ng-class="{ active: $route.current.activemenu == 'manage'}" >
                     <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="tfalserue">Manage <span class="caret"></span></a>
                     <ul class="dropdown-menu dropdown_mobile">
                         <li ng-class="{active: $route.current.activetab == 'group'}">
@@ -92,7 +95,7 @@
                             <a href="#/jobs">Job Schedule</a>
                         </li>
                     </ul>
-                </li>
+                </li> -->
                 <li ng-class="{ active: $route.current.activemenu == 'admin'}" >
                     <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="tfalserue">Admin <span class="caret"></span></a>
                     <ul class="dropdown-menu dropdown_mobile">

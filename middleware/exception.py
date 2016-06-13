@@ -7,7 +7,7 @@ from bootstrap.models import SwitchBootDetail
 from config.models import Profile as ConfigProfile
 from config.models import Configlet
 from discovery.models import DiscoveryRule
-from fabric.models import Link, Switch, Topology
+from fabric.models import Link, Switch, Topology, SwitchConfig
 from feature.models import Profile as FeatureProfile
 from feature.models import Feature
 from image.models import ImageProfile
@@ -96,6 +96,9 @@ class ExceptionMiddleware(object):
             code = status.HTTP_404_NOT_FOUND
         elif isinstance(exception, Configlet.DoesNotExist):
             msg = "Configlet does not exist "
+            code = status.HTTP_404_NOT_FOUND
+        elif isinstance(exception, SwitchConfig.DoesNotExist):
+            msg = "Switch Running Config does not exist "
             code = status.HTTP_404_NOT_FOUND
 
         # ignite exceptions

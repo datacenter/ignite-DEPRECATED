@@ -279,7 +279,6 @@ angular.module('topologyApp', [])
             var exPorts = []
         }
         exPorts.push(assignPort);
-        //debugger;
         return exPorts;
         //return ["xxx"];
     }
@@ -294,7 +293,6 @@ angular.module('topologyApp', [])
             var exPorts = []
         }
         exPorts.push(assignPort);
-        //debugger;
         return exPorts;
         // return ["xxx"];
     }
@@ -384,7 +382,6 @@ angular.module('topologyApp', [])
             spineStructure.name = $scope.spineStructure.name + (spineCount + 1);
 
             spineStructure.ports = angular.copy($scope.spinePorts);
-            //debugger;
             $scope.topology.topology_json.spine_list.splice(spineCount, 0, spineStructure);
 
 

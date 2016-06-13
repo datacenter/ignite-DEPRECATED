@@ -7,4 +7,7 @@ urlpatterns = patterns('',
     url(r'^/linecard$', LineCardListView.as_view()),
     url(r'^/model/(?P<id>[1-9][0-9]*)$', SwitchDetailView.as_view()),
     url(r'^/model$', SwitchListView.as_view()),
+    url(r'^/model/(?P<id>[1-9][0-9]*)/status/progress$', SwitchModelBootProgressView.as_view()),
+    url(r'^/model/(?P<id>[1-9][0-9]*)/status/fail$', SwitchModelBootFailView.as_view()),
+    url(r'^/model/(?P<id>[1-9][0-9]*)/status/success$', SwitchModelBootSuccessView.as_view()),
 )

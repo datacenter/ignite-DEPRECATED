@@ -13,3 +13,4 @@ STATE = "state"
 
 #error messages
 ERR_IMG_PRO_IMAGE_PATH_EMPTY = "provide any one of the image/path"
+ERR_CAN_NOT_DELETE_DEFAULT_IMAGE = "Can not delete default Image Profile"
