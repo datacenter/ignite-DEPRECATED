@@ -34,8 +34,38 @@ angular.module('PoapServer')
             });
         };
 
-        $scope.deleteConfiguration = function(id, $index) {
-            $scope.selectedId = id;
+        $scope.deleteConfiguration = function(profileindex_id, id, $index) {
+
+                $scope.selectedId = profileindex_id;
+                $scope.latest_version_id = id;
+
+                var modalInstance = $modal.open({
+                    animation: $scope.animationsEnabled,
+                    templateUrl: 'pages/template/modal/configletDelete.html',
+                    controller: 'ConfigDeleteCtrl',
+                    size: 'md',
+                    backdrop: 'static',
+                    resolve: {
+                        dataToModal : function() {
+                            return {
+                                id : $scope.selectedId,
+                                action : 'delete',
+                                callerScope : $scope
+                            }
+                        }
+                     }
+                });
+
+                modalInstance.result.then(function(modalData) {
+                    $scope.delete_type = modalData.submitData.delete_operation;
+                    $scope.deleteConfirm();
+
+                }, function() {
+                    $log.info('Modal dismissed at: ' + new Date());
+                });
+        };
+
+        $scope.deleteConfirm = function() {
             var modalInstance = $modal.open({
                 animation: $scope.animationsEnabled,
                 templateUrl: 'pages/template/modal/deleteModal.html',
@@ -47,7 +77,7 @@ angular.module('PoapServer')
                         return {
                             id : $scope.selectedId,
                             action : 'delete',
-                            message : 'Are you sure you want to delete this configuration?',
+                            message : 'Are you sure you want to delete?',
                             callerScope : $scope
                         }
                     }
@@ -70,6 +100,10 @@ angular.module('PoapServer')
                     value : $scope.selectedId,
                     noTrailingSlash : true
                 };
+
+                if($scope.delete_type === 'delete_latest') {
+                    reqHeader.value = reqHeader.value+'/profile/'+$scope.latest_version_id;
+                }
 
                 appServices.doAPIRequest(appSettings.appAPI.configuration.delete, null, reqHeader).then(function(data) {
                     /* TODO after delete success */

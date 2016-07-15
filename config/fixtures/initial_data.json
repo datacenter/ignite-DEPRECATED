@@ -1,13 +1,27 @@
 [
+ {
+        "model": "config.profileindex",
+        "pk":1,
+        "fields": {
+            "name":"Default",
+            "updated_by" : "admin",
+            "created": "2016-04-26 11:29:51.405893+00:00",
+            "updated": "2016-04-26 11:29:51.405893+00:00"
+        }
+    },
+
     {
         "model": "config.profile",
         "pk":1,
         "fields": {
             "name":"Default",
             "submit":"True",
+            "version": 1,
+            "profileindex":1,
             "updated_by" : "admin",
             "created": "2016-04-26 11:29:51.405893+00:00",
             "updated": "2016-04-26 11:29:51.405893+00:00"
         }
     }
-]
+] 
+

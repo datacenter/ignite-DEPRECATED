@@ -22,6 +22,8 @@ app.directive('onReadFile', function ($parse) {
 	};
 });
 
+// for reading check list in customized form
+
 app.directive('checklistModel', ['$parse', '$compile', function($parse, $compile) {
   // contains
   function contains(arr, item, comparator) {

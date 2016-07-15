@@ -53,10 +53,20 @@ angular.module('PoapServer')
             $scope.openConfigletModal();
         };
 
-        $scope.viewConfiglet = function(id, index) {
+        $scope.viewConfiglet = function(configletindex_id, id, index) {
             $scope.action = "view";
-            $scope.selectedId = id;
-            $scope.openConfigletModal(index);
+            $scope.selectedId = configletindex_id;
+            $scope.openConfigletModal(id, index);
+            /*var requestHeader = {
+                appendToURL : true,
+                value : configletindex_id,
+                noTrailingSlash : true
+            };
+
+            appServices.doAPIRequest(appSettings.appAPI.configlets.getById, null, requestHeader).then(function(data) {
+                    $scope.openConfigletModal(id, index, data);
+            });*/
+            
         };
 
         $scope.editConfiglet = function(id, index) {
@@ -65,9 +75,37 @@ angular.module('PoapServer')
             $scope.openConfigletModal(index);
         };
 
-        $scope.deleteConfiglet = function(id, index) {
-            $scope.selectedId = id;
+        $scope.deleteConfiglet = function(configletindex_id, id, index) {
+            $scope.selectedId = configletindex_id;
+            $scope.latest_version = id;
 
+            var modalInstance = $modal.open({
+                animation: $scope.animationsEnabled,
+                templateUrl: 'pages/template/modal/configletDelete.html',
+                controller: 'ConfigDeleteCtrl',
+                size: 'md',
+                backdrop: 'static',
+                resolve: {
+                    dataToModal : function() {
+                        return {
+                            id : $scope.selectedId,
+                            action : 'delete',
+                            callerScope : $scope
+                        }
+                    }
+                 }
+            });
+
+            modalInstance.result.then(function(modalData) {
+                $scope.delete_type = modalData.submitData.delete_operation;
+                $scope.deleteConfirm(modalData);
+
+            }, function() {
+                $log.info('Modal dismissed at: ' + new Date());
+            });
+        };
+
+        $scope.deleteConfirm = function(modalData) {
             var modalInstance = $modal.open({
                 animation: $scope.animationsEnabled,
                 templateUrl: 'pages/template/modal/deleteModal.html',
@@ -79,7 +117,7 @@ angular.module('PoapServer')
                         return {
                             id : $scope.selectedId,
                             action : 'delete',
-                            message : 'Are you sure you want to delete this configlet?',
+                            message : 'Are you sure you want to delete?',
                             callerScope : $scope
                         }
                     }
@@ -92,13 +130,13 @@ angular.module('PoapServer')
             }, function() {
                 $log.info('Modal dismissed at: ' + new Date());
             });
-        };
+        }
 
 
 
         /**Configlets Modal**/
         $scope.animationsEnabled = true;
-        $scope.openConfigletModal = function(index) {
+        $scope.openConfigletModal = function(id, index) {
             $scope.modalInstance = $modal.open({
                 animation: $scope.animationsEnabled,
                 templateUrl: 'pages/template/modal/configletsModal.html',
@@ -109,7 +147,8 @@ angular.module('PoapServer')
                     dataToModal : function() {
                         return {
                             action : $scope.action,
-                            id : $scope.selectedId,
+                            id : id,
+                            configletindex_id : $scope.selectedId,
                             callerScope : $scope,
                             index : index
                         }
@@ -129,7 +168,7 @@ angular.module('PoapServer')
             var requestHeader = {
                 fileUpload : true,
                 appendToURL : true,
-                value : data.id,
+                value : data.append_url,
                 noTrailingSlash : true
             };
             var dataToSubmit = file;
@@ -145,6 +184,7 @@ angular.module('PoapServer')
                 var reqHeader = {};
                 appServices.doAPIRequest(appSettings.appAPI.configlets.add, dataToSubmit, null).then(function(data) {
                    if(typeof modalData.uploadFile != 'undefined') {
+                        data.append_url = data.configletindex_id+'/true';
                         $scope.uploadConfigletFile(data, modalData.uploadFile, function(cData) {
                             console.log(cData);
                             $scope.init();
@@ -160,7 +200,7 @@ angular.module('PoapServer')
                 if(typeof modalData.uploadFile != "undefined") {
 
                     var uData = {
-                        id : $scope.selectedId
+                        append_url : $scope.selectedId+"/configlet/"+modalData.submitData.id+"/"+modalData.new_version
                     }
 
                     $scope.uploadConfigletFile(uData, modalData.uploadFile, function(cData) {
@@ -178,6 +218,12 @@ angular.module('PoapServer')
                     value : $scope.selectedId,
                     noTrailingSlash : true
                 };
+
+                if($scope.delete_type === 'delete_latest') {
+                    reqHeader.value = reqHeader.value+'/configlet/'+$scope.latest_version+'/none';
+                } else {
+                    reqHeader.value = reqHeader.value+'/none';
+                }
 
                 appServices.doAPIRequest(appSettings.appAPI.configlets.delete, null, reqHeader).then(function(data) {
                     /* TODO after delete success */
@@ -208,9 +254,13 @@ angular.module('PoapServer')
 
 */
 
-angular.module('PoapServer').controller('ConfigletsModalCtrl', function($scope, $modalInstance, FileReader, appSettings, appServices, dataToModal) {
+angular.module('PoapServer').controller('ConfigletsModalCtrl', function($scope, $modal, $modalInstance, FileReader, appSettings, appServices, dataToModal) {
     $scope.appSettings = appSettings;
     $scope.action = dataToModal.action;
+    /*$scope.version_data = dataToModal.versions;
+    $scope.version = dataToModal.id;*/
+    $scope.latest_version = 1;
+    $scope.version = "";
 
     $scope.readFile = function($fileContent){
         $scope.content = $fileContent;
@@ -222,10 +272,42 @@ angular.module('PoapServer').controller('ConfigletsModalCtrl', function($scope, 
         "type": appSettings.defaultData.configlets.config_type
     };
 
-    $scope.ok = function() {
+    $scope.save = function() {
+
+        if($scope.action == 'edit' && $scope.version == $scope.latest_version) {
+            var modalInstance = $modal.open({
+                animation: $scope.animationsEnabled,
+                templateUrl: 'pages/template/modal/configSave.html',
+                controller: 'SaveConfigCtrl',
+                size: 'md',
+                backdrop: 'static',
+                resolve: {
+                    dataToModal : function() {
+                        return {
+                            callerScope : $scope
+                        }
+                    }
+                 }
+            });
+
+            modalInstance.result.then(function(modalData) {
+                $scope.ok(modalData);
+            }, function() {
+                $log.info('Modal dismissed at: ' + new Date());
+            });
+        } else {
+            var modalData = {
+                new_version : false
+            }
+            $scope.ok(modalData);
+        }
+    };
+
+    $scope.ok = function(modalData) {
         $modalInstance.close({
             submitData : $scope.submitData,
             uploadFile : $scope.uploadFile,
+            new_version : modalData.new_version,
             action : $scope.action
         });
     };
@@ -238,16 +320,39 @@ angular.module('PoapServer').controller('ConfigletsModalCtrl', function($scope, 
         if($scope.action ==  'view' || $scope.action == 'edit'  || $scope.action == 'viewothers') {
             var requestHeader = {
                 appendToURL : true,
-                value : dataToModal.id,
+                value : dataToModal.configletindex_id+'/false',
                 noTrailingSlash : true
             };
+            /*+'/configlet/'+dataToModal.id
             appServices.doAPIRequest(appSettings.appAPI.configlets.getById, null, requestHeader).then(function(data) {
-                $scope.submitData = data;
-                $scope.view = {
-                    fileContent : data.fileContent
-                }
+                    $scope.submitData = data;
+                    $scope.version = 1;
+                    $scope.view = {
+                        fileContent : data.fileContent
+                    }
+            });
+
+            requestHeader.value = dataToModal.configletindex_id;*/
+            appServices.doAPIRequest(appSettings.appAPI.configlets.getById, null, requestHeader).then(function(data) {
+                    $scope.version_data = data;
+                    $scope.submitData = $scope.version_data[$scope.version_data.length - 1];
+                    $scope.latest_version = $scope.submitData.version;
+                    $scope.version = angular.copy($scope.latest_version);
+                    if(dataToModal.version != undefined) {
+                        $scope.version = dataToModal.version;
+                    }
+                    $scope.loadVersion();
             });
         }
+    };
+
+    $scope.loadVersion = function() {
+        $scope.submitData = ($scope.version_data.filter(function(version) {
+                    return version.version == $scope.version;
+                }))[0];
+        $scope.new_version = false;
+        // alert('version : '+$scope.version);
+
     };
 
     $scope.init = function() {
@@ -260,8 +365,31 @@ angular.module('PoapServer').controller('ConfigletsModalCtrl', function($scope, 
     }
 
     $scope.deleteConfiglet = function()  {
-        dataToModal.callerScope.deleteConfiglet(dataToModal.id, dataToModal.index);
+        dataToModal.callerScope.deleteConfiglet(dataToModal.configletindex_id, dataToModal.id, dataToModal.index);
     }
 
     $scope.init();
 });
+
+
+angular.module('PoapServer').controller('ConfigDeleteCtrl', function($scope, $modalInstance, appSettings, appServices, dataToModal) {
+    $scope.submitData = {
+      "delete_operation" : "delete_latest"
+    }
+
+    $scope.ok = function() {
+        $modalInstance.close({
+            submitData : $scope.submitData,
+            action : $scope.action,
+            id : $scope.id
+        });
+    };
+
+    $scope.cancel = function() {
+        $modalInstance.dismiss('cancel');
+    };
+
+    $scope.init = function() {};
+
+    $scope.init();
+  });

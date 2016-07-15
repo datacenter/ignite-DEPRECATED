@@ -805,7 +805,7 @@ angular.module('PoapServer')
           noTrailingSlash: true
         };
 
-      appServices.doAPIRequest(appSettings.appAPI.configuration.list, null, reqHeader).then(function(data) {
+      appServices.doAPIRequest(appSettings.appAPI.fabricInstance.all_config_profile, null, reqHeader).then(function(data) {
         $scope.switchDetails.selectList.config_list = data;
       });
       appServices.doAPIRequest(appSettings.appAPI.fabricProfile.list, null, reqHeader).then(function(data) {
@@ -1413,6 +1413,9 @@ angular.module('PoapServer').controller('FabricConfigCtrl',
           var defaultVal = {"id" : 0, "name" : "--None--"};
           $scope.submitData.config_profile = angular.copy(dataToModal.topology.config_profile);
           $scope.submitData.feature_profile = angular.copy(dataToModal.topology.feature_profile);
+          angular.forEach($scope.selectList.config_list, function(val, key){
+              val.name = val.name+' ('+val.version+')';
+          });
           $scope.selectList.config_list.unshift(defaultVal);
           $scope.selectList.fabricProfile_list.unshift(defaultVal);
           $scope.selectList.workflow_list.unshift(defaultVal);

@@ -205,11 +205,13 @@
                         fd.append("file", requestParams)
 
                         httpParams.data = fd;
+                        var version_data = { 'new_version':headerParams.new_version };
+                        httpParams.data.new_version = headerParams.new_version;
 
                     }
                 }
 
-                console.log('httpParams');
+                console.log('httpParams ===================== ');
                 console.log(httpParams);
 
                 $timeout(function() {

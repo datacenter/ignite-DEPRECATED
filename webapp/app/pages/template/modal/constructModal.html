@@ -28,14 +28,26 @@
                     </select>
                 </div>
             </div>
-            <div class="col-sm-6">
+            <div class="col-sm-4">
                 <div class="form-group">
                     <label>Template/Script</label>
                     <select class="form-control" 
-                    ng-model="submitData.configlet_id" 
+                    ng-model="submitData.configletindex_id" 
                     ng-disabled="submitData.construct_type == '' || action == 'view'"
                     ng-change="filterParams()"
-                    ng-options = "v.id as v.name for (k, v) in configlets"
+                    ng-options = "v.configletindex_id as v.name for (k, v) in configlets"
+                    >
+                        <option value="">Select</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <div class="form-group">
+                    <label>Version</label>
+                    <select class="form-control" 
+                    ng-model="version" 
+                    ng-change="filterVersionParams()"
+                    ng-options = "v.version as v.version for (k, v) in versions"
                     >
                         <option value="">Select</option>
                     </select>
@@ -47,11 +59,11 @@
                 <h5 class="page-header pull-left">Parameters ({{params_list.length}})</h5>
             </div>
         </div>
-        <div class="alert alert-info" ng-hide="submitData.configlet_id != ''">
+        <div class="alert alert-info" ng-hide="submitData.configletindex_id != ''">
             Select a configlet
         </div>
 
-        <div class="table-responsive" ng-hide="submitData.configlet_id == ''">
+        <div class="table-responsive" ng-hide="submitData.configletindex_id == ''">
             <table class="table table-hover">
                 <thead>
                     <tr>

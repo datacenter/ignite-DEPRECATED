@@ -1,5 +1,6 @@
 # globals
 CONFIGLET_ID = "configlet_id"
+CONFIGLETINDEX_ID = "configletindex_id"
 CONSTRUCT_LIST = "construct_list"
 FALSE = "false"
 FILE = "file"
@@ -8,6 +9,8 @@ NAME = "name"
 SUBMIT = "submit"
 TRUE = "true"
 CONSTRUCT_TYPE = "type"
+VERSION = "version"
+NEW_VERSION = "new_version"
 
 PARAM_LIST = 'param_list'
 PARAM_NAME = 'param_name'
@@ -47,8 +50,9 @@ ERR_PROF_IS_EMPTY = "No configlet is added"
 ERR_CONFIGLET_FILE_NOT_FOUND = "Configlet not found"
 ERR_CAN_NOT_DELETE_DEFAULT_CONFIG = "Deletion of default config profile is not allowed"
 ERR_CAN_NOT_EDIT_DEFAULT_CONFIG = "Can not edit default config profile"
+ERR_CHANGE_IN_PARAMS = "Parameters are changed"
 
-#Instance dependent params
+# Instance dependent params
 HOST_NAME = 'HOST_NAME'
 VPC_PEER_SRC = 'VPC_PEER_SRC'
 VPC_PEER_DST = 'VPC_PEER_DST'
@@ -56,6 +60,6 @@ VPC_PEER_PORTS = 'VPC_PEER_PORTS'
 UPLINK_PORTS = 'UPLINK_PORTS'
 DOWNLINK_PORTS = 'DOWNLINK_PORTS'
 
-#Instance param type valid choices
+# Instance param type valid choices
 INSTANCE_PARAM_VALUE = [HOST_NAME, VPC_PEER_SRC, VPC_PEER_DST, VPC_PEER_PORTS,
                         UPLINK_PORTS, DOWNLINK_PORTS]

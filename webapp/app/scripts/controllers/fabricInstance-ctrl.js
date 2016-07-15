@@ -288,8 +288,11 @@ angular.module('PoapServer').controller('FabricCreateCtrl',
                     $scope.selectList.workflow_list = data;
                     $scope.selectList.workflow_list.unshift(defaultVal);
                 });
-                appServices.doAPIRequest(appSettings.appAPI.configuration.list, null, reqHeader).then(function(data) {
+                appServices.doAPIRequest(appSettings.appAPI.fabricInstance.all_config_profile, null, reqHeader).then(function(data) {
                     $scope.selectList.config_list = data;
+                    angular.forEach($scope.selectList.config_list, function(val, key){
+                        val.name = val.name+' ('+val.version+')';
+                    });
                     $scope.selectList.config_list.unshift(defaultVal);
                     appServices.doAPIRequest(appSettings.appAPI.fabricProfile.list, null, reqHeader).then(function(data) {
                         $scope.selectList.fabricProfile_list = data;

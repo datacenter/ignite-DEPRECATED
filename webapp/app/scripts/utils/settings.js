@@ -18,45 +18,45 @@
 
             //API URL
             "appAPI": {
-                "baseURL": "http://127.0.0.1:8000",
+                "baseURL": "http://10.11.0.138:8000",
 
                 "configlets" : {
                   "list" : {
                      // "url" : "http://localhost:9010/data/configlets-list.json",
-                      "url" : "/api/config/configlet",
+                      "url" : "/api/config/configletindex",
                       "method" : "GET",
                       "auth" : "true"
                     },
                   "add" : {
                       //"url" : "/data/add-configlets.json",
-                      "url" : "/api/config/configlet",
+                      "url" : "/api/config/configletindex",
                       //"method" : "GET",
                       "method" : "POST", // This is for API.
                       "auth" : "true"
                   },
                   "upload" : {
-                     "url" : "/api/config/configlet/",
+                     "url" : "/api/config/configletindex/",
                       //"url" : "/configlet/",
                       "method" : "PUT",
                       //"method" : "PUT", // This is for API.
                       "auth" : "true"
                   },
                   "getById" : {
-                    "url" : "/api/config/configlet/",
+                    "url" : "/api/config/configletindex/",
                       //"url" : "/configlet/",
                       "method" : "GET",
                       //"method" : "PUT", // This is for API.
                       "auth" : "true"
                   },
                   "edit" : {
-                    "url" : "/api/config/configlet/",
+                    "url" : "/api/config/configletindex/",
                       //"url" : "/configlet/",
                       //"method" : "GET",
                       "method" : "PUT", // This is for API.
                       "auth" : "true"
                   },
                   "delete" : {
-                    "url" : "/api/config/configlet/",
+                    "url" : "/api/config/configletindex/",
                       //"url" : "/configlet/",
                      "method" : "DELETE",
                       //"method" : "POST", // This is for API.
@@ -212,27 +212,27 @@
                 },
                 "configuration": {
                     "list": {
-                        "url": "/api/config/profile",
+                        "url": "/api/config/profileindex",
                         "method": "GET",
                         "auth": "true"
                     },
                     "add" : {
-                        "url": "/api/config/profile",
+                        "url": "/api/config/profileindex",
                         "method": "POST",
                         "auth": "true"
                     },
                     "view" : {
-                        "url": "/api/config/profile/",
+                        "url": "/api/config/profileindex/",
                         "method": "GET",
                         "auth": "true"
                     },
                     "edit" : {
-                        "url": "/api/config/profile/",
+                        "url": "/api/config/profileindex/",
                         "method": "PUT",
                         "auth": "true"
                     },
                     "delete" : {
-                        "url": "/api/config/profile/",
+                        "url": "/api/config/profileindex/",
                         "method": "DELETE",
                         "auth": "true"
                     }
@@ -338,6 +338,11 @@
                     },
                     "fetch_config": {
                       "url": "/api/fabric/fabric/",
+                      "method": "GET",
+                      "auth": "true"
+                    },
+                    "all_config_profile": {
+                      "url": "/api/config/allprofiles",
                       "method": "GET",
                       "auth": "true"
                     }

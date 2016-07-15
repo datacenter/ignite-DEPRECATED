@@ -318,7 +318,7 @@ a {
 }
 /**./Topology**/
 /* fabric instance */
-.form-inline #config_name,.form-inline .select_topology {
+.form-inline #config_name, .form-inline #config_version, .form-inline .select_topology {
   width:100%;
 }
 
@@ -712,3 +712,33 @@ label:hover {
 }
 
 /** config diff style **/
+
+/** type-ahead **/
+
+.typeahead-demo .custom-popup-wrapper {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display: none;
+    background-color: #f9f9f9;
+  }
+
+  .typeahead-demo .custom-popup-wrapper > .message {
+    padding: 10px 20px;
+    border-bottom: 1px solid #ddd;
+    color: #868686;
+  }
+
+  .typeahead-demo .custom-popup-wrapper > .dropdown-menu {
+    position: static;
+    float: none;
+    display: block;
+    min-width: 160px;
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  /** type-ahead **/

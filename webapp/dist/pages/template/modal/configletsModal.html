@@ -16,7 +16,7 @@
     <div class="modal-body">
         <form>
             <div class="row">
-                <div class="col-xs-4">
+                <div ng-class="{'col-xs-4': action == 'add', 'col-xs-3': action !== 'add'}">
                     <div class="form-group">
                         <label for="name">Name</label>
                         <input type="text" class="form-control" 
@@ -26,6 +26,37 @@
                         >
                     </div>
                 </div>
+                <div class="col-xs-2" data-ng-show="action !== 'add'">
+                    <div class="form-group">
+                        <label for="version">Versions</label>
+                        <select class="form-control" 
+                        ng-model="version" 
+                        ng-change="loadVersion()"
+                        ng-options = "v.version as v.version for (k, v) in version_data"
+                        >
+                        </select>
+                    </div>
+                </div>
+                <!-- <div class="col-xs-2" data-ng-show="action !== 'add'">
+                    <div class="form-group">
+                        <label for="version">Versions</label>
+                        <select class="form-control" data-ng-model="version"
+                        data-ng-options="v.id as v.id for (k,v) in version_data"
+                        data-ng-change="loadVersion()">
+                        </select>
+                    </div>
+                    <label for="version">Versions</label>
+                    <div class="select-label">
+                        <label>
+                            <select class="form-control" 
+                                ng-model="version" 
+                                ng-change="loadVersion()">
+                                <option ng-repeat="version in version_data" value="{{version.version}}">
+                                {{version.version}}</option>
+                            </select>
+                        </label>
+                    </div>
+                </div> -->
                 <div class="col-xs-4">
                     <div class="form-group">
                         <label for="group_name">Group Name</label>
@@ -36,7 +67,7 @@
                         ng-model="submitData.group" />
                     </div>
                 </div>
-                <div class="col-xs-4">
+                <div ng-class="{'col-xs-4': action == 'add', 'col-xs-3': action !== 'add'}">
                     <div class="form-group">
                         <label for="type">Type</label>
                         <div class="select-label">
@@ -98,7 +129,19 @@
     </div>
 </div>
 <div class="modal-footer">
+    <!-- <li ng-show="mode == 'edit'"> -->
+    <!-- <input type="checkbox" class="form-control chk chk-trans"
+        ng-model="new_version" ng-show="action == 'edit'"
+        ng-disabled="version != latest_version" style="margin-right: 5px;">
+    <span ng-show="action == 'edit'">Create Version</span> -->
+    <!-- </li> -->
     <button class="btn btn-trans btn-default btn-raised" ng-click="cancel()">Cancel</button>
-    <button class="btn btn-raised btn-primary" ng-hide="action == 'view' || action == 'viewothers'" ng-click="ok()">Save</button>
+    <button class="btn btn-raised btn-primary" ng-hide="action == 'view' || action == 'viewothers'"
+        ng-click="save()"
+        ng-disabled="(action == 'add' && !uploadFile) || (action == 'edit' && version != latest_version)">Save</button>
+    <!-- <button class="btn btn-raised btn-primary"
+        ng-show="action == 'edit'"
+        ng-disabled="version != latest_version"
+        ng-click="ok('true')">Create Version</button> -->
 </div>
 </div>

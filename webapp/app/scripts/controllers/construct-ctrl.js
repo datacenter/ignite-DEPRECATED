@@ -17,6 +17,10 @@ angular.module('PoapServer')
         /**Configlets Modal**/
 
         $scope.animationsEnabled = true;
+        $scope.profile_versions = [];
+        $scope.latest_version = "";
+        $scope.version = "";
+        $scope.new_version = false;
 
         $scope.submitData = {
             "name": "",
@@ -27,7 +31,7 @@ angular.module('PoapServer')
         $scope.getConfigletName = function(id) {
             var name = '';
             angular.forEach($scope.configlets, function(val, key) {
-                if(val.id == id) {
+                if(val.configletindex_id == id) {
                     name = val.name;
                     return false;
                 }
@@ -152,25 +156,55 @@ angular.module('PoapServer')
 
         $scope.submit = function() {
             $scope.submitData.submit = true;
-            $scope.doSubmit();
+            var modalData = {
+                new_version : false
+            }
+            $scope.doSubmit(modalData);
         };
 
         $scope.save = function() {
-            $scope.doSubmit();
+            $scope.submitData.submit = false;
+
+            if($scope.mode == 'edit' && $scope.version == $scope.latest_version) {
+                var modalInstance = $modal.open({
+                    animation: $scope.animationsEnabled,
+                    templateUrl: 'pages/template/modal/configSave.html',
+                    controller: 'SaveConfigCtrl',
+                    size: 'md',
+                    backdrop: 'static',
+                    resolve: {
+                        dataToModal : function() {
+                            return {
+                                callerScope : $scope
+                            }
+                        }
+                     }
+                });
+
+                modalInstance.result.then(function(modalData) {
+                    $scope.doSubmit(modalData);
+                }, function() {
+                    $log.info('Modal dismissed at: ' + new Date());
+                });
+            } else {
+                $scope.doSubmit();
+            }
+            
         };
 
-        $scope.doSubmit = function() {
+        $scope.doSubmit = function(modalData) {
             var mode = $routeParams.mode;
             if(mode == 'add' || mode == 'clone') {
+                $scope.submitData.new_version = false;
                 appServices.doAPIRequest(appSettings.appAPI.configuration.add, $scope.submitData, null).then(function(data) {
                     $location.path('/configuration');
                 });
             }
             else if(mode == 'edit') {
-                var id = $routeParams.id;
+                $scope.submitData.new_version = modalData.new_version;
                 var reqHeader = {
                     appendToURL : true,
-                    value : id,
+                    value : $scope.submitData.profileindex_id+'/profile/'+$scope.submitData.id,
                     noTrailingSlash : true
                 };
                 appServices.doAPIRequest(appSettings.appAPI.configuration.edit, $scope.submitData, reqHeader).then(function(data) {
@@ -205,7 +239,11 @@ angular.module('PoapServer')
             };
 
             appServices.doAPIRequest(appSettings.appAPI.configuration.view, null, reqHeader).then(function(data) {
-                $scope.submitData = data;
+                $scope.profile_versions = data;
+                $scope.submitData = $scope.profile_versions[$scope.profile_versions.length-1];
+                $scope.version = angular.copy($scope.submitData.version);
+                $scope.latest_version = angular.copy($scope.submitData.version);
+                $scope.latest_version_id = angular.copy($scope.submitData.id);
 
                 if($routeParams.mode == 'clone') {
                     $scope.submitData.name = "";
@@ -229,7 +267,14 @@ angular.module('PoapServer')
             $location.path(path);
         };
 
-        $scope.deleteConfiguration = function(id, $index) {
+        $scope.loadVersion = function() {
+            $scope.submitData = ($scope.profile_versions.filter(function(version){
+                return version.version == $scope.version;
+            }))[0];
+            $scope.new_version = false;
+        };
+
+        /*$scope.deleteConfiguration = function(id, $index) {
             $scope.selectedId = $scope.configId;
             var modalInstance = $modal.open({
                 animation: $scope.animationsEnabled,
@@ -254,16 +299,76 @@ angular.module('PoapServer')
             }, function() {
                 $log.info('Modal dismissed at: ' + new Date());
             });
+        };*/
+
+        $scope.deleteConfiguration = function(profileindex_id, $index) {
+
+                $scope.selectedId = profileindex_id;
+
+                var modalInstance = $modal.open({
+                    animation: $scope.animationsEnabled,
+                    templateUrl: 'pages/template/modal/configletDelete.html',
+                    controller: 'ConfigDeleteCtrl',
+                    size: 'md',
+                    backdrop: 'static',
+                    resolve: {
+                        dataToModal : function() {
+                            return {
+                                id : $scope.selectedId,
+                                action : 'delete',
+                                callerScope : $scope
+                            }
+                        }
+                     }
+                });
+
+                modalInstance.result.then(function(modalData) {
+                    $scope.delete_type = modalData.submitData.delete_operation;
+                    $scope.deleteConfirm();
+
+                }, function() {
+                    $log.info('Modal dismissed at: ' + new Date());
+                });
+        };
+
+        $scope.deleteConfirm = function() {
+            var modalInstance = $modal.open({
+                animation: $scope.animationsEnabled,
+                templateUrl: 'pages/template/modal/deleteModal.html',
+                controller: 'AlertModalCtrl',
+                size: 'md',
+                backdrop: 'static',
+                resolve: {
+                    dataToModal : function() {
+                        return {
+                            id : $scope.selectedId,
+                            action : 'delete',
+                            message : 'Are you sure you want to delete?',
+                            callerScope : $scope
+                        }
+                    }
+                 }
+            });
+
+            modalInstance.result.then(function(modalData) {
+                $scope.doDelete(modalData);
+            }, function() {
+                $log.info('Modal dismissed at: ' + new Date());
+            });
         };
 
         $scope.doDelete = function() {
-            var id = $routeParams.id;
             var reqHeader = {
                 appendToURL : true,
-                value : id,
+                value : $scope.selectedId,
                 noTrailingSlash : true
             };
-            appServices.doAPIRequest(appSettings.appAPI.configuration.delete, $scope.submitData, reqHeader).then(function(data) {
+
+            if($scope.delete_type === 'delete_latest') {
+                reqHeader.value = reqHeader.value+'/profile/'+$scope.latest_version_id;
+            }
+
+            appServices.doAPIRequest(appSettings.appAPI.configuration.delete, null, reqHeader).then(function(data) {
                 $location.path('/configuration');
             });
         };
@@ -302,7 +407,7 @@ angular.module('PoapServer')
             $scope.constructModalInstance.dismiss();
         };
 
-        $scope.configletDialog = function(id) {
+        $scope.configletDialog = function(configletindex_id, version) {
             $scope.modalInstance = $modal.open({
                 animation: $scope.animationsEnabled,
                 templateUrl: 'pages/template/modal/configletsModal.html',
@@ -313,7 +418,8 @@ angular.module('PoapServer')
                     dataToModal : function() {
                         return {
                             action : 'viewothers',
-                            id : id
+                            configletindex_id : configletindex_id,
+                            version : version
                         }
                     }
                  }
@@ -356,14 +462,16 @@ angular.module('PoapServer').controller('constructModalCtrl', function($scope, $
     $scope.action = dataToModal.action;
 
     $scope.submitData = {
-        configlet_id : "",
+        configletindex_id : "",
         param_list : []
     };
 
     $scope.configlets = [];
+    $scope.versions = [];
+    $scope.version = '';
 
     $scope.resetValues = function() {
-        $scope.submitData.configlet_id = '';
+        $scope.submitData.configletindex_id = '';
         $scope.submitData.param_list = [];
         $scope.configlets = [];
     };
@@ -396,9 +504,46 @@ angular.module('PoapServer').controller('constructModalCtrl', function($scope, $
     };
 
     $scope.filterParams = function() {
-        $scope.submitData.param_list = [];
-        angular.forEach($scope.configletsCache, function(val, key) {
-            if(val.id == $scope.submitData.configlet_id) {
+        if(!($scope.submitData.configletindex_id == '' || $scope.submitData.configletindex_id == null)) {
+            $scope.submitData.param_list = [];
+            angular.forEach($scope.configletsCache, function(val, key) {
+                if(val.configletindex_id == $scope.submitData.configletindex_id) {
+                    $scope.submitData.version = val.version;
+                    $scope.version = angular.copy($scope.submitData.version);
+                    // $scope.submitData.id = val.id;
+                    angular.forEach(val.parameters, function(val1, key1) {
+                        var paramObject = {
+                            "param_name": val1,
+                            "param_type": "",
+                            "param_value": ""
+                        };
+                        $scope.submitData.param_list.push(paramObject);
+                    });
+                }
+            });
+            var reqHeader = {
+                appendToURL : true,
+                value : $scope.submitData.configletindex_id+'/none',
+                noTrailingSlash : true
+            };
+            appServices.doAPIRequest(appSettings.appAPI.configlets.getById, null, reqHeader).then(function(data) {
+                $scope.versions = data;
+            });
+        } else {
+            $scope.versions = [];
+            $scope.version = '';
+            $scope.submitData.param_list = [];
+        }
+    };
+
+    $scope.filterVersionParams = function() {
+        $scope.param_list = angular.copy($scope.submitData.param_list);
+        // $scope.version = angular.copy($scope.submitData.version);
+        angular.forEach($scope.versions, function(val, key) {
+            if(val.version == $scope.version) {
+                $scope.submitData = val;
+                $scope.submitData.construct_type = $scope.submitData.type;
+                /*$scope.submitData.param_list = [];
                 angular.forEach(val.parameters, function(val1, key1) {
                     var paramObject = {
                         "param_name": val1,
@@ -406,10 +551,16 @@ angular.module('PoapServer').controller('constructModalCtrl', function($scope, $
                         "param_value": ""
                     };
                     $scope.submitData.param_list.push(paramObject);
-                });
+                });*/
+                $scope.submitData.param_list = angular.copy($scope.param_list);
             }
         });
     };
+
+    /*$scope.$watch("submitData.version", function () {
+            alert('versions :');
+            console.log($scope.versions);
+    });*/
 
     $scope.ok = function() {
         console.log($scope.submitData);
@@ -425,14 +576,26 @@ angular.module('PoapServer').controller('constructModalCtrl', function($scope, $
     };
 
     $scope.setValues = function() {
-        $scope.submitData.construct_type = dataToModal.editData.construct_type;
-        $scope.filterConfiglets();
-        setTimeout(function() {
-            $scope.submitData.configlet_id = dataToModal.editData.configlet_id;
-            // angular.copy(dataToModal.editData.param_list, $scope.params_list);
-            angular.copy(dataToModal.editData.param_list, $scope.submitData.param_list);
-            $scope.$digest();
-        }, 500);
+        var reqHeader = {
+            appendToURL : true,
+            value : dataToModal.editData.configletindex_id+'/none',
+            noTrailingSlash : true
+        };
+        appServices.doAPIRequest(appSettings.appAPI.configlets.getById, null, reqHeader).then(function(data) {
+            $scope.versions = data;
+            $scope.submitData = ($scope.versions.filter(function(filter){
+                return filter.version == dataToModal.editData.version;
+            })[0]);
+            $scope.version = angular.copy($scope.submitData.version);
+            $scope.submitData.construct_type = $scope.submitData.type;
+            $scope.filterConfiglets();
+            // setTimeout(function() {
+                $scope.submitData.configletindex_id = dataToModal.editData.configletindex_id;
+                // angular.copy(dataToModal.editData.param_list, $scope.params_list);
+                angular.copy(dataToModal.editData.param_list, $scope.submitData.param_list);
+                // $scope.$digest();
+            // }, 500);
+        });
     };
 
     $scope.clearParamValue = function(index) {
@@ -457,3 +620,23 @@ angular.module('PoapServer').controller('constructModalCtrl', function($scope, $
     $scope.init();
 
 });
+
+angular.module('PoapServer').controller('SaveConfigCtrl', 
+    function($scope, $modalInstance, $modal, appServices, appSettings, dataToModal) {
+        $scope.new_version = false;
+
+        $scope.cancel = function() {
+            if($scope.view_type == 'list') {
+                $modalInstance.dismiss('cancel');
+            } else {
+                $scope.view_type = 'list';
+            }
+        };
+
+        $scope.ok = function() {
+            $modalInstance.close({
+                new_version : $scope.new_version,
+                action : $scope.action,
+            });
+        };
+});    

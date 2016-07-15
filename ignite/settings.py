@@ -155,8 +155,11 @@ PKG_PATH = os.path.join(SCRIPT_PATH, "packages/")
 #Repository path
 REPO_PATH = os.path.join(MEDIA_ROOT, "repo/")
 
+#Switch config path
+SWITCH_CONFIG_PATH = os.path.join(MEDIA_ROOT, "switch/")
+
 # External packages
-YAML_LIB = "PyYAML-3.11.tar.gz"
+YAML_LIB = "PyYAML-3.11.tar"
 
 # Logging
 

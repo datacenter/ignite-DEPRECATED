@@ -1,0 +1,25 @@
+<div>
+  <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" ng-click="cancel()" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+      </button>
+    <h3 class="modal-title pull-left">Save</h3>
+  </div>
+  <div class="modal-body">
+    <form>
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group form-inline form_inline_style">
+              <input type="checkbox" class="form-control chk chk-trans" ng-model="new_version" style="margin-right: 5px; height: 18px">
+              Create a new version
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="modal-footer">
+  <button class="btn btn-trans btn-default btn-raised" ng-click="cancel()">Cancel</button>
+  <button class="btn btn-trans btn-raised btn-primary" ng-click="ok()">Save</button>
+</div>
+</div>

@@ -351,7 +351,7 @@
                             </div>
                             <div class="input-group input-group-sm" data-ng-if="source == 'fabric'">
                                 <span class="input-group-addon link_switch_modal_field"> Config Profile</span>
-                                <select class="form-control input-addon" ng-disabled="!editSwitchFlag" ng-init="switch.config_profile" ng-model="switch.config_profile" ng-options="v.id as v.name for (k,v) in switchDetails.selectList.config_list" data-ng-if="editSwitchFlag || (!editSwitchFlag && switch.config_profile != null)" >
+                                <select class="form-control input-addon" ng-disabled="!editSwitchFlag" ng-init="switch.config_profile" ng-model="switch.config_profile" ng-options="v.id as v.name+' ('+v.version+')' for (k,v) in switchDetails.selectList.config_list" data-ng-if="editSwitchFlag || (!editSwitchFlag && switch.config_profile != null)" >
                                     <option value="">--tier default--</option>
                                 </select>
                                 <input type="text" class="form-control" readonly

@@ -5,22 +5,28 @@
         </div>
         <div class="pull-right">
             <ul class="list-inline table-actions">
-                <li ng-hide="mode == 'clone' || mode == 'add'">
-                    <a href="javascript:void(0);" ng-click="deleteConfiguration(id,0)"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>
+                <li ng-hide="mode == 'clone' || mode == 'add' || mode == 'edit'">
+                    <a href="javascript:void(0);" ng-click="deleteConfiguration(configId,0)"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>
                 </li>
                 <li ng-hide="mode == 'edit' || mode == 'add' || mode == 'clone'">
                     <a href="#/constructs/edit/{{configId}}" ng-click=""><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a>
                 </li>
-                <li ng-hide="mode == 'clone'">
+                <li ng-hide="mode == 'clone' || mode == 'edit' || mode == 'add'">
                     <a href="#/constructs/clone/{{configId}}" ng-click=""><span class="icon_clone" aria-hidden="true"></span></a>
                 </li>
+                <!-- <li ng-show="mode == 'edit'">
+                    <input type="checkbox" class="form-control chk chk-trans" ng-model="new_version"
+                        ng-disabled="version != latest_version" style="margin-right: 5px;">
+                    Create Version
+                </li> -->
                 <li>
                     <button type="button" class="btn btn-default btn-raised" ng-click="goBack('/configuration')">Cancel</button>
                 </li>
                 <li ng-hide="mode == 'view'">
-                    <button type="button" class="btn btn-raised btn-primary" ng-click="save()">Save</button>
+                    <button type="button" class="btn btn-raised btn-primary"
+                        ng-disabled="mode == 'edit' && version != latest_version" ng-click="save()">Save</button>
                 </li>
-                <li ng-hide="mode == 'view' || submitData.submit">
+                <li ng-hide="mode == 'view'">
                     <button type="submit" class="btn btn-default btn-raised" ng-click="submit()">Submit</button>
                 </li>
             </ul>
@@ -39,6 +45,15 @@
                     ng-model="submitData.name"
                     ng-disabled="mode == 'view'"
                     >
+                </div>
+                <div class="form-group" ng-hide="mode == 'add'">
+                    <label for="config_version">Version</label>
+                    <select class="form-control"
+                    id="config_version"
+                    ng-model="version" 
+                    ng-change="loadVersion()"
+                    ng-options = "v.version as v.version for (k, v) in profile_versions">
+                    </select>
                 </div>
             </form>
         </div>
@@ -101,7 +116,7 @@
                     <td>{{$index + 1}}</td>
                     <!-- <td><a href="javascript:void(0);" ng-click="constructDialog('view',null, $index)">{{construct.construct_type}}</a>
                     </td> -->
-                    <td><a href="javascript:void(0);" ng-click="configletDialog(construct.configlet_id)">{{getConfigletName(construct.configlet_id)}}</a></td>
+                    <td><a href="javascript:void(0);" ng-click="configletDialog(construct.configletindex_id,construct.version)">{{getConfigletName(construct.configletindex_id)}} ({{construct.version}})</a></td>
                     <td>
                         <ul class="parameter_list">
                             <li ng-repeat="param in construct.param_list">

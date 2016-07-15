@@ -138,7 +138,7 @@ def run_single_sequence(task, break_flag=False):
     print 'Running sequence ' + ' on group ' + str(task['group_id'])
     print 'break_flag is', break_flag
     switches = get_all_switches(task)
-    if task['type'] != "custom":
+    if task['type'] not in ["custom", "switch_upgrade", "epld_upgrade"]:
         if task['task_params']['image']['is_encrypted']:
             password = decrypt_data(task['task_params']['image']['image_server_password'])
             task['task_params']['image']['image_server_password'] = password
@@ -166,13 +166,14 @@ def fill_image_details(task, decrypt=True):
         raise Exception("No system image is found in "+image_profile.profile_name)
     if task['type'] == 'epld_upgrade' and image_profile.epld_image == None:
         raise Exception("No epld image is found in "+image_profile.profile_name)
-    task['params'] = {}
+    task['task_params'] = {}
     image['profile_name'] = image_profile.profile_name
     image['system_image'] = image_profile.system_image
     image['id'] = image_profile.id
     image['image_server_ip'] = image_profile.image_server_ip
     image['image_server_username'] = image_profile.image_server_username
     password = image_profile.image_server_password
+    image['is_encrypted'] = image_profile.is_encrypted
     if decrypt:
         if image_profile.is_encrypted:
             password = decrypt_data(password)
@@ -180,7 +181,7 @@ def fill_image_details(task, decrypt=True):
     image['access_protocol'] = image_profile.access_protocol
     if task['type'] == 'epld_upgrade':
         image['epld_image'] = image_profile.epld_image
-    task['params']['image'] = image
+    task['task_params']['image'] = image
 
 
 def fill_task_input(task):
