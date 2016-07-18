@@ -10,7 +10,7 @@ from config.profile import build_config_profile
 from constants import *
 import discovery.discoveryrule as discoveryrule
 from fabric.constants import SERIAL_NUM, SERIAL_NUMBER, NEIGHBOR, ERR_SERIAL_NUM_IN_USE
-from fabric.constants import POAP_CONFIG, RUNNING_CONFIG
+from fabric.constants import POAP_CONFIG, RUNNING_CONFIG, DISCOVERY
 from fabric.build import build_config, build_switch_config
 from fabric.fabric import search_fabric, get_switch_workflow
 from fabric.fabric import get_switch_image, get_switch_feature_profile
@@ -238,10 +238,14 @@ def update_boot_detail(switch, boot_status="",
     boot_detail.save()
     switch.boot_detail = boot_detail
     switch.save()
+    logger.debug(str(old_status)+" " + str(model_type) +" " + str(boot_status) +" " + str(match_type))
     if model_type:
-        update_switch_model(old_status, boot_status, model_type)
+        update_switch_model(old_status, boot_status, model_type, match_type)
+    elif match_type == DISCOVERY:
+        model_type = SwitchModel.objects.get(pk=1).name
+        update_switch_model(BOOT_PROGRESS, boot_status, model_type, match_type)
     else:
-        update_switch_model(old_status, boot_status, boot_detail.model_type)
+        update_switch_model(old_status, boot_status, boot_detail.model_type, match_type)
 
 
 def _get_server_response(status, yaml_file=None, err_msg=""):
@@ -292,7 +296,8 @@ def update_boot_status(data):
         raise IgniteException(ERR_SERIAL_NUM_MISMATCH)
 
 
-def update_switch_model(old_status, boot_status, model_type):
+def update_switch_model(old_status, boot_status, model_type, match_type):
+    logger.debug("inside update_siwthc_model = " +str(old_status))
     try:
         switch_model = SwitchModel.objects.get(name=model_type)
     except SwitchModel.DoesNotExist:
@@ -302,12 +307,12 @@ def update_switch_model(old_status, boot_status, model_type):
         if not old_status == BOOT_PROGRESS:
             switch_model.boot_in_progress += 1
             switch_model.save()
-            return
 
     if boot_status == BOOT_SUCCESS:
         if old_status == BOOT_PROGRESS:
             switch_model.booted_with_success += 1
-            switch_model.boot_in_progress -= 1
+            if match_type != DISCOVERY:
+                switch_model.boot_in_progress -= 1
 
     elif boot_status == BOOT_FAIL:
         if old_status == BOOT_PROGRESS:

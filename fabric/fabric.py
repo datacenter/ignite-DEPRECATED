@@ -6,7 +6,7 @@ from ignite.settings import BASE_DIR
 
 from netaddr import IPAddress, IPNetwork
 
-from bootstrap.constants import BOOT_SUCCESS
+from bootstrap.constants import BOOT_PROGRESS, BOOT_SUCCESS, BOOT_FAIL
 import build
 import config.profile as config
 from constants import *
@@ -22,10 +22,11 @@ from utils.exception import IgniteException
 from workflow.constants import BOOTSTRAP_WORKFLOW_ID
 import workflow.workflow as workflow
 from utils.utils import ports_to_string
-from bootstrap.constants import BOOT_PROGRESS, BOOT_FAIL
 from pool.pool import _validate_pool
 from pool.constants import IPV4
 from group.scripts.upgrade import get_nxapi_template, build_nxapi_url
+from switch.models import SwitchModel
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -804,6 +805,7 @@ def add_discovered_switches(fab_id, tiers, switch_with_ip):
         find_duplicate([spine_switch[1]])
         switch.topology_id = fab_id
         switch.mgmt_ip = switch_with_ip[spine_switch[0]]
+        switch.model = SwitchModel.objects.get(id=1)
         switch.save()
         bootstrap.update_boot_detail(switch,
                                       match_type=DISCOVERY,
@@ -822,6 +824,7 @@ def add_discovered_switches(fab_id, tiers, switch_with_ip):
         find_duplicate([leaf_switch[1]])
         switch.topology_id = fab_id
         switch.mgmt_ip = switch_with_ip[leaf_switch[0]]
+        switch.model = SwitchModel.objects.get(id=1)
         switch.save()
         bootstrap.update_boot_detail(switch,
                                       match_type=DISCOVERY,
@@ -838,6 +841,7 @@ def add_discovered_switches(fab_id, tiers, switch_with_ip):
         switch.name = core_switch
         switch.dummy = False
         switch.topology_id = fab_id
+        switch.model = SwitchModel.objects.get(id=1)
         switch.save()
         bootstrap.update_boot_detail(switch,
                                       match_type=DISCOVERY,
@@ -854,6 +858,7 @@ def add_discovered_switches(fab_id, tiers, switch_with_ip):
         switch.name = border_switch
         switch.dummy = False
         switch.topology_id = fab_id
+        switch.model = SwitchModel.objects.get(id=1)
         switch.save()
         bootstrap.update_boot_detail(switch,
                                       match_type=DISCOVERY,
@@ -959,11 +964,31 @@ def get_ports_info(connectivities, borders, cores):
     return ports_info
 
 
+def Update_switch_model_boot_count(boot_status, model_type):
+    try:
+        switch_model = SwitchModel.objects.get(name=model_type)
+    except:
+        switch_model = SwitchModel.objects.get(id=1)
+    if boot_status == BOOT_PROGRESS:
+        switch_model.boot_in_progress -= 1
+    elif boot_status == BOOT_SUCCESS:
+        switch_model.booted_with_success -= 1
+    elif boot_status == BOOT_FAIL:
+        switch_model.booted_with_fail -=1
+    switch_model.save()
+    logger.debug("Switch model boot status count is update")
+
+
 def delete_discovered_fabric(fab_id):
     try:
+        logger.debug("fab id is=" + str(fab_id))
         for switch in Switch.objects.filter(topology_id=fab_id):
             # delete switch and boot detail if any
             boot_detail = switch.boot_detail
+            if boot_detail:
+                logger.debug("switch model  " + switch.model.name)
+                logger.debug("switch boot status is " + boot_detail.boot_status)
+                Update_switch_model_boot_count(boot_detail.boot_status, switch.model.name)
             try:
                 switch.delete()
             except Exception as e:
