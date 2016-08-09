@@ -308,7 +308,7 @@ def get_file(access_protocol='', hostname='', port='', username='', password='',
 
     if access_protocol == PROTO_SCP:
         cmd = "terminal password %s ; " % password
-        cmd += "copy %s://%s@%s%s %s vrf %s" % (access_protocol, username, hostname, file_src, file_dst, vrf)
+        cmd += "copy %s://%s@%s/%s %s vrf %s" % (access_protocol, username, hostname, file_src, file_dst, vrf)
 
     if access_protocol == PROTO_TFTP:
 

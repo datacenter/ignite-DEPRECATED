@@ -27,9 +27,19 @@ def add_profile(data, user, id=0):
     if id:
         # update of an existing profile; fetch it
         profile = get_profile(id)
+        logger.debug("password stored in db " + str(profile.image_server_password))
+        if not profile.image_server_password == data[IMAGE_SERVER_PASSWORD]:
+            password = encrypt_data(data[IMAGE_SERVER_PASSWORD])
+            logger.debug("change in password, new encoded password " + str(password))
+            profile.image_server_password = str(password)
+            profile.is_encrypted = True
+
     else:
         # create new profile
         profile = ImageProfile()
+        password = encrypt_data(data[IMAGE_SERVER_PASSWORD])
+        profile.image_server_password = str(password)
+        profile.is_encrypted = True
 
     profile.profile_name = data[PROFILE_NAME]
     profile.system_image = data[SYSTEM_IMAGE]
@@ -37,9 +47,6 @@ def add_profile(data, user, id=0):
     profile.kickstart_image = data[KICKSTART_IMAGE]
     profile.image_server_ip = data[IMAGE_SERVER_IP]
     profile.image_server_username = data[IMAGE_SERVER_USERNAME]
-    password = encrypt_data(data[IMAGE_SERVER_PASSWORD])
-    profile.image_server_password = str(password)
-    profile.is_encrypted = True
     profile.access_protocol = data[ACCESS_PROTOCOL]
     profile.updated_by = user
 

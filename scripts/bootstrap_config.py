@@ -95,7 +95,7 @@ def do_copy(source, dest):
 
     if protocol_g == PROTO_SCP:
         cmd = "terminal dont-ask ; terminal password %s ; " % password_g
-        cmd += "copy %s://%s@%s%s %s vrf %s" % (protocol_g, username_g,
+        cmd += "copy %s://%s@%s/%s %s vrf %s" % (protocol_g, username_g,
                                                 hostname_g, source, dest, vrf_g)
 
     if protocol_g == PROTO_TFTP:

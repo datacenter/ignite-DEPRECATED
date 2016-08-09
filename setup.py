@@ -3,6 +3,8 @@ import os
 import subprocess
 import sys
 import platform
+import pwd
+import crypt
 
 from ignite.conf import DB_NAME, DB_USER, DB_PASSWORD, SYSLOG_PORT
 from ignite.conf import IGNITE_IP, IGNITE_PORT, IGNITE_USER, IGNITE_PASSWORD
@@ -22,7 +24,7 @@ CENTOS = "CENTOS"
 UBUNTU = "UBUNTU"
 if 'CentOS Linux' in  platform.linux_distribution():
     PLATFORM = CENTOS
-elif 'Ubuntu' in platfOrm.linux_distribution():
+elif 'Ubuntu' in platform.linux_distribution():
     PLATFORM = UBUNTU 
 else:
     print "Unknown platform"
@@ -125,6 +127,18 @@ CMD_LIST_SETUP = (
      CELERY_START,),
 )
 
+def create_user():
+    try:
+        pwd.getpwnam(IGNITE_USER)
+        sys.stdout.write("\nUser " + IGNITE_USER + " existed")
+    except KeyError:
+        sys.stdout.write("\nUser " + IGNITE_USER + " not existed")
+        sys.stdout.write("\nCreating User " + IGNITE_USER)
+        password = crypt.crypt(IGNITE_PASSWORD, "22")
+        cmd = "sudo useradd -p " + password + " " + IGNITE_USER
+        os.system(cmd)
+
+
 def exec_cmds(CMD_LIST, dep_type=""):
     for (name, cmd) in CMD_LIST:
         sys.stdout.write(name + " - ")
@@ -164,6 +178,7 @@ if inp == "y" or inp == "Y":
         exec_cmds(PSYCOPG2)
     exec_cmds(CMD_LIST_PYTHON_DEP)
 
+create_user()
 sys.stdout.write("\nSetting up Ignite server\n")
 sys.stdout.flush()
 

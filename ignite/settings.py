@@ -159,7 +159,7 @@ REPO_PATH = os.path.join(MEDIA_ROOT, "repo/")
 SWITCH_CONFIG_PATH = os.path.join(MEDIA_ROOT, "switch/")
 
 # External packages
-YAML_LIB = "PyYAML-3.11.tar"
+YAML_LIB = "PyYAML-3.11.tar.gz"
 
 # Logging
 
