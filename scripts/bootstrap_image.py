@@ -7,7 +7,7 @@ import time
 
 
 #Set syslog server and port - fill in from ignite/config.py
-SYSLOG_SERVER = "127.0.0.1"
+SYSLOG_SERVER = "10.122.140.124"
 SYSLOG_PORT = 514
 
 MD5SUM_EXT = "md5"
@@ -83,7 +83,7 @@ def cleanup_exit(exit_status):
 def rm_rf(filename):
     filename_u = "/" + filename.replace(":", "/")
     if not os.path.exists(filename_u):
-        syslog("rm_rm: file does not exist- %s" %filename)
+        syslog("rm_rf: file does not exist- %s" %filename)
         return True
     try:
         cli("delete %s" % filename)
@@ -198,21 +198,14 @@ def get_image(protocol="scp", port="", hostname="", file_src="",
     image_name = os.path.basename(file_src)
     syslog("Image to download %s" % image_name)
     file_dst_local = IMAGE_DST_LOCAL_PATH + image_name
-    syslog("Image temp detination %s" % file_dst_local)
+    syslog("MD5 file temp detination %s" % file_dst_local)
     file_dst = file_dst + image_name
     syslog("Image final detination %s" % file_dst)
-
-    if not rm_rf(file_dst_local):
-	if not fatal:
-            cleanup_exit(0)
-
-        cleanup_exit(1)
 
 
     #will set default image (full path)
     if default_image == "":
         default_image = file_dst
-        #default_image = default_image_g
         syslog("Default image is %s" % default_image)
 
     md5_file_name_src = "%s.%s" % (file_src, MD5SUM_EXT)
@@ -248,7 +241,7 @@ def get_image(protocol="scp", port="", hostname="", file_src="",
             syslog("Does not exist %s" % default_image)
 
 
-        if not do_copy(file_src, file_dst_local):
+        if not do_copy(file_src, file_dst):
 
             if fatal:
                 cleanup_exit(1)
@@ -258,19 +251,18 @@ def get_image(protocol="scp", port="", hostname="", file_src="",
         syslog("INFO: Completed Copy of System Image")
 
         #check if the downloaded image md5 matches the md5 calculated at source
-        if not same_md5(file_dst_local, md5_file_name_dst):
+        if not same_md5(file_dst, md5_file_name_dst):
 
             if not fatal:
                 cleanup_exit(1)
 
             cleanup_exit(0)
 
-        cmd = "copy %s %s ; " % (file_dst_local, file_dst)
-        cmd +=  "config terminal ; boot nxos %s ; exit ; " % (file_dst)
+        cmd =  "config terminal ; boot nxos %s ; exit ; " % (file_dst)
         cmd += "copy running-config startup-config ; "
         run_cli(cmd)
     else:
-        cmd =  "config terminal ; boot nxos %s ; exit ; " % (file_dst)
+        cmd =  "config terminal ; boot nxos %s ; exit ; " % (default_image)
         cmd += "copy running-config startup-config ; "
         run_cli(cmd)
 
