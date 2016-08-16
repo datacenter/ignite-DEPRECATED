@@ -21,6 +21,8 @@ CMD_LIST_SYSTEM_DEP_CENTOS = (
      "systemctl start postgresql-9.3",),
     ("enable postgres-",
      "systemctl enable postgresql-9.3",),
+    ("Install mod_wsgi-",
+     "yum -y install mod_wsgi",),
     ("Install RabbitMQ and dependencies(may take a while, ignore errors)",
      "yum -y install wget;wget https://packages.erlang-solutions.com/erlang-solutions-1.0-1.noarch.rpm",),
     ("rpm for erlang(ignore errors)",

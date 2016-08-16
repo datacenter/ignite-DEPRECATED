@@ -11,6 +11,8 @@ CMD_LIST_SYSTEM_DEP_UBUNTU = (
      "apt-get install python-pip"),
     ("Install Postgresql(may take a while)",
      "apt-get install postgresql-9.3 postgresql-common"),
+    ("Install mod_wsgi (may take a while)",
+     "apt-get install libapache2-mod-wsgi"),
     ("Install RabbitMQ (may take a while)",
      "apt-get install rabbitmq-server"),
 )
