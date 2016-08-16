@@ -86,7 +86,7 @@ Create file ignite.conf in direcotry /etc/apache2/sites-available/ and add follo
 ####2.1.4. Enabling the new site.
 To enable the ignite.conf created in step 2.1.3. use a2ensite command.
 
-         a2ensite /etc/apache2/sites-available/ignite.conf
+         a2ensite ignite.conf
 
 ####2.1.5. Restarting apache2 server
 
@@ -134,6 +134,9 @@ Clone in directory /var/www/ using github repository use **git clone** command.
 ######Number of lines to display in logs
         LOG_LINE_COUNT - POAP Logs for a switch can be accessed through Ignite UI. This parameter sets the limit on logs to be displayed in the UI.
 
+######Relative path setting for apache2 hosting
+        PROJECT_DIR - If Ignite is hosted using apache2 make sure that this variable contains the relative path to Ignite's manage.py(~ignite/) from default directory of apache2(var/www/). For instance if Ignite is cloned inside /var/www/, this variable should be set to 'ignite'.
+
 ######RabbitMQ Settings
 **Note** Leave these parameter to default if there are no specific requirements.
 
@@ -154,6 +157,7 @@ Clone in directory /var/www/ using github repository use **git clone** command.
 Installation script runs in three stages. It first installs system packages then python packages and the sets up the Ignite server. User can skip first 2 stages of installation during execution of setup script if dependencies had been installed beforehand. 
 
 Run setup.py from /var/www/ directory with sudo privilege if server is hosted using apache2.
+Also please make ure that PROJECT_DIR is set as mentioned in step 3.1.
 
         sudo python ignite/setup.py
 
