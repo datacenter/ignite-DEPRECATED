@@ -44,7 +44,7 @@ POAP_IP_CMD = "sed -i 's/^ignite_hostname = \".*\"/ignite_hostname = \"" \
               + IGNITE_IP + "\"/' " + POAP_FILE
 POAP_PORT_CMD = "sed -i 's/^ignite_port = \".*\"/ignite_port = \"" \
                 + IGNITE_PORT + "\"/' " + POAP_FILE
-POAP_MD5 = "python -c \"from scripts import ck_sum; ck_sum.get_ck_sum(\'" + POAP_FILE + "\')\""
+POAP_MD5 = "python -c \"import sys; sys.path.append(\'" + SCRIPT_PATH + "\'); import ck_sum; ck_sum.get_ck_sum(\'" + POAP_FILE + "\')\""
 
 # sed commands to replace syslog variables in bootstrap_config.py
 CFG_IP_CMD = "sed -i 's/^SYSLOG_SERVER = \".*\"/SYSLOG_SERVER = \"" \
