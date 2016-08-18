@@ -13,6 +13,7 @@ from ignite.settings import BASE_DIR, UI_ROOT, MEDIA_ROOT, SCRIPT_PATH
 from setup_ubuntu  import *
 from setup_centos  import *
 
+MANAGE_FILE = os.path.join(BASE_DIR, "manage.py")
 CFG_FILE = os.path.join(SCRIPT_PATH, "bootstrap_config.py")
 IMG_FILE = os.path.join(SCRIPT_PATH, "bootstrap_image.py")
 POAP_FILE = os.path.join(SCRIPT_PATH, "poap.py")
@@ -83,17 +84,17 @@ CMD_LIST_SETUP = (
     ("Create Database (ignore error if database already exists)",
      "export PGPASSWORD=" + DB_PASSWORD + "\ncreatedb " + DB_NAME + " -U " + DB_USER,),
     ("Database Migrate",
-     "python manage.py migrate",),
+     "python " + MANAGE_FILE + " migrate",),
     ("Load user fixture",
-     "python manage.py loaddata utils/fixtures/initial_data.json",),
+     "python " + MANAGE_FILE + " loaddata utils/fixtures/initial_data.json",),
     ("Load image profile fixture",
-     "python manage.py loaddata image/fixtures/initial_data.json",),
+     "python " + MANAGE_FILE + " loaddata image/fixtures/initial_data.json",),
     ("Load workflow fixtures",
-     "python manage.py loaddata workflow/fixtures/initial_data.json",),
+     "python " + MANAGE_FILE + " loaddata workflow/fixtures/initial_data.json",),
     ("Load switch fixtures",
-     "python manage.py loaddata switch/fixtures/initial_data.json",),
+     "python " + MANAGE_FILE + " loaddata switch/fixtures/initial_data.json",),
     ("Load configprofile fixture",
-     "python manage.py loaddata config/fixtures/initial_data.json",),
+     "python " + MANAGE_FILE + " loaddata config/fixtures/initial_data.json",),
     ("Javascript IP+Port Setting", JS_SED_CMD,),
     ("POAP User Setting", POAP_USER_CMD,),
     ("POAP Password Setting", POAP_PWD_CMD,),
@@ -116,9 +117,9 @@ CMD_LIST_SETUP = (
     ("Setting Celery Group", CELERYD_GROUP_CMD,),
     ("Export django settings", "export DJANGO_SETTINGS_MODULE=ignite.settings",),
     ("Copying celeryd init",
-     "cp scripts/celeryd /etc/init.d/celeryd",),
+     "cp " + CELERYD_FILE + " /etc/init.d/celeryd",),
     ("Copying celeryd settings",
-     "cp scripts/celeryd_config /etc/default/celeryd",),
+     "cp " + CELERYD_FILE + " /etc/default/celeryd",),
     ("Starting celery worker",
      "/etc/init.d/celeryd restart",),
     ("Stop celery worker (ignore errors if not running)",
